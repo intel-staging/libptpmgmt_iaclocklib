@@ -71,14 +71,27 @@ string TimeBaseState::toString() const
         to_string(eventState.synced_to_primary_clock) + "\n";
 }
 
-const ClkMgrSubscription &TimeBaseState::get_eventSub()
+const PTPClockSubscription &TimeBaseState::get_ptpEventSub()
 {
-    return eventSub;
+    return ptpEventSub;
 }
 
-void TimeBaseState::set_eventSub(const ClkMgrSubscription &eSub)
+const SysClockSubscription &TimeBaseState::get_sysEventSub()
 {
-    eventSub.set_ClkMgrSubscription(eSub);
+    return sysEventSub;
+}
+
+void TimeBaseState::set_ptpEventSub(const PTPClockSubscription &eSub)
+{
+    ptpEventSub.setEventMask(eSub.getEventMask());
+    ptpEventSub.defineClockOffsetThreshold(eSub.getClockOffsetThreshold());
+    ptpEventSub.set_composite_event_mask(eSub.get_composite_event_mask());
+}
+
+void TimeBaseState::set_sysEventSub(const SysClockSubscription &eSub)
+{
+    sysEventSub.setEventMask(eSub.getEventMask());
+    sysEventSub.defineClockOffsetThreshold(eSub.getClockOffsetThreshold());
 }
 
 void TimeBaseState::set_last_notification_time(const timespec &newTime)
@@ -129,18 +142,20 @@ void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
     else
         state.set_last_notification_time(last_notification_time);
     // Get a copy of subscription mask
-    ClkMgrSubscription sub = state.get_eventSub();
-    uint32_t eventSub = sub.get_event_mask();
-    uint32_t composite_eventSub = sub.get_composite_event_mask();
+    PTPClockSubscription ptpSub = state.get_ptpEventSub();
+    SysClockSubscription sysSub = state.get_sysEventSub();
+    uint32_t ptpEventSub = ptpSub.getEventMask();
+    uint32_t ptpCompositeEventSub = ptpSub.get_composite_event_mask();
+    //uint32_t sysEventSub = sysSub.getEventMask();
     // Get the current state of the timebase
     PTPClockEvent ptp4lEventState = state.get_ptp4lEventState();
     SysClockEvent chronyEventState = state.get_chronyEventState();
     // Update eventGMOffset
-    if((eventSub & eventGMOffset) &&
+    if((ptpEventSub & eventGMOffset) &&
         (newEvent.master_offset != ptp4lEventState.getClockOffset())) {
         ptpClockEventHandler.setClockOffset(ptp4lEventState,
             newEvent.master_offset);
-        if(sub.in_range(thresholdGMOffset, ptp4lEventState.getClockOffset())) {
+        if(ptpSub.clockOffsetInRange(ptp4lEventState.getClockOffset())) {
             if(!(ptp4lEventState.isOffsetInRange())) {
                 ptpClockEventHandler.setOffsetInRange(ptp4lEventState, true);
                 ptpClockEventHandler.setOffsetInRangeEventCount(ptp4lEventState,
@@ -157,7 +172,7 @@ void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
         }
     }
     // Update eventSyncedToGM
-    if((eventSub & eventSyncedToGM) &&
+    if((ptpEventSub & eventSyncedToGM) &&
         (newEvent.synced_to_primary_clock !=
             ptp4lEventState.isSyncedWithGm())) {
         ptpClockEventHandler.setSyncedWithGm(ptp4lEventState,
@@ -173,7 +188,7 @@ void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
         sourceClockUUIDBytes[i] =
             static_cast<uint8_t>(sourceClockUUID >>(8 * (7 - i)));
     }
-    if((eventSub & eventGMChanged) &&
+    if((ptpEventSub & eventGMChanged) &&
         (memcmp(sourceClockUUIDBytes, newEvent.gm_identity,
                 sizeof(newEvent.gm_identity)) != 0)) {
         uint64_t identity = 0;
@@ -188,7 +203,7 @@ void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
         state.set_event_changed(true);
     }
     // Update eventASCapable
-    if((eventSub & eventASCapable) &&
+    if((ptpEventSub & eventASCapable) &&
         (newEvent.as_capable != ptp4lEventState.isAsCapable())) {
         ptpClockEventHandler.setAsCapable(ptp4lEventState, newEvent.as_capable);
         ptpClockEventHandler.setAsCapableEventCount(ptp4lEventState,
@@ -197,13 +212,13 @@ void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
     }
     // Update composite event
     bool composite_event = true;
-    if(composite_eventSub & eventGMOffset)
+    if(ptpCompositeEventSub & eventGMOffset)
         composite_event &= ptp4lEventState.isOffsetInRange();
-    if(composite_eventSub & eventSyncedToGM)
+    if(ptpCompositeEventSub & eventSyncedToGM)
         composite_event &= ptp4lEventState.isSyncedWithGm();
-    if(composite_eventSub & eventASCapable)
+    if(ptpCompositeEventSub & eventASCapable)
         composite_event &= ptp4lEventState.isAsCapable();
-    if(composite_eventSub &&
+    if(ptpCompositeEventSub &&
         (composite_event != ptp4lEventState.isCompositeEventMet())) {
         ptpClockEventHandler.setCompositeEvent(ptp4lEventState,
             composite_event);
@@ -224,8 +239,7 @@ void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
     if(newEvent.chrony_offset != chronyEventState.getClockOffset()) {
         sysClockEventHandler.setClockOffset(chronyEventState,
             newEvent.chrony_offset);
-        if(sub.in_range(thresholdChronyOffset,
-                chronyEventState.getClockOffset())) {
+        if(sysSub.clockOffsetInRange(chronyEventState.getClockOffset())) {
             if(!(chronyEventState.isOffsetInRange())) {
                 sysClockEventHandler.setOffsetInRange(chronyEventState, true);
                 sysClockEventHandler.setOffsetInRangeEventCount(chronyEventState,
