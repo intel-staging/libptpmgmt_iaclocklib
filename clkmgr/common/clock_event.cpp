@@ -10,6 +10,7 @@
  */
 
 #include "pub/clkmgr/event.h"
+#include "common/clock_event_handler.hpp"
 
 __CLKMGR_NAMESPACE_USE;
 
@@ -129,12 +130,12 @@ SysClockEvent &ClockSyncBases::getSysClock() const
     return sysClockSync;
 }
 
-void ClockSyncBases::setPTPAvailability(bool available)
+void ClockSyncBaseHandler::setPTPAvailability(bool available)
 {
     ptpAvailable = available;
 }
 
-void ClockSyncBases::setSysAvailability(bool available)
+void ClockSyncBaseHandler::setSysAvailability(bool available)
 {
     sysAvailable = available;
 }

@@ -34,8 +34,6 @@ class TimeBaseState
     Event_state eventState = {}; /**< Event state */
     PTPClockEvent ptp4lEventState; /**< PTP4L Event state */
     SysClockEvent chronyEventState; /**< Chrony Event state */
-    //PTPStateCount ptp4lEventStateCount = {}; /**< PTP4L Event count */
-    //ChronyStateCount chronyEventStateCount = {}; /**< Chrony Event count */
     ClkMgrSubscription eventSub = {}; /**< Event subscription */
     timespec last_notification_time = {}; /**< Last notification time */
 
@@ -64,18 +62,6 @@ class TimeBaseState
     void set_event_changed(bool state);
 
     /**
-     * Get the ptp4l event state counts
-     * @return Reference to the event state counts
-     */
-    //   PTPStateCount &get_ptpEventStateCount();
-
-    /**
-     * Get the chrony event state counts
-     * @return Reference to the event state counts
-     */
-    //   ChronyStateCount &get_chronyEventStateCount();
-
-    /**
      * Get the ptp4l event state
      * @return Reference to the event state
      */
@@ -87,18 +73,6 @@ class TimeBaseState
      * @return Reference to the event state
      */
     SysClockEvent &get_chronyEventState();
-
-    /**
-     * Set the ptp4l event state counts
-     * @param[in] eCount Event state counts
-     */
-    //   void set_ptpEventStateCount(const PTPStateCount &eCount);
-
-    /**
-     * Set the chrony event state counts
-     * @param[in] eCount Event state counts
-     */
-    //   void set_chronyEventStateCount(const ChronyStateCount &eCount);
 
     /**
      * Set the ptp4l event state
@@ -170,7 +144,10 @@ class TimeBaseStates
     bool getTimeBaseState(int timeBaseIndex, TimeBaseState &state);
 
     // Method to set TimeBaseState by timeBaseIndex
-    void setTimeBaseState(int timeBaseIndex, const ptp_event &event);
+#define PTP_CLOCK 0
+#define SYSTEM_CLOCK 1
+    void setTimeBaseState(int timeBaseIndex, int clockType,
+        const ClockEventBase &newEvent);
 
     // Method to set ClkMgrSubscription by timeBaseIndex
     void setEventSubscription(int timeBaseIndex, const ClkMgrSubscription &sub) {

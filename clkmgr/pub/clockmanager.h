@@ -70,7 +70,7 @@ class ClockManager
      *
      * @param[in] newSub Reference to the new subscription details.
      * @param[in] timeBaseName Name of the time base to be subscribed.
-     * @param[out] ClockSyncBases Reference to the map containing clock
+     * @param[out] clockSyncBases Reference to the map containing clock
      * synchronization states and count.
      * @return True on successful subscription, false on failure.
      */
@@ -85,7 +85,7 @@ class ClockManager
      *
      * @param[in] newSub Reference to the new subscription details.
      * @param[in] timeBaseIndex Index of the time base to be subscribed.
-     * @param[out] ClockSyncBases Reference to the map containing clock
+     * @param[out] clockSyncBases Reference to the object containing clock
      * synchronization states and count.
      * @return True on successful subscription, false on failure.
      */
@@ -101,7 +101,7 @@ class ClockManager
      * @li Use 0 to check without waiting.
      * @li Use -1 to wait indefinitely until an event change occurs.
      * @param[in] timeBaseName Name of the time base to be monitored.
-     * @param[out] ClockSyncBases Reference to the map containing clock
+     * @param[out] clockSyncBases Reference to the map containing clock
      * synchronization states and count.
      * @return Result indicating the status of event changes.
      * @li 1 if an event change occurs within the timeout period.

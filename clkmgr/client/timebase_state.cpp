@@ -23,6 +23,9 @@ __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
+ClockEventHandler ptpClockEventHandler(ClockEventHandler::PTPClock);
+ClockEventHandler sysClockEventHandler(ClockEventHandler::SysClock);
+
 bool TimeBaseState::get_subscribed() const
 {
     return subscribed;
@@ -109,8 +112,8 @@ bool TimeBaseStates::getTimeBaseState(int timeBaseIndex, TimeBaseState &state)
     return false;
 }
 
-void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
-    const ptp_event &newEvent)
+void TimeBaseStates::setTimeBaseState(int timeBaseIndex, int clockType,
+    const ClockEventBase &newEvent)
 {
     std::lock_guard<rtpi::mutex> lock(mtx);
     auto &state = timeBaseStateMap[timeBaseIndex];
@@ -124,115 +127,113 @@ void TimeBaseStates::setTimeBaseState(int timeBaseIndex,
     ClkMgrSubscription sub = state.get_eventSub();
     uint32_t eventSub = sub.get_event_mask();
     uint32_t composite_eventSub = sub.get_composite_event_mask();
-    // Get the current state of the timebase
-    PTPClockEvent ptp4lEventState = state.get_ptp4lEventState();;
-    SysClockEvent chronyEventState = state.get_chronyEventState();
-    // Update eventGMOffset
-    if((eventSub & eventGMOffset) &&
-        (newEvent.master_offset != ptp4lEventState.getClockOffset())) {
-        PTPClockEventHandler::setClockOffset(ptp4lEventState,
-            newEvent.master_offset);
-        if(sub.in_range(thresholdGMOffset, ptp4lEventState.getClockOffset())) {
-            if(!(ptp4lEventState.isOffsetInRange())) {
-                PTPClockEventHandler::setOffsetInRange(ptp4lEventState, true);
-                PTPClockEventHandler::setOffsetInRangeEventCount(
-                    ptp4lEventState, 1);
-                state.set_event_changed(true);
-            }
-        } else {
-            if((ptp4lEventState.isOffsetInRange())) {
-                PTPClockEventHandler::setOffsetInRange(ptp4lEventState, false);
-                PTPClockEventHandler::setOffsetInRangeEventCount(
-                    ptp4lEventState, 1);
-                state.set_event_changed(true);
-            }
-        }
-    }
-    // Update eventSyncedToGM
-    if((eventSub & eventSyncedToGM) &&
-        (newEvent.synced_to_primary_clock !=
-            ptp4lEventState.isSyncedToPrimaryClock())) {
-        PTPClockEventHandler::setSyncedToPrimaryClock(ptp4lEventState,
-            newEvent.synced_to_primary_clock);
-        PTPClockEventHandler::setSyncedToGmEventCount(ptp4lEventState, 1);
-        state.set_event_changed(true);
-    }
-    // Update eventGMChanged
-    uint64_t sourceClockUUID = ptp4lEventState.getGmIdentity();
-    uint8_t sourceClockUUIDBytes[8];
-    for(int i = 0; i < 8; ++i) {
-        sourceClockUUIDBytes[i] =
-            static_cast<uint8_t>(sourceClockUUID >>(8 * (7 - i)));
-    }
-    if((eventSub & eventGMChanged) &&
-        (memcmp(sourceClockUUIDBytes, newEvent.gm_identity,
-                sizeof(newEvent.gm_identity)) != 0)) {
-        uint64_t identity = 0;
-        for(int i = 0; i < 8; ++i) {
-            identity |=
-                static_cast<uint64_t>(newEvent.gm_identity[i]) << (8 * (7 - i));
-        }
-        PTPClockEventHandler::setGmIdentity(ptp4lEventState, identity);
-        PTPClockEventHandler::setGmChanged(ptp4lEventState, true);
-        PTPClockEventHandler::setSyncedToGmEventCount(ptp4lEventState, 1);
-        state.set_event_changed(true);
-    }
-    // Update eventASCapable
-    if((eventSub & eventASCapable) &&
-        (newEvent.as_capable != ptp4lEventState.isAsCapable())) {
-        PTPClockEventHandler::setAsCapable(ptp4lEventState, newEvent.as_capable);
-        PTPClockEventHandler::setAsCapableEventCount(ptp4lEventState, 1);
-        state.set_event_changed(true);
-    }
-    // Update composite event
-    bool composite_event = true;
-    if(composite_eventSub & eventGMOffset)
-        composite_event &= ptp4lEventState.isOffsetInRange();
-    if(composite_eventSub & eventSyncedToGM)
-        composite_event &= ptp4lEventState.isSyncedToPrimaryClock();
-    if(composite_eventSub & eventASCapable)
-        composite_event &= ptp4lEventState.isAsCapable();
-    if(composite_eventSub &&
-        (composite_event != ptp4lEventState.isCompositeEvent())) {
-        PTPClockEventHandler::setCompositeEvent(ptp4lEventState,
-            composite_event);
-        PTPClockEventHandler::setCompositeEventCount(ptp4lEventState, 1);
-        state.set_event_changed(true);
-    }
-    // Update notification timestamp
-    uint64_t notification_timestamp = last_notification_time.tv_sec;
-    notification_timestamp *= NSEC_PER_SEC;
-    notification_timestamp += last_notification_time.tv_nsec;
-    PTPClockEventHandler::setNotificationTimestamp(ptp4lEventState,
-        notification_timestamp);
-    // Update GM logSyncInterval
-    PTPClockEventHandler::setSyncInterval(ptp4lEventState,
-        newEvent.ptp4l_sync_interval);
-    // Update Chrony clock offset
-    if(newEvent.chrony_offset != chronyEventState.getClockOffset()) {
-        SysClockEventHandler::setClockOffset(chronyEventState,
-            newEvent.chrony_offset);
-        if(sub.in_range(thresholdChronyOffset,
-                chronyEventState.getClockOffset())) {
-            if(!(chronyEventState.isOffsetInRange())) {
-                SysClockEventHandler::setOffsetInRange(chronyEventState, true);
-                SysClockEventHandler::setOffsetInRangeEventCount(
-                    chronyEventState, 1);
-                state.set_event_changed(true);
-            }
-        } else {
-            if((chronyEventState.isOffsetInRange())) {
-                SysClockEventHandler::setOffsetInRange(chronyEventState, false);
-                SysClockEventHandler::setOffsetInRangeEventCount(
-                    chronyEventState, 1);
-                state.set_event_changed(true);
+    if(clockType == PTP_CLOCK) {
+        const PTPClockEvent *ptpEvent =
+            dynamic_cast<const PTPClockEvent *>(&newEvent);
+        PTPClockEvent ptp4lEventState = state.get_ptp4lEventState();
+        // Update eventGMOffset
+        if((eventSub & eventGMOffset) &&
+            (ptpEvent->getClockOffset() != ptp4lEventState.getClockOffset())) {
+            ptpClockEventHandler.setClockOffset(ptp4lEventState,
+                ptpEvent->getClockOffset());
+            if(sub.in_range(thresholdGMOffset, ptp4lEventState.getClockOffset())) {
+                if(!(ptp4lEventState.isOffsetInRange())) {
+                    ptpClockEventHandler.setOffsetInRange(ptp4lEventState, true);
+                    ptpClockEventHandler.setOffsetInRangeEventCount(
+                        ptp4lEventState, 1);
+                    state.set_event_changed(true);
+                }
+            } else {
+                if((ptp4lEventState.isOffsetInRange())) {
+                    ptpClockEventHandler.setOffsetInRange(ptp4lEventState, false);
+                    ptpClockEventHandler.setOffsetInRangeEventCount(
+                        ptp4lEventState, 1);
+                    state.set_event_changed(true);
+                }
             }
         }
+        // Update eventSyncedToGM
+        if((eventSub & eventSyncedToGM) && (ptpEvent->isSyncedToPrimaryClock() !=
+                ptp4lEventState.isSyncedToPrimaryClock())) {
+            ptpClockEventHandler.setSyncedToPrimaryClock(ptp4lEventState,
+                ptpEvent->isSyncedToPrimaryClock());
+            ptpClockEventHandler.setSyncedToGmEventCount(ptp4lEventState, 1);
+            state.set_event_changed(true);
+        }
+        // Update eventGMChanged
+        if((eventSub & eventGMChanged) &&
+            (ptpEvent->getGmIdentity() != ptp4lEventState.getGmIdentity())) {
+            ptpClockEventHandler.setGmIdentity(ptp4lEventState,
+                ptpEvent->getGmIdentity());
+            ptpClockEventHandler.setGmChanged(ptp4lEventState, true);
+            ptpClockEventHandler.setSyncedToGmEventCount(ptp4lEventState, 1);
+            state.set_event_changed(true);
+        }
+        // Update eventASCapable
+        if((eventSub & eventASCapable) &&
+            (ptpEvent->isAsCapable() != ptp4lEventState.isAsCapable())) {
+            ptpClockEventHandler.setAsCapable(ptp4lEventState,
+                ptpEvent->isAsCapable());
+            ptpClockEventHandler.setAsCapableEventCount(ptp4lEventState, 1);
+            state.set_event_changed(true);
+        }
+        // Update composite event
+        bool composite_event = true;
+        if(composite_eventSub & eventGMOffset)
+            composite_event &= ptp4lEventState.isOffsetInRange();
+        if(composite_eventSub & eventSyncedToGM)
+            composite_event &= ptp4lEventState.isSyncedToPrimaryClock();
+        if(composite_eventSub & eventASCapable)
+            composite_event &= ptp4lEventState.isAsCapable();
+        if(composite_eventSub &&
+            (composite_event != ptp4lEventState.isCompositeEvent())) {
+            ptpClockEventHandler.setCompositeEvent(ptp4lEventState,
+                composite_event);
+            ptpClockEventHandler.setCompositeEventCount(ptp4lEventState, 1);
+            state.set_event_changed(true);
+        }
+        // Update notification timestamp
+        uint64_t notification_timestamp = last_notification_time.tv_sec;
+        notification_timestamp *= NSEC_PER_SEC;
+        notification_timestamp += last_notification_time.tv_nsec;
+        ptpClockEventHandler.setNotificationTimestamp(ptp4lEventState,
+            notification_timestamp);
+        // Update GM logSyncInterval
+        ptpClockEventHandler.setSyncInterval(ptp4lEventState,
+            ptpEvent->getSyncInterval());
+        //state.set_ptpEventStateCount(ptpEventCount);
+        state.set_ptpEventState(ptp4lEventState);
     }
-    SysClockEventHandler::setGmIdentity(chronyEventState,
-        newEvent.chrony_reference_id);
-    SysClockEventHandler::setSyncInterval(chronyEventState,
-        newEvent.polling_interval);
-    state.set_chronyEventState(chronyEventState);
-    state.set_ptpEventState(ptp4lEventState);
+    if(clockType == SYSTEM_CLOCK) {
+        const SysClockEvent *chronyEvent =
+            dynamic_cast<const SysClockEvent *>(&newEvent);
+        // Get the current state of the timebase
+        SysClockEvent chronyEventState = state.get_chronyEventState();
+        // Update Chrony clock offset
+        if(chronyEvent->getClockOffset() != chronyEventState.getClockOffset()) {
+            sysClockEventHandler.setClockOffset(chronyEventState,
+                chronyEvent->getClockOffset());
+            if(sub.in_range(thresholdChronyOffset,
+                    chronyEventState.getClockOffset())) {
+                if(!(chronyEventState.isOffsetInRange())) {
+                    sysClockEventHandler.setOffsetInRange(chronyEventState, true);
+                    sysClockEventHandler.setOffsetInRangeEventCount(
+                        chronyEventState, 1);
+                    state.set_event_changed(true);
+                }
+            } else {
+                if((chronyEventState.isOffsetInRange())) {
+                    sysClockEventHandler.setOffsetInRange(chronyEventState, false);
+                    sysClockEventHandler.setOffsetInRangeEventCount(
+                        chronyEventState, 1);
+                    state.set_event_changed(true);
+                }
+            }
+        }
+        sysClockEventHandler.setGmIdentity(chronyEventState,
+            chronyEvent->getGmIdentity());
+        sysClockEventHandler.setSyncInterval(chronyEventState,
+            chronyEvent->getSyncInterval());
+        state.set_chronyEventState(chronyEventState);
+    }
 }

@@ -26,6 +26,26 @@ class ClockEventHandler
 {
   public:
     /**
+     * This enumeration is used to specify whether the clock event handler
+     * is for a PTP clock or a system clock. It helps differentiate the
+     * operations and attributes specific to each clock type.
+     */
+    enum ClockType {
+        PTPClock,   /**< Represents a PTP clock event. */
+        SysClock    /**< Represents a system clock event. */
+    };
+
+    /**
+     * Initializes the handler to operate on either PTP or system clock events
+     * based on the provided clock type. This constructor sets the internal
+     * state to ensure that the handler performs the correct operations for
+     * the specified clock type.
+     *
+     * @param type The type of clock event to handle (PTPClock or SysClock).
+     */
+    ClockEventHandler(ClockType type) : clockType(type) {}
+
+    /**
      * Sets the notification timestamp of a ClockEventBase object.
      * @param event The ClockEventBase object to modify.
      * @param timestamp The new notification timestamp.
@@ -116,25 +136,16 @@ class ClockEventHandler
     static void setCompositeEventCount(ClockEventBase &event, uint32_t count) {
         event.compositeEventCount = count;
     }
-};
 
-/**
- * This friend class provides setter functions for PTPClockEvent.
- *
- * This class is designed to modify the private attributes of PTPClockEvent.
- * It contains static methods to set various attributes of PTPClockEvent.
- */
-class PTPClockEventHandler  : public ClockEventHandler
-{
-  public:
     /**
      * Sets whether the clock is synced to the primary clock.
      * @param event The ClockEventBase object to modify.
      * @param synced True if the clock is synced to the primary clock, false
      * otherwise.
      */
-    static void setSyncedToPrimaryClock(PTPClockEvent &event, bool synced) {
-        event.syncedToPrimaryClock = synced;
+    void setSyncedToPrimaryClock(PTPClockEvent &event, bool synced) {
+        if(clockType == PTPClock)
+            event.syncedToPrimaryClock = synced;
     }
 
     /**
@@ -142,8 +153,9 @@ class PTPClockEventHandler  : public ClockEventHandler
      * @param event The ClockEventBase object to modify.
      * @param capable True if the clock is IEEE 802.1AS capable, false otherwise.
      */
-    static void setAsCapable(PTPClockEvent &event, bool capable) {
-        event.asCapable = capable;
+    void setAsCapable(PTPClockEvent &event, bool capable) {
+        if(clockType == PTPClock)
+            event.asCapable = capable;
     }
 
     /**
@@ -164,28 +176,31 @@ class PTPClockEventHandler  : public ClockEventHandler
     static void setAsCapableEventCount(PTPClockEvent &event, uint32_t count) {
         event.asCapableCount = count;
     }
+
+  private:
+    ClockType clockType;
 };
 
 /**
- * This friend class provides setter functions for SysClockEvent.
+ * This friend class provides setter functions for ClockSyncBases.
  *
- * This class is designed to modify the private attributes of SysClockEvent.
- * It contains static methods to set various attributes of SysClockEvent.
+ * This class is designed to modify the protected attributes of ClockSyncBases.
+ * It contains static methods to set various attributes of ClockSyncBases.
  */
-class SysClockEventHandler  : public ClockEventHandler
+class ClockSyncBaseHandler : ClockSyncBases
 {
   public:
     /**
-     * Constructor to initialize both base and derived class members.
-     *
-     * Initializes the Chrony-specific attributes to default values.
+     * Sets the availability of the PTP clock.
+     * @param available True if the PTP clock is available, false otherwise.
      */
-    SysClockEventHandler() {}
+    void setPTPAvailability(bool available);
 
-  private:
     /**
-     * Add Chrony-specific attributes and methods here if needed in the future.
+     * Sets the availability of the system clock.
+     * @param available True if the system clock is available, false otherwise.
      */
+    void setSysAvailability(bool available);
 };
 
 __CLKMGR_NAMESPACE_END

@@ -14,12 +14,16 @@
 #include "common/print.hpp"
 #include "common/serialize.hpp"
 #include "proxy/notification_msg.hpp"
+#include "pub/clockmanager.h"
 
 __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-extern std::map<int, ptp_event> ptp4lEvents;
+extern std::map<int, PTPClockEvent> ptp4lEvents;
+#ifdef HAVE_LIBCHRONY
+extern std::map<int, SysClockEvent> chronyEvents;
+#endif
 
 /**
  * Create the ProxyNotificationMessage object
@@ -52,13 +56,24 @@ BUILD_TXBUFFER_TYPE(ProxyNotificationMessage::makeBuffer) const
     PrintDebug("[ProxyNotificationMessage]::makeBuffer");
     if(!Message::makeBuffer(TxContext))
         return false;
-    ptp_event event = ptp4lEvents[timeBaseIndex];
     // Add timeBaseIndex into the message
     if(!WRITE_TX(FIELD, timeBaseIndex, TxContext))
         return false;
-    // Add event data into the message
-    if(!WRITE_TX(FIELD, event, TxContext))
+    // Add clockType into the message
+    if(!WRITE_TX(FIELD, clockType, TxContext))
         return false;
+    if(clockType == PTP_CLOCK) {
+        PTPClockEvent event = ptp4lEvents[timeBaseIndex];
+        if(!WRITE_TX(FIELD, event, TxContext))
+            return false;
+    }
+    #ifdef HAVE_LIBCHRONY
+    if(clockType == SYSTEM_CLOCK) {
+        SysClockEvent event = chronyEvents[timeBaseIndex];
+        if(!WRITE_TX(FIELD, event, TxContext))
+            return false;
+    }
+    #endif
     return true;
 }
 

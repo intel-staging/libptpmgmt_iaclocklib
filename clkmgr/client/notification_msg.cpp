@@ -65,13 +65,26 @@ PARSE_RXBUFFER_TYPE(ClientNotificationMessage::parseBuffer)
 {
     PrintDebug("[ClientNotificationMessage]::parseBuffer ");
     int timeBaseIndex = 0;
-    ptp_event data = {};
+    int clockType = 0;
     if(!Message::parseBuffer(LxContext))
         return false;
     if(!PARSE_RX(FIELD, timeBaseIndex, LxContext))
         return false;
-    if(!PARSE_RX(FIELD, data, LxContext))
+    if(!PARSE_RX(FIELD, clockType, LxContext))
         return false;
-    TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex, data);
+    if(clockType == PTP_CLOCK) {
+        PTPClockEvent data;
+        if(!PARSE_RX(FIELD, data, LxContext))
+            return false;
+        TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex,
+            clockType, data);
+    }
+    if(clockType == SYSTEM_CLOCK) {
+        SysClockEvent data;
+        if(!PARSE_RX(FIELD, data, LxContext))
+            return false;
+        TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex,
+            clockType, data);
+    }
     return true;
 }

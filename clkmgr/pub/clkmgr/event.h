@@ -4,6 +4,18 @@
 /** @file
  * @brief class and structures for clock events
  *
+ * This file defines the model for managing clock synchronization events.
+ * The primary class, ClockSyncBases represents a complete event model
+ * that encapsulates events for different types of clocks. Each clock event
+ * is derived from the ClockEventBase class, providing a unified interface
+ * for handling clock-specific attributes and operations.
+ *
+ * Two types of clock events is supported:
+ * - PTPClockEvent represents events specific to Precision Time Protocol
+ *   (PTP) clocks.
+ * - SysClockEvent represents events specific to system clocks, such as
+ *   those managed by Chrony.
+ *
  * @author Lai Peter Jun Ann <peter.jun.ann.lai@@intel.com>
  * @copyright © 2024 Intel Corporation.
  *
@@ -29,13 +41,6 @@ class ClockEventHandler;
 class ClockEventBase
 {
   public:
-    /**
-     * Constructor to initialize base class members.
-     *
-     * Initializes the clock synchronization attributes to default values.
-     */
-    ClockEventBase();
-
     /**
      * Gets the notification timestamp.
      *
@@ -111,6 +116,7 @@ class ClockEventBase
     virtual ~ClockEventBase() {}
 
   protected:
+    ClockEventBase();                 /**< Initialize base class members */
     int64_t clockOffset;              /**< Clock offset */
     bool offsetInRange;               /**< Offset in range */
     uint64_t sourceClockUUID;         /**< Source clock UUID */
@@ -127,16 +133,11 @@ class ClockEventBase
 /**
  * This class extends the ClockEventBase class to include attributes specific to
  * Precision Time Protocol (PTP) synchronization, such as whether the clock is
- * synced to the primary clock and whether it is IEEE 802.1AS capable.
+ * synced to the primary clock and whether it is an IEEE 802.1AS capable.
  */
 class PTPClockEvent : public ClockEventBase
 {
   public:
-    /**
-     * Constructor to initialize both base and derived class members.
-     *
-     * Initializes the PTP-specific attributes to default values.
-     */
     PTPClockEvent();
 
     /**
@@ -147,9 +148,9 @@ class PTPClockEvent : public ClockEventBase
     bool isSyncedToPrimaryClock() const;
 
     /**
-     * Checks if the clock is IEEE 802.1AS capable.
+     * Checks if the clock is an IEEE 802.1AS capable.
      *
-     * @return True if the clock is IEEE 802.1AS capable, false otherwise.
+     * @return True if the clock is an IEEE 802.1AS capable, false otherwise.
      */
     bool isAsCapable() const;
     /**
@@ -161,24 +162,19 @@ class PTPClockEvent : public ClockEventBase
     uint32_t getSyncedToGmEventCount() const;
 
     /**
-     * Gets the count of events where the clock is IEEE 802.1AS capable.
+     * Gets the count of events where the clock is an IEEE 802.1AS capable.
      *
      * @return The count of IEEE 802.1AS capable events as a uint32_t.
      */
     uint32_t getAsCapableEventCount() const;
 
   private:
-    bool syncedToPrimaryClock;
-    /**< Indicates if the clock is synced to the primary clock */
-    bool asCapable;
-    /**< Indicates if the clock is IEEE 802.1AS capable */
-    uint32_t syncedToPrimaryClockCount;
-    /**< Count of events where the clock is synced to the primary clock */
-    uint32_t asCapableCount;
-    /**< Count of events where the clock is IEEE 802.1AS capable */
+    bool syncedToPrimaryClock;          /**< Synced to primary clock */
+    bool asCapable;                     /**< IEEE 802.1AS capable */
+    uint32_t syncedToPrimaryClockCount; /**< Synced event count */
+    uint32_t asCapableCount;            /**< AS capable event count */
 
-    friend class PTPClockEventHandler;
-    /**< Friend class to modify PTPClockEventHandler */
+    friend class ClockEventHandler;  /**< Friend class */
 };
 
 /**
@@ -190,19 +186,10 @@ class PTPClockEvent : public ClockEventBase
 class SysClockEvent : public ClockEventBase
 {
   public:
-    /**
-     * Constructor to initialize both base and derived class members.
-     *
-     * Initializes the Chrony-specific attributes to default values.
-     */
     SysClockEvent() {}
 
   private:
-    /**
-     * Add Chrony-specific attributes and methods here if needed in the future.
-     */
-    friend class SysClockEventHandler;
-    /**< Friend class to modify SysClockEventHandler */
+    friend class ClockEventHandler;  /**< Friend class */
 };
 
 /**
@@ -252,18 +239,6 @@ class ClockSyncBases
     SysClockEvent &getSysClock() const;
 
     /**
-     * Sets the availability of the PTP clock.
-     * @param available True if the PTP clock is available, false otherwise.
-     */
-    void setPTPAvailability(bool available);
-
-    /**
-     * Sets the availability of the system clock.
-     * @param available True if the system clock is available, false otherwise.
-     */
-    void setSysAvailability(bool available);
-
-    /**
      * Updates the PTP clock with a new PTPClockEvent object.
      * @param newPTPClock The new PTPClockEvent object to update.
      */
@@ -280,6 +255,8 @@ class ClockSyncBases
     SysClockEvent &sysClockSync;  /**< Reference to the system clock object */
     bool ptpAvailable;            /**< Availability status of the PTP clock */
     bool sysAvailable;            /**< Availability status of the system clock */
+
+    friend class ClockSyncBaseHandler;  /**< Friend class */
 };
 
 __CLKMGR_NAMESPACE_END
