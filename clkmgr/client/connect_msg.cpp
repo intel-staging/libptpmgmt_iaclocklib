@@ -12,7 +12,6 @@
 #include "pub/clkmgr/timebase_configs.h"
 #include "client/connect_msg.hpp"
 #include "common/print.hpp"
-#include "common/ptp_event.hpp"
 #include "common/serialize.hpp"
 #include "common/timebase.h"
 

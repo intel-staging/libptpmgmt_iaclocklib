@@ -10,6 +10,7 @@
  */
 
 #include "common/print.hpp"
+#include "common/clock_event_handler.hpp"
 #include "proxy/client.hpp"
 #include "proxy/config_parser.hpp"
 #include "proxy/connect_chrony.hpp"

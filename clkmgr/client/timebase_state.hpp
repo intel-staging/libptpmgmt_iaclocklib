@@ -12,8 +12,9 @@
 #ifndef CLIENT_TIMEBASE_STATE_HPP
 #define CLIENT_TIMEBASE_STATE_HPP
 
-#include "common/ptp_event.hpp"
+#include "common/clock_event_handler.hpp"
 #include "pub/clkmgr/subscription.h"
+#include "pub/clockmanager.h"
 
 #include <atomic>
 #include <map>
@@ -31,7 +32,10 @@ class TimeBaseState
     bool subscribed{false}; /**< Subscription status */
     bool event_changed{false}; /**< Subscription status */
     Event_state eventState = {}; /**< Event state */
-    Event_count eventStateCount = {}; /**< Event count */
+    PTPClockEvent ptp4lEventState; /**< PTP4L Event state */
+    SysClockEvent chronyEventState; /**< Chrony Event state */
+    //PTPStateCount ptp4lEventStateCount = {}; /**< PTP4L Event count */
+    //ChronyStateCount chronyEventStateCount = {}; /**< Chrony Event count */
     ClkMgrSubscription eventSub = {}; /**< Event subscription */
     timespec last_notification_time = {}; /**< Last notification time */
 
@@ -60,28 +64,53 @@ class TimeBaseState
     void set_event_changed(bool state);
 
     /**
-     * Get the event state counts
+     * Get the ptp4l event state counts
      * @return Reference to the event state counts
      */
-    const Event_count &get_eventStateCount();
+    //   PTPStateCount &get_ptpEventStateCount();
 
     /**
-     * Get the event state
+     * Get the chrony event state counts
+     * @return Reference to the event state counts
+     */
+    //   ChronyStateCount &get_chronyEventStateCount();
+
+    /**
+     * Get the ptp4l event state
      * @return Reference to the event state
      */
-    Event_state &get_eventState();
+    //Event_state &get_eventState();
+    PTPClockEvent &get_ptp4lEventState();
 
     /**
-     * Set the event state counts
+     * Get the chrony event state
+     * @return Reference to the event state
+     */
+    SysClockEvent &get_chronyEventState();
+
+    /**
+     * Set the ptp4l event state counts
      * @param[in] eCount Event state counts
      */
-    void set_eventStateCount(const Event_count &eCount);
+    //   void set_ptpEventStateCount(const PTPStateCount &eCount);
 
     /**
-     * Set the event state
+     * Set the chrony event state counts
+     * @param[in] eCount Event state counts
+     */
+    //   void set_chronyEventStateCount(const ChronyStateCount &eCount);
+
+    /**
+     * Set the ptp4l event state
      * @param[in] eState Event state
      */
-    void set_eventState(const Event_state &eState);
+    void set_ptpEventState(const PTPClockEvent &ptpState);
+
+    /**
+     * Set the chrony event state
+     * @param[in] eState Event state
+     */
+    void set_chronyEventState(const SysClockEvent &chronyState);
 
     /**
      * Set the last notification time
