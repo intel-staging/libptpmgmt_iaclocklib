@@ -74,10 +74,11 @@ class ClockEventHandler
     /**
      * Set whether the offset is in range for a ClockEventBase object.
      * @param[in] event The ClockEventBase object to modify.
-     * @param[in] in_range True if the offset is in range, false otherwise.
+     * @param[in] isClockOffsetInRange True if the offset is in range,
+     * false otherwise.
      */
-    static void setOffsetInRange(ClockEventBase &event, bool in_range) {
-        event.offsetInRange = in_range;
+    static void setOffsetInRange(ClockEventBase &event, bool isClockOffsetInRange) {
+        event.offsetInRange = isClockOffsetInRange;
     }
 
     /**
