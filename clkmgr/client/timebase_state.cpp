@@ -266,6 +266,8 @@ void TimeBaseStates::setTimeBaseState(size_t timeBaseIndex,
         newEvent.chrony_reference_id);
     sysClockEventHandler.setSyncInterval(chronyEventState,
         newEvent.polling_interval);
+    sysClockEventHandler.setNotificationTimestamp(chronyEventState,
+        notification_timestamp);
     state.set_chronyEventState(chronyEventState);
     state.set_ptpEventState(ptp4lEventState);
 }
