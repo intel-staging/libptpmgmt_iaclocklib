@@ -8,6 +8,7 @@
 #include <client/subscribe_msg.hpp>
 #include <common/serialize.hpp>
 #include <common/print.hpp>
+#include <iostream>
 
 using namespace JClkLibClient;
 using namespace JClkLibCommon;
@@ -54,6 +55,9 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 	if (!PARSE_RX(FIELD, data, LxContext))
 		return false;
 
+	std::cout << "[TRY ClientSubscribeMessage] set subscribe event : " + state.get_eventSub().c_get_val_event().toString() << "\n";
+	std::cout << "[TRYYYYY1234] get subscribe event : " + state.get_eventSub().get_value().toString() << "\n";
+
 	printf("master_offset = %ld, servo_state = %d gmPresent = %d\n", data.master_offset, data.servo_state, data.gmPresent);
 	printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x ",
 		data.gmIdentity[0], data.gmIdentity[1],data.gmIdentity[2],
@@ -64,30 +68,25 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 	/* TODO : set the client_data per client instead of global */
 	if (data.master_offset != client_data.master_offset) {
 		client_data.master_offset = data.master_offset;
-		if ((client_data.master_offset > client_data.master_offset_low) && (client_data.master_offset < client_data.master_offset_high)) {
+		if ((client_data.master_offset > state.get_eventSub().get_value().getLower(0)) && (client_data.master_offset < state.get_eventSub().get_value().getUpper(0))) {
 			client_data.master_offset_within_boundary = true;
-			client_data.offset_event_count.fetch_add(1, std::memory_order_relaxed) + 1; // Atomic increment
 		}
 	}
 
 	if (data.servo_state != client_data.servo_state) {
 		client_data.servo_state = data.servo_state;
-		client_data.servo_state_event_count.fetch_add(1, std::memory_order_relaxed); // Atomic increment
 	}
 
 	if (memcmp(client_data.gmIdentity, data.gmIdentity, sizeof(data.gmIdentity)) != 0) {
 		memcpy(client_data.gmIdentity, data.gmIdentity, sizeof(data.gmIdentity));
-		client_data.gmIdentity_event_count.fetch_add(1, std::memory_order_relaxed); // Atomic increment
 	}
 
 	if (data.asCapable != client_data.asCapable) {
 		client_data.asCapable = data.asCapable;
-		client_data.asCapable_event_count.fetch_add(1, std::memory_order_relaxed); // Atomic increment
 	}
 
 	if (data.gmPresent != client_data.gmPresent) {
 		client_data.gmPresent = data.gmPresent;
-		client_data.gmPresent_event_count.fetch_add(1, std::memory_order_relaxed); // Atomic increment
 	}
 
 	printf("CLIENT master_offset = %ld, servo_state = %d gmPresent = %d\n", client_data.master_offset, client_data.servo_state, client_data.gmPresent);

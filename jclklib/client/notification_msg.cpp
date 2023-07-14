@@ -54,11 +54,26 @@ BUILD_TXBUFFER_TYPE(ClientNotificationMessage::makeBuffer) const
 PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
 {
 	PrintDebug("[ClientNotificationMessage]::processMessage ");
+
+	client_ptp_data.master_offset_low = -1000;
+	client_ptp_data.master_offset_high = 1000;
+
 	if (proxy_data.master_offset != client_ptp_data.master_offset) {
 		client_ptp_data.master_offset = proxy_data.master_offset;
-		if ((client_ptp_data.master_offset > client_ptp_data.master_offset_low) && (client_ptp_data.master_offset < client_ptp_data.master_offset_high)) {
-			client_ptp_data.master_offset_within_boundary = true;
-			client_ptp_data.offset_event_count.fetch_add(1, std::memory_order_relaxed);
+		if ((client_ptp_data.master_offset > state.get_eventSub().get_value().getLower(0)) && (client_ptp_data.master_offset < state.get_eventSub().get_value().getUpper(0))) {
+			if (!(client_ptp_data.master_offset_within_boundary))
+			{
+				client_ptp_data.master_offset_within_boundary = true;
+				client_ptp_data.offset_event_count.fetch_add(1, std::memory_order_relaxed);
+			}
+		}
+		else
+		{
+			if ((client_ptp_data.master_offset_within_boundary))
+			{
+				client_ptp_data.master_offset_within_boundary = false;
+				client_ptp_data.offset_event_count.fetch_add(1, std::memory_order_relaxed);
+			}
 		}
 	}
 
