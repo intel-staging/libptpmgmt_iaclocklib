@@ -149,3 +149,6 @@ The Licence of this project is
   * The library is under LGPL v3 or later.
   * The pmc and phc_ctl tools and the testing scripts are under GPL v3 or later.
   * Documentation is under under GFDL v1.3 or later without invariants sections.
+
+# <u>Disclaimer</u>
+This project is under development. All source code and features on the main branch are for the purpose of testing or evaluation and not production ready.
