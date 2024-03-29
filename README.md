@@ -158,3 +158,6 @@ This project is under development. All source code and features on the main bran
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/30019/badge.svg"/>
 </a>
+
+# <u>OpenSSF Scorecard</u>
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intel-staging/libptpmgmt_iaclocklib/badge)](https://securityscorecards.dev/viewer/?uri=github.com/intel-staging/libptpmgmt_iaclocklib)
