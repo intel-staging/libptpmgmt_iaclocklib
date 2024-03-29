@@ -32,7 +32,7 @@ jobs:
         names: [deb.trixie, deb.bookworm, rpmbuild, pacmanbuild, portage]
       fail-fast: false
     container:
-      image: ghcr.io/${{ github.repository_owner }}/${{ matrix.names }}:latest
+      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
     env:
       GITHUB_CONTAINER: ${{ matrix.names }}
 
@@ -61,7 +61,7 @@ jobs:
         names: [deb.trixie, deb.bookworm]
       fail-fast: false
     container:
-      image: ghcr.io/${{ github.repository_owner }}/${{ matrix.names }}:latest
+      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
 
     steps:
 
@@ -80,7 +80,7 @@ jobs:
         names: [deb.trixie, deb.bookworm, rpmbuild, pacmanbuild, portage]
       fail-fast: false
     container:
-      image: ghcr.io/${{ github.repository_owner }}/${{ matrix.names }}:latest
+      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
     env:
       GITHUB_CONTAINER: ${{ matrix.names }}
 
