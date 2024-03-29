@@ -20,6 +20,9 @@ on: [push, pull_request]
 env:
   USER: builder
 
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest
