@@ -21,6 +21,9 @@ on: [push, pull_request, workflow_dispatch]
 env:
   USER: builder
 
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest
