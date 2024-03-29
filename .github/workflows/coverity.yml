@@ -1,0 +1,25 @@
+# Visit https://scan.coverity.com/projects/libptpmgmt_iaclocklib for coverity result
+
+name: Coverity Scan
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install dependencies
+      run: sudo apt-get install -y swig libtool-bin
+    - uses: actions/checkout@v4
+    - name: autoconf
+      run: autoconf
+    - name: configure
+      run: ./configure
+    - uses: vapier/coverity-scan-action@v1
+      with:
+        email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        project: libptpmgmt_iaclocklib
