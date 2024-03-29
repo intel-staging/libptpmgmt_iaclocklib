@@ -174,3 +174,9 @@ The Licence of this project is
 
 # <u>Disclaimer</u>
 This project is under development. All source code and features on the main branch are for the purpose of testing or evaluation and not production ready.
+
+# <u>Coverity Scan</u>
+<a href="https://scan.coverity.com/projects/libptpmgmt_iaclocklib">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/30019/badge.svg"/>
+</a>
