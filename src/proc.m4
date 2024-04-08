@@ -481,6 +481,10 @@ cnst_st() int NM(NOTIFY_TIME_SYNC) = 1;
 cnst_st() int NM(NOTIFY_PARENT_DATA_SET) = 2;
 /** Notify Common Mean Link Delay Information in SUBSCRIBE_EVENTS_NP.bitmask */
 cnst_st() int NM(NOTIFY_CMLDS) = 3;
+/** Notify NP parent state offset in SUBSCRIBE_EVENTS_NP.bitmask */
+cnst_st() int NM(NOTIFY_PORT_STATE_NP) = 4;
+/** Notify all event in SUBSCRIBE_EVENTS_NP.bitmask */
+cnst_st() int NM(NOTIFY_ALL) = 5;
 /** Subscribe events TLV
  * @note linuxptp implementation specific
  */
