@@ -478,6 +478,11 @@ cnst_st() int NM(NOTIFY_PORT_STATE) = 0;
 cnst_st() int NM(NOTIFY_TIME_SYNC) = 1;
 /** Notify parent data in SUBSCRIBE_EVENTS_NP.bitmask */
 cnst_st() int NM(NOTIFY_PARENT_DATA_SET) = 2;
+/** Notify NP parent state offset in SUBSCRIBE_EVENTS_NP.bitmask */
+cnst_st() int NM(NOTIFY_PORT_STATE_NP) = 3;
+/** Notify all event in SUBSCRIBE_EVENTS_NP.bitmask */
+cnst_st() int NM(NOTIFY_ALL) = 4;
+
 /** Subscribe events TLV
  * @note linuxptp implementation specific
  */
