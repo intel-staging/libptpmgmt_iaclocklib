@@ -1,0 +1,25 @@
+# scan virus
+name: "Virus Scan"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  job_id:
+    name: Scan Virus
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.0.0
+        with:
+          fetch-depth: 0
+      - name: Scan Repository
+        uses: hugoalh/scan-virus-ghaction@v0.20.0
+        with:
+          statistics_summary: True
