@@ -41,6 +41,24 @@ struct port_info {
     bool local;
 };
 
+/** client subscribe event */
+enum subscribe_event : uint8_t {
+    gmIdentity                              = 0x1, /**< UUID */
+    as_capable                              = 0x2, /**< as_capable */
+    master_offset                           = 0x4, /**< master_offset */
+    servo_state                             = 0x8, /**< servo_state */
+};
+
+struct client_ptp_event {
+    int64_t master_offset;
+    int64_t master_offset_upper;
+    int64_t master_offset_lower;
+    ClockIdentity_t gmIdentity; /**< Grandmaster clock ID */
+    Integer32_t asCapable; /**< Flag for 802@.1AS Capable */
+    int64_t servo_state;
+    subscribe_event client_subscribe_event; //event that subcribed by client
+};
+
 struct ptp_event {
     int64_t master_offset;
     ClockIdentity_t gmIdentity; /**< Grandmaster clock ID */
