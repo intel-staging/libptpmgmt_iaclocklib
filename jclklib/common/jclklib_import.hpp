@@ -104,6 +104,21 @@ namespace JClkLibCommon
 		int32_t asCapable; /* 802@.1AS Capable */
 		uint8_t servo_state;
 	};
+
+	struct client_ptp_event {
+		int64_t master_offset;
+		int64_t master_offset_low;
+		int64_t master_offset_high;
+		bool master_offset_within_boundary;
+		uint8_t gmIdentity[8]; /* Grandmaster clock ID */
+		int32_t asCapable; /* 802@.1AS Capable */
+		uint8_t servo_state;
+		uint8_t ptp4l_id;
+		std::atomic<int> offset_event_count{};
+		std::atomic<int> gmIdentity_event_count{};
+		std::atomic<int> asCapable_event_count{};
+		std::atomic<int> servo_state_event_count{};
+	};
 }
 
 #endif/*JCLKLIB_IMPORT_HPP*/
