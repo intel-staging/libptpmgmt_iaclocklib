@@ -20,7 +20,7 @@ REAL_TARGETS = jclklib.so test
 
 .PHONY: default
 default:
-	$(MAKE) -s -C $(JCLKLIB_CLIENT_DIR) build-all 2>&1 | less -R
+	$(MAKE) -s -C $(JCLKLIB_CLIENT_DIR) build-all 2>&1
 
 .PHONY: build-prep
 build-prep:
