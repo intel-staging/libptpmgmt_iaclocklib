@@ -17,7 +17,7 @@ OBJ_DIR = $(JCLKLIB_COMMON_DIR)/obj
 
 .PHONY: default
 default:
-	$(MAKE) -s -C $(JCLKLIB_COMMON_DIR) build-all 2>&1 | less -R
+	$(MAKE) -s -C $(JCLKLIB_COMMON_DIR) build-all 2>&1
 
 .PHONY: build-prep
 build-prep:
