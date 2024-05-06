@@ -90,6 +90,9 @@ bool JClkLibClient::subscribe(JClkLibCommon::jcl_subscription &newSub, JClkLibCo
 		PrintDebug("[JClkLibClient::subscribe] subscribeMsgcreation is OK !!\n");
 
 	/* Write the current event subscription */
+	state.get_eventSub().set_event(newSub.getc_event());
+	state.get_eventSub().set_value(newSub.getc_value());
+
 	cmsg->getSubscription().get_event().copyEventMask(newSub.get_event());
 
 	ClientMessageQueue::writeTransportClientId(subscribeMsg.get());
