@@ -31,6 +31,9 @@ int main()
     int ret = EXIT_SUCCESS;
     JClkLibCommon::jcl_subscription sub = {};
     JClkLibCommon::jcl_state currentState = {};
+    JClkLibCommon::jcl_state jcl_state = {};
+    JClkLibCommon::jcl_state_event_count eventCount = {};
+    unsigned timeout = 1;
 
     std::uint32_t event2Sub1[1] = {((1<<gmPresentEvent)|(1<<gmChangedEvent)|(1<<servoLockedEvent)|(1<<gmOffsetEvent))};
 
@@ -54,10 +57,17 @@ int main()
     std::cout << "[CLIENT] set subscribe event : " + sub.c_get_val_event().toString() << "\n";
     subscribe(sub, currentState);
     std::cout << "[CLIENT] " + state.toString();
+
     while (!signal_flag) {
         /* ToDo: call wait API here */
+        status_wait(timeout, jcl_state , eventCount);
+        std::cout << "[CLIENT status_wait] " + state.toString();
         sleep(1);
     }
+
+    printf ("offset_in_range = %ld, servo_locked = %ld gmPresent = %ld as_Capable = %ld gm_Changed = %ld\n", \
+	eventCount.offset_in_range_event_count, eventCount.servo_locked_event_count,\
+	eventCount.gmPresent_event_count, eventCount.asCapable_event_count, eventCount.gm_changed_event_count);
 
  do_exit:
 	disconnect();
