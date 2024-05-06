@@ -55,9 +55,6 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
 {
 	PrintDebug("[ClientNotificationMessage]::processMessage ");
 
-	client_ptp_data.master_offset_low = -1000;
-	client_ptp_data.master_offset_high = 1000;
-
 	if (proxy_data.master_offset != client_ptp_data.master_offset) {
 		client_ptp_data.master_offset = proxy_data.master_offset;
 		if ((client_ptp_data.master_offset > state.get_eventSub().get_value().getLower(0)) && (client_ptp_data.master_offset < state.get_eventSub().get_value().getUpper(0))) {
