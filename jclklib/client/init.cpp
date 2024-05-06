@@ -29,6 +29,8 @@ std::condition_variable ClientConnectMessage::cv;
 std::mutex ClientSubscribeMessage::cv_mtx;
 std::condition_variable ClientSubscribeMessage::cv;
 
+extern JClkLibCommon::client_ptp_event client_ptp_data;
+
 TransportClientId globalClientID;
 
 bool JClkLibClient::connect()
@@ -155,7 +157,11 @@ int JClkLibClient::status_wait( unsigned timeout, JClkLibCommon::jcl_state &jcl_
 	jcl_state = state.get_eventState();
 
 	/* Reset the atomic */
-	//client_data.event_count.fetch_sub(eventCount, std::memory_order_relaxed);
+	client_ptp_data.offset_event_count.fetch_sub(eventCount.offset_in_range_event_count, std::memory_order_relaxed);
+	client_ptp_data.asCapable_event_count.fetch_sub(eventCount.asCapable_event_count, std::memory_order_relaxed);
+	client_ptp_data.servo_state_event_count.fetch_sub(eventCount.servo_locked_event_count, std::memory_order_relaxed);
+	client_ptp_data.gmPresent_event_count.fetch_sub(eventCount.gmPresent_event_count, std::memory_order_relaxed);
+	client_ptp_data.gmChanged_event_count.fetch_sub(eventCount.gm_changed_event_count, std::memory_order_relaxed);
 
 	return true;
 }
