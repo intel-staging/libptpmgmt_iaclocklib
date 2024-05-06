@@ -62,14 +62,12 @@ int main()
     while (!signal_flag) {
         /* ToDo: call wait API here */
         status_wait(timeout, jcl_state , eventCount);
-        printf ("\n\nAPP PRINT jcl_state: offset_in_range = %d, servo_locked = %d gmPresent = %d as_Capable = %d gm_Changed = %d\n", \
+        printf ("APP PRINT jcl_state: offset_in_range = %d, servo_locked = %d gmPresent = %d as_Capable = %d gm_Changed = %d\n", \
                jcl_state.offset_in_range, jcl_state.servo_locked,\
                jcl_state.gm_present, jcl_state.as_Capable, jcl_state.gm_changed);
         printf ("APP PRINT eventCount: offset_in_range = %ld, servo_locked = %ld gmPresent = %ld as_Capable = %ld gm_Changed = %ld\n\n", \
                eventCount.offset_in_range_event_count, eventCount.servo_locked_event_count,\
                eventCount.gmPresent_event_count, eventCount.asCapable_event_count, eventCount.gm_changed_event_count);
-
-        std::cout << "[CLIENT status_wait] " + state.toString();
         sleep(1);
     }
 
