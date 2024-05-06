@@ -8,7 +8,6 @@
 #include <client/subscribe_msg.hpp>
 #include <common/serialize.hpp>
 #include <common/print.hpp>
-#include <iostream>
 
 using namespace JClkLibClient;
 using namespace JClkLibCommon;
@@ -54,9 +53,6 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 
 	if (!PARSE_RX(FIELD, data, LxContext))
 		return false;
-
-	std::cout << "[TRY ClientSubscribeMessage] set subscribe event : " + state.get_eventSub().c_get_val_event().toString() << "\n";
-	std::cout << "[TRYYYYY1234] get subscribe event : " + state.get_eventSub().get_value().toString() << "\n";
 
 	printf("master_offset = %ld, servo_state = %d gmPresent = %d\n", data.master_offset, data.servo_state, data.gmPresent);
 	printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x ",
