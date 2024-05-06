@@ -154,11 +154,6 @@ int JClkLibClient::status_wait( unsigned timeout, JClkLibCommon::jcl_state &jcl_
 	eventCount =  state.get_eventStateCount();
 	jcl_state = state.get_eventState();
 
-	printf("[JClkLibClient]::status_wait : event_count -  \n");
-	printf ("offset_in_range = %ld, servo_locked = %ld gmPresent = %ld as_Capable = %ld gm_Changed = %ld\n", \
-	eventCount.offset_in_range_event_count, eventCount.servo_locked_event_count,\
-	eventCount.gmPresent_event_count, eventCount.asCapable_event_count, eventCount.gm_changed_event_count);
-
 	/* Reset the atomic */
 	//client_data.event_count.fetch_sub(eventCount, std::memory_order_relaxed);
 

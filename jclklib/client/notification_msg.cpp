@@ -89,20 +89,6 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
 		client_ptp_data.asCapable_event_count.fetch_add(1, std::memory_order_relaxed);
 	}
 
-	// Load the value of event_count atomically for TESTING only, will be remove later
-	int offset_event_count = client_ptp_data.offset_event_count;
-	int gmIdentity_event_count = client_ptp_data.gmIdentity_event_count;
-	int asCapable_event_count = client_ptp_data.asCapable_event_count;
-	int servo_state_event_count = client_ptp_data.servo_state_event_count;
-
-	printf("CLIENT master_offset = %ld, servo_state = %d ", client_ptp_data.master_offset, client_ptp_data.servo_state);
-	printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x ",
-		client_ptp_data.gmIdentity[0], client_ptp_data.gmIdentity[1],client_ptp_data.gmIdentity[2],
-		client_ptp_data.gmIdentity[3], client_ptp_data.gmIdentity[4],
-		client_ptp_data.gmIdentity[5], client_ptp_data.gmIdentity[6],client_ptp_data.gmIdentity[7]);
-	printf("asCapable = %d\n\n", client_ptp_data.asCapable);
-	printf("CLIENT offset_event_count = %d, gmIdentity_event_count = %d, asCapable_event_count = %d, servo_state_event_count = %d\n\n", offset_event_count, gmIdentity_event_count, asCapable_event_count, servo_state_event_count);
-
 	jclCurrentState.gm_present = client_ptp_data.gmPresent > 0 ? true:false;
 	jclCurrentState.as_Capable = client_ptp_data.asCapable > 0 ? true:false;
 	jclCurrentState.offset_in_range = client_ptp_data.master_offset_within_boundary;
@@ -128,14 +114,6 @@ PARSE_RXBUFFER_TYPE(ClientNotificationMessage::parseBuffer)
 
 	if (!PARSE_RX(FIELD, proxy_data, LxContext))
 		return false;
-
-	printf("master_offset = %ld, servo_state = %d ", proxy_data.master_offset, proxy_data.servo_state);
-	printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x ",
-		proxy_data.gmIdentity[0], proxy_data.gmIdentity[1],proxy_data.gmIdentity[2],
-		proxy_data.gmIdentity[3], proxy_data.gmIdentity[4],
-		proxy_data.gmIdentity[5], proxy_data.gmIdentity[6],proxy_data.gmIdentity[7]);
-	printf("asCapable = %d\n\n", proxy_data.asCapable);
-
 
 	return true;
 }
