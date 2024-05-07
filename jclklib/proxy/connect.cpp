@@ -26,8 +26,6 @@ using namespace std;
 using namespace JClkLibProxy;
 using namespace ptpmgmt;
 
-const int SUBSCRIBE_DURATION = 180; /* 3 minutes */
-
 static const size_t bufSize = 2000;
 static char buf[bufSize];
 static Init obj;
@@ -163,7 +161,6 @@ static inline bool msg_set_action(bool local, mng_vals_e id)
 bool event_subscription(struct jcl_handle **handle)
 {
     memset(d.bitmask, 0, sizeof d.bitmask);
-    d.duration = SUBSCRIBE_DURATION;
     d.setEvent(NOTIFY_TIME_SYNC);
     d.setEvent(NOTIFY_PORT_STATE_NP);
 
