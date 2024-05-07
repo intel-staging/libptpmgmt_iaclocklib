@@ -62,21 +62,29 @@ int main()
     while (!signal_flag) {
         if (!jcl_status_wait(timeout, jcl_state , eventCount)) {
             printf("No event status changes identified in %d seconds.\n\n", timeout);
-        } else {
-            printf("APP PRINT jcl_state: offset_in_range = %d, servo_locked = %d, "
-                   "gmPresent = %d, as_Capable = %d, gm_Changed = %d\n",
-                   jcl_state.offset_in_range, jcl_state.servo_locked,
-                   jcl_state.gm_present, jcl_state.as_Capable, jcl_state.gm_changed);
-            printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x\n",
-                   jcl_state.gmIdentity[0], jcl_state.gmIdentity[1], jcl_state.gmIdentity[2],
-                   jcl_state.gmIdentity[3], jcl_state.gmIdentity[4],
-                   jcl_state.gmIdentity[5], jcl_state.gmIdentity[6], jcl_state.gmIdentity[7]);
-            printf("APP PRINT eventCount: offset_in_range = %ld, servo_locked = %ld, "
-                   "gmPresent = %ld, as_Capable = %ld, gm_Changed = %ld\n\n",
-                   eventCount.offset_in_range_event_count, eventCount.servo_locked_event_count,
-                   eventCount.gmPresent_event_count, eventCount.asCapable_event_count,
-                   eventCount.gm_changed_event_count);
+            sleep(1);
+            continue;
         }
+
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s | %-12s | %-11s |\n", "Event", "Event Status", "Event Count");
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s | %-12d | %-11ld |\n", "offset_in_range",
+            jcl_state.offset_in_range, eventCount.offset_in_range_event_count);
+        printf("| %-16s | %-12d | %-11ld |\n", "servo_locked",
+            jcl_state.servo_locked, eventCount.servo_locked_event_count);
+        printf("| %-16s | %-12d | %-11ld |\n", "gmPresent",
+            jcl_state.gm_present, eventCount.gmPresent_event_count);
+        printf("| %-16s | %-12d | %-11ld |\n", "as_Capable",
+            jcl_state.as_Capable, eventCount.asCapable_event_count);
+        printf("| %-16s | %-12d | %-11ld |\n", "gm_Changed",
+            jcl_state.gm_changed, eventCount.gm_changed_event_count);
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s |     %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n", "UUID",
+            jcl_state.gmIdentity[0], jcl_state.gmIdentity[1], jcl_state.gmIdentity[2],
+            jcl_state.gmIdentity[3], jcl_state.gmIdentity[4],
+            jcl_state.gmIdentity[5], jcl_state.gmIdentity[6], jcl_state.gmIdentity[7]);
+        printf("+------------------+----------------------------+\n\n");
         sleep(1);
     }
 
