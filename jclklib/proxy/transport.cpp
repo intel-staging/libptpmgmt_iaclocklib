@@ -1,9 +1,11 @@
-/*! \file transport.cpp
-    \brief Proxy transport base class implementation for JClkLib. It provides common functionality for derived transport classes.
-
-    (C) Copyright Intel Corporation 2023. All rights reserved. Intel Confidential.
-    Author: Christopher Hall <christopher.s.hall@intel.com>
-*/
+/** @file transport.cpp
+ * @brief Proxy transport base class implementation for JClkLib. It provides common functionality for derived transport classes.
+ *
+ * @author Christopher Hall <christopher.s.hall@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
 
 #include <proxy/transport.hpp>
 #include <proxy/null_tport.hpp>

@@ -1,9 +1,11 @@
-/*! \file connect.cpp
-    \brief Proxy connect message class.
-
-    (C) Copyright Intel Corporation 2023. All rights reserved. Intel Confidential.
-    Author: Lai Peter Jun Ann <peter.jun.ann.lai@intel.com>
-*/
+/** @file connect.cpp
+ * @brief Proxy connect ptp4l message class.
+ *
+ * @author Lai Peter Jun Ann <peter.jun.ann.lai@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
 
 #include <proxy/connect.hpp>
 #include <stdio.h>

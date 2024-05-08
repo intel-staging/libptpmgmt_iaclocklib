@@ -1,9 +1,12 @@
-/*! \file thread.hpp
-    \brief Proxy message thread class.
+/** @file thread.hpp
+ * @brief Proxy message thread class.
+ *
+ * @author Lai Peter Jun Ann <peter.jun.ann.lai@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
 
-    (C) Copyright Intel Corporation 2023. All rights reserved. Intel Confidential.
-    Author: Lai Peter Jun Ann <peter.jun.ann.lai@intel.com>
-*/
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
