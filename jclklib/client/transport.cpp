@@ -1,9 +1,11 @@
-/*! \file transport.cpp
-    \brief Client transport base implementation for JClkLib. It is extended for specific transports such as POSIX message queue.
-
-    (C) Copyright Intel Corporation 2023. All rights reserved. Intel Confidential.
-    Author: Christopher Hall <christopher.s.hall@intel.com>
-*/
+/** @file transport.cpp
+ * @brief Client transport base implementation for JClkLib. It is extended for specific transports such as POSIX message queue.
+ *
+ * @author Christopher Hall <christopher.s.hall@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
 
 #include <client/transport.hpp>
 #include <client/null_tport.hpp>

@@ -1,9 +1,11 @@
-/*! \file subscribe_msg.cpp
-    \brief Client subscribe message class. Implements client specific functionality.
-
-    (C) Copyright Intel Corporation 2023. All rights reserved. Intel Confidential.
-    @author: Noor Azura Ahmad Tarmizi <noor.azura.ahmad.tarmizi@intel.com>
-*/
+/** @file subscribe_msg.cpp
+ * @brief Client subscribe message class. Implements client specific functionality.
+ *
+ * @author Noor Azura Ahmad Tarmizi <noor.azura.ahmad.tarmizi@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
 
 #include <client/subscribe_msg.hpp>
 #include <common/serialize.hpp>
