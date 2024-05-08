@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. All rights reserved.
+#
+# @author Song Yoong Siang <yoong.siang.song@intel.com>
+# @copyright © 2024 Intel Corporation. All rights reserved.
+# @license LGPL-3.0-or-later
+#
 # For most projects, this workflow file will not need changing; you simply need
 # to commit it to your repository.
 #
@@ -8,7 +15,8 @@
 # We have attempted to detect the languages in your repository. Please check
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
-#
+###############################################################################
+
 name: "CodeQL"
 
 on:
