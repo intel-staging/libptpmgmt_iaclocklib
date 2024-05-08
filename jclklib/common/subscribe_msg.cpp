@@ -1,9 +1,11 @@
-/*! \file subscribe_msg.cpp
-    \brief Common subscribe message implementation. Implements common functions and (de-)serialization
-
-    (C) Copyright Intel Corporation 2023. All rights reserved. Intel Confidential.
-    Author: Christopher Hall <christopher.s.hall@intel.com>
-*/
+/** @file subscribe_msg.cpp
+ * @brief Common subscribe message implementation. Implements common functions and (de-)serialization
+ *
+ * @author Christopher Hall <christopher.s.hall@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
 
 #include <common/subscribe_msg.hpp>
 #include <common/serialize.hpp>

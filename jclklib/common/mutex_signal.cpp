@@ -1,3 +1,12 @@
+/** @file mutex_signal.cpp
+ * @brief Common pthread mutex implementation.
+ *
+ * @author Christopher Hall <christopher.s.hall@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
+
 #include <common/mutex_signal.hpp>
 
 #include <cstring>

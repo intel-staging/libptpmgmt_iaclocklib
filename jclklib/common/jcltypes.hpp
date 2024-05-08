@@ -1,3 +1,12 @@
+/** @file jcltypes.hpp
+ * @brief Common message type
+ *
+ * @author Christopher Hall <christopher.s.hall@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
+
 #include <cstdint>
 
 #ifndef COMMON_JCLTYPES_HPP

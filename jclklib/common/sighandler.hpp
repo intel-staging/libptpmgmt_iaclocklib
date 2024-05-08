@@ -1,9 +1,11 @@
-/*! \file sighandler.hpp
-    \brief Signal handling utilities
-
-    (C) Copyright Intel Corporation 2023. All rights reserved. Intel Confidential.
-    Author: Christopher Hall <christopher.s.hall@intel.com>
-*/
+/** @file sighandler.hpp
+ * @brief Signal handling utilities
+ *
+ * @author Christopher Hall <christopher.s.hall@intel.com>
+ * @copyright © 2024 Intel Corporation. All rights reserved.
+ * @license LGPL-3.0-or-later
+ *
+ */
 
 #ifndef SIGHANDLER_HPP
 #define SIGHANDLER_HPP
