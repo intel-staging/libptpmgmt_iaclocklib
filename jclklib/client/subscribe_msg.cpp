@@ -20,7 +20,7 @@ using namespace JClkLibClient;
 using namespace JClkLibCommon;
 using namespace std;
 
-JClkLibCommon::client_ptp_event client_data = {};
+//JClkLibCommon::client_ptp_event client_data = {};
 
 /** @brief Create the ClientSubscribeMessage object
  *
@@ -50,12 +50,20 @@ bool ClientSubscribeMessage::initMessage()
         return true;
 }
 
+void ClientSubscribeMessage::setClientState(ClientState *newClientState){
+	//currentClientState.set_clientState(newClientState);
+	currentClientState = newClientState;
+	jclCurrentState = &newClientState->get_eventState();
+
+}
+
+
 PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 	JClkLibCommon::ptp_event data = {};
-	JClkLibCommon::jcl_state jclCurrentState = {};
+	//JClkLibCommon::jcl_state jclCurrentStateLocal = *jclCurrentState;
 
 	std::uint32_t eventSub[1];
-	state.get_eventSub().get_event().readEvent(eventSub, (std::size_t)sizeof(eventSub));
+	currentClientState->get_eventSub().get_event().readEvent(eventSub, (std::size_t)sizeof(eventSub));
 
 	PrintDebug("[ClientSubscribeMessage]::parseBuffer ");
 	if(!CommonSubscribeMessage::parseBuffer(LxContext))
@@ -74,8 +82,8 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 	/* TODO : set the client_data per client instead of global */
 	if ((eventSub[0] & 1<<gmOffsetEvent) && (data.master_offset != client_data.master_offset)) {
 		client_data.master_offset = data.master_offset;
-		if ((client_data.master_offset > state.get_eventSub().get_value().getLower(gmOffsetValue)) &&
-		    (client_data.master_offset < state.get_eventSub().get_value().getUpper(gmOffsetValue))) {
+		if ((client_data.master_offset > currentClientState->get_eventSub().get_value().getLower(gmOffsetValue)) &&
+		    (client_data.master_offset < currentClientState->get_eventSub().get_value().getUpper(gmOffsetValue))) {
 			client_data.master_offset_within_boundary = true;
 		}
 	}
@@ -86,7 +94,7 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 
 	if ((eventSub[0] & 1<<gmChangedEvent) && (memcmp(client_data.gmIdentity, data.gmIdentity, sizeof(data.gmIdentity))) != 0) {
 		memcpy(client_data.gmIdentity, data.gmIdentity, sizeof(data.gmIdentity));
-		jclCurrentState.gm_changed = true;
+		jclCurrentState->gm_changed = true;
 	}
 
 	if ((eventSub[0] & 1<<asCapableEvent) && (data.asCapable != client_data.asCapable)) {
@@ -104,14 +112,13 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 		client_data.gmIdentity[5], client_data.gmIdentity[6],client_data.gmIdentity[7]);
 	printf("asCapable = %d\n\n", client_data.asCapable);
 
-	jclCurrentState.gm_present = client_data.gmPresent > 0 ? true:false;
-	jclCurrentState.as_Capable = client_data.asCapable > 0 ? true:false;
-	jclCurrentState.offset_in_range = client_data.master_offset_within_boundary;
-	jclCurrentState.servo_locked = client_data.servo_state >= SERVO_LOCKED ? true:false;
-	memcpy(jclCurrentState.gmIdentity, client_data.gmIdentity, sizeof(client_data.gmIdentity));
-	/* TODO : checked for jclCurrentState.gm_changed based on GM_identity previously stored */
+	jclCurrentState->gm_present = client_data.gmPresent > 0 ? true:false;
+	jclCurrentState->as_Capable = client_data.asCapable > 0 ? true:false;
+	jclCurrentState->offset_in_range = client_data.master_offset_within_boundary;
+	jclCurrentState->servo_locked = client_data.servo_state >= SERVO_LOCKED ? true:false;
+	memcpy(jclCurrentState->gmIdentity, client_data.gmIdentity, sizeof(client_data.gmIdentity));
 
-	this->setClientState (jclCurrentState);
+	//this->setClientState (jclCurrentState);
 	
 	return true;
 }
@@ -134,12 +141,16 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
 
         PrintDebug("[ClientSubscribeMessage]::processMessage (reply)");
 
-		state.set_eventState(this->getClientState());
-		state.set_subscribed(true);
+		//state.set_eventState(this->getClientState()); // still need this ? 
+		//state.set_subscribed(true);
+
+		
+		//currentClientState->set_eventState(this->getClientState()); // still need this ? 
+		currentClientState->set_subscribed(true);
 
 		this->set_msgAck(ACK_NONE);
 
-		JClkLibCommon::jcl_state jclCurrentState = state.get_eventState();
+		JClkLibCommon::jcl_state jclCurrentState = currentClientState->get_eventState();
 		printf("[ClientSubscribeMessage]::processMessage : state -  offset in range = %d, servo_locked = %d gmPresent = %d as_Capable = %d\n", \
 	 	jclCurrentState.offset_in_range, jclCurrentState.servo_locked, jclCurrentState.gm_present, jclCurrentState.as_Capable);
 	

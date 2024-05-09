@@ -24,7 +24,10 @@ namespace JClkLibClient
 				     virtual public ClientMessage
 	{
 	private:
-		JClkLibCommon::jcl_state clientState = {};
+		//JClkLibCommon::jcl_state clientState = {};
+		JClkLibCommon::jcl_state *jclCurrentState;
+		ClientState *currentClientState;
+		JClkLibCommon::client_ptp_event client_data = {};
 	public:
 		ClientSubscribeMessage() : MESSAGE_SUBSCRIBE() {};
 
@@ -54,12 +57,16 @@ namespace JClkLibClient
 
 		virtual PARSE_RXBUFFER_TYPE(parseBuffer);
 
-		void setClientState(JClkLibCommon::jcl_state newState) {
+/*
+		void setClientState(JClkLibCommon::jcl_state *newState) {
 			clientState = newState;
 		}
-
-		JClkLibCommon::jcl_state &getClientState()
+*/
+/*
+		JClkLibCommon::jcl_state *getClientState()
 		{ return clientState; }
+*/
+		void setClientState(ClientState *newClientState);
 	};
 }
 
