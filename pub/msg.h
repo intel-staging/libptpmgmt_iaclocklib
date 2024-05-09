@@ -256,6 +256,15 @@ class Message
      */
     static const char *servo2str_c(servoState_e state);
     /**
+     * Convert string to servo state
+     * @param[in] str string to search
+     * @param[out] state servo state
+     * @param[in] caseSens perform case sensetive match
+     * @return true if found
+     */
+    static const bool findServoState(const std::string &str,
+        servoState_e &state, bool caseSens = true);
+    /**
      * Convert TLV type to string
      * @param[in] type
      * @return string with the TLV type
