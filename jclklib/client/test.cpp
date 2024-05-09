@@ -97,9 +97,8 @@ int main(int argc, char *argv[])
     printf("[jclklib] Obtained data from Subscription Event:\n");
     printf("+-------------------+--------------------+\n");
     printf("| %-17s | %-18s |\n", "Event", "Event Status");
-    printf("+-------------------+--------------------+\n");
-    if (!event2Sub1[0]) {
-        printf("| %-17s | %-18s |\n", "N/A", "N/A");
+    if (event2Sub1[0]) {
+        printf("+-------------------+--------------------+\n");
     }
     if (event2Sub1[0] & (1<<gmOffsetEvent)) {
         printf("| %-17s | %-18d |\n", "offset_in_range",
@@ -127,8 +126,6 @@ int main(int argc, char *argv[])
     if (composite_event[0]) {
         printf("| %-17s | %-18d |\n", "composite_event",
             jcl_state.composite_event);
-    } else {
-        printf("| %-17s | %-18s |\n", "N/A", "N/A");
     }
     if (composite_event[0] & (1<<gmOffsetEvent)) {
         printf("| - %-15s | %-18s |\n", "offset_in_range", " ");
@@ -139,7 +136,11 @@ int main(int argc, char *argv[])
     if (composite_event[0] & (1<<asCapableEvent)) {
         printf("| - %-15s | %-18s |\n", "as_Capable", " ");
     }
-    printf("+-------------------+--------------------+\n\n");
+    if (composite_event[0]) {
+        printf("+-------------------+--------------------+\n\n");
+    } else {
+        printf("\n");
+    }
 
     sleep(1);
 
@@ -155,9 +156,8 @@ int main(int argc, char *argv[])
         printf("+-------------------+--------------+-------------+\n");
         printf("| %-17s | %-12s | %-11s |\n", "Event", "Event Status",
             "Event Count");
+        if (event2Sub1[0]) {
         printf("+-------------------+--------------+-------------+\n");
-        if (!event2Sub1[0]) {
-            printf("| %-17s | %-12s | %-11s |\n", "N/A", "N/A", "N/A");
         }
         if (event2Sub1[0] & (1<<gmOffsetEvent)) {
             printf("| %-17s | %-12d | %-11ld |\n", "offset_in_range",
@@ -190,8 +190,6 @@ int main(int argc, char *argv[])
         if (composite_event[0]) {
             printf("| %-17s | %-12d | %-11ld |\n", "composite_event",
                    jcl_state.composite_event, eventCount.composite_event_count);
-        } else {
-            printf("| %-17s | %-12s | %-11s |\n", "N/A", "N/A", "N/A");
         }
         if (composite_event[0] & (1<<gmOffsetEvent)) {
             printf("| - %-15s | %-12s | %-11s |\n", "offset_in_range", "", "");
@@ -202,7 +200,11 @@ int main(int argc, char *argv[])
         if (composite_event[0] & (1<<asCapableEvent)) {
             printf("| - %-15s | %-12s | %-11s |\n", "as_Capable", "", "");
         }
-        printf("+-------------------+--------------+-------------+\n\n");
+        if (composite_event[0]) {
+            printf("+-------------------+--------------+-------------+\n\n");
+        } else {
+            printf("\n");
+        }
         sleep(1);
     }
 
