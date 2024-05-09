@@ -115,11 +115,11 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 		}
 	}
 
-	if ((composite_eventSub[0] & 1<<servoLockedEvent) && (data.servo_state != composite_client_data.servo_state)) {
+	if (composite_eventSub[0] & 1<<servoLockedEvent) {
 		composite_client_data.composite_event &= data.servo_state >= SERVO_LOCKED ? true:false;
 	}
 
-	if ((composite_eventSub[0] & 1<<asCapableEvent) && (data.asCapable != composite_client_data.asCapable)) {
+	if (composite_eventSub[0] & 1<<asCapableEvent) {
 		composite_client_data.composite_event &= data.asCapable > 0 ? true:false;
 	}
 
