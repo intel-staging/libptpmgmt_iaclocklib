@@ -91,7 +91,7 @@ void event_handle()
     switch(msg.getTlvId()) {
         case TIME_STATUS_NP:
             //workaround for ptp4l continue to send even gm is not present
-            if(portState != TIME_RECEIVER) {
+            if(portState < UNCALIBRATED) {
                 return;
             }
 
