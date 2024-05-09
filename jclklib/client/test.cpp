@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
         sleep(1);
     }
 
-	jcl_disconnect();
+    jcl_disconnect();
 
     return EXIT_SUCCESS;
 }
