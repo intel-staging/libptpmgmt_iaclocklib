@@ -24,7 +24,10 @@ namespace JClkLibClient
 				     virtual public ClientMessage
 	{
 	private:
-		JClkLibCommon::jcl_state clientState = {};
+		JClkLibCommon::jcl_state *jclCurrentState;
+		ClientState *currentClientState;
+		inline static std::map <JClkLibCommon::sessionId_t, JClkLibCommon::client_ptp_event*> client_ptp_event_map;
+
 	public:
 		ClientSubscribeMessage() : MESSAGE_SUBSCRIBE() {};
 
@@ -54,12 +57,16 @@ namespace JClkLibClient
 
 		virtual PARSE_RXBUFFER_TYPE(parseBuffer);
 
-		void setClientState(JClkLibCommon::jcl_state newState) {
-			clientState = newState;
-		}
+		void setClientState(ClientState *newClientState);
 
-		JClkLibCommon::jcl_state &getClientState()
-		{ return clientState; }
+		/* delete the corresponding map pair item */
+		static void deleteClientPtpEventStruct(JClkLibCommon::sessionId_t sID);
+
+		/* get the corresponding map pair item */
+		static JClkLibCommon::client_ptp_event* getClientPtpEventStruct(JClkLibCommon::sessionId_t sID);
+
+		/* reduce the corresponding eventCount */
+		static void resetClientPtpEventStruct(JClkLibCommon::sessionId_t sID, JClkLibCommon::jcl_state_event_count &eventCount);
 	};
 }
 

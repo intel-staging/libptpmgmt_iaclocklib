@@ -48,26 +48,56 @@ int main()
     signal(SIGTERM, signal_handler);
     signal(SIGHUP, signal_handler);
 
-    std::cout << "[CLIENT] Before connect : Session ID : " << state.get_sessionId() << "\n";
+    JClkLibClientApi *cmAPI = new JClkLibClientApi();
 
-    if (jcl_connect() == false) {
+    cmAPI->init();
+
+    ClientState &myState = cmAPI->getClientState();
+
+    std::cout << "[CLIENT] Before connect : Session ID : " << myState.get_sessionId() << "\n";
+
+    if (cmAPI->jcl_connect() == false) {
         std::cout << "[CLIENT] Failure in connecting !!!\n";
         ret = EXIT_FAILURE;
         goto do_exit;
     }
     else {
-        std::cout << "[CLIENT] Connected. Session ID : " << state.get_sessionId() << "\n";
+        std::cout << "[CLIENT] Connected. Session ID : " << myState.get_sessionId() << "\n";
     }
     sleep(5);
 
     sub.get_event().writeEvent(event2Sub1, (std::size_t)sizeof(event2Sub1));
+
+    // Set the upper and lower values for gmOffset boundary.
     sub.get_value().setValue(gmOffsetValue, 100000, -100000);
     std::cout << "[CLIENT] set subscribe event : " + sub.c_get_val_event().toString() << "\n";
-    jcl_subscribe(sub, currentState);
-    std::cout << "[CLIENT] " + state.toString();
+    cmAPI->jcl_subscribe(sub, currentState);
+    std::cout << "[CLIENT cmAPI data] " + cmAPI->getClientState().toString();
+    std::cout << "[CLIENT RETURNED currentState] ";
+    
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s | %-12s |\n", "Event", "Event Status");
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s | %-12d |\n", "offset_in_range",
+            currentState.offset_in_range);
+        printf("| %-16s | %-12d |\n", "servo_locked",
+            currentState.servo_locked);
+        printf("| %-16s | %-12d |\n", "gmPresent",
+            currentState.gm_present);
+        printf("| %-16s | %-12d |\n", "as_Capable",
+            currentState.as_Capable);
+        printf("| %-16s | %-12d |\n", "gm_Changed",
+            currentState.gm_changed);
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s |     %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n", "UUID",
+            currentState.gmIdentity[0], currentState.gmIdentity[1], currentState.gmIdentity[2],
+            currentState.gmIdentity[3], currentState.gmIdentity[4],
+            currentState.gmIdentity[5], currentState.gmIdentity[6], currentState.gmIdentity[7]);
+        printf("+------------------+----------------------------+\n\n");
+
 
     while (!signal_flag) {
-        if (!jcl_status_wait(timeout, jcl_state , eventCount)) {
+        if (!cmAPI->jcl_status_wait(timeout, jcl_state , eventCount)) {
             printf("No event status changes identified in %d seconds.\n\n", timeout);
             sleep(1);
             continue;
@@ -96,7 +126,7 @@ int main()
     }
 
  do_exit:
-	jcl_disconnect();
+	cmAPI->jcl_disconnect();
 
     return ret;
 }
