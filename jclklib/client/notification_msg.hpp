@@ -46,8 +46,18 @@ namespace JClkLibClient
 
 		virtual PARSE_RXBUFFER_TYPE(parseBuffer);
 
+		void setClientState(ClientState *newClientState);
 	protected:
 		ClientNotificationMessage() : MESSAGE_NOTIFY() {}
+
+	private:
+		JClkLibCommon::jcl_state *jclCurrentState;
+		ClientState *currentClientState;
+		JClkLibCommon::jcl_state_event_count *jclCurrentEventCount;
+		JClkLibCommon::client_ptp_event client_ptp_data = {};
+		JClkLibCommon::ptp_event proxy_data = {};
+		//JClkLibCommon::jcl_state jclCurrentState = {};
+		//JClkLibCommon::jcl_state_event_count jclCurrentEventCount = {};
 	};
 }
 

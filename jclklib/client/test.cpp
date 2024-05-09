@@ -70,7 +70,7 @@ int main()
     sub.get_value().setValue(gmOffsetValue, 100000, -100000);
     std::cout << "[CLIENT] set subscribe event : " + sub.c_get_val_event().toString() << "\n";
     cmAPI->jcl_subscribe(sub, currentState);
-    std::cout << "[CLIENT] " + state.toString();
+    std::cout << "[CLIENT] " + cmAPI->getClientState().toString();
 
     while (!signal_flag) {
         if (!cmAPI->jcl_status_wait(timeout, jcl_state , eventCount)) {
