@@ -732,6 +732,25 @@ const char *Message::servo2str_c(servoState_e state)
     }
     return "unknown servo state";
 }
+const bool Message::findServoState(const std::string &str, servoState_e &state,
+    bool caseSens)
+{
+    if(str.empty())
+        return false;
+    int (*_strcmp)(const char *, const char *);
+    if(caseSens)
+        _strcmp = strcmp; // Excect match
+    else
+        _strcmp = strcasecmp;
+    for(int i = SERVO_UNLOCKED; i <= SERVO_LOCKED_STABLE; i++) {
+        servoState_e v = (servoState_e)i;
+        if(_strcmp(str.c_str(), servo2str_c(v)) == 0) {
+            state = v;
+            return true;
+        }
+    }
+    return false;
+}
 const char *Message::tlv2str_c(tlvType_e type)
 {
     switch(type) {
