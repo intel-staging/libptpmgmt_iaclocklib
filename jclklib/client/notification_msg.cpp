@@ -129,11 +129,11 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
 		}
 	}
 
-	if ((composite_eventSub[0] & 1<<servoLockedEvent) && (proxy_data.servo_state != composite_client_ptp_data.servo_state)) {
+	if (composite_eventSub[0] & 1<<servoLockedEvent) {
 		composite_client_ptp_data.composite_event &= proxy_data.servo_state >= SERVO_LOCKED ? true:false;
 	}
 
-	if ((composite_eventSub[0] & 1<<asCapableEvent) && (proxy_data.asCapable != composite_client_ptp_data.asCapable)) {
+	if (composite_eventSub[0] & 1<<asCapableEvent) {
 		composite_client_ptp_data.composite_event &= proxy_data.asCapable > 0 ? true:false;
 	}
 
