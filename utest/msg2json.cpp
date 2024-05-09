@@ -1319,6 +1319,7 @@ TEST(Tlv2JsonTest, TIME_STATUS_NP)
     t.gmPresent = 0;
     ClockIdentity_t clockId = { 196, 125, 70, 255, 254, 32, 172, 174 };
     t.gmIdentity = clockId;
+    t.servo_state = SERVO_UNLOCKED;
     EXPECT_STREQ(tlv2json(TIME_STATUS_NP, &t).c_str(),
         "{\n"
         "  \"master_offset\" : 0,\n"
@@ -1330,7 +1331,8 @@ TEST(Tlv2JsonTest, TIME_STATUS_NP)
         "  \"nanoseconds_lsb\" : 0,\n"
         "  \"fractional_nanoseconds\" : 0,\n"
         "  \"gmPresent\" : 0,\n"
-        "  \"gmIdentity\" : \"c47d46.fffe.20acae\"\n"
+        "  \"gmIdentity\" : \"c47d46.fffe.20acae\",\n"
+        "  \"servo_state\" : \"SERVO_UNLOCKED\"\n"
         "}");
 }
 
