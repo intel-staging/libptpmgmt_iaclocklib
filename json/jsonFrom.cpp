@@ -580,6 +580,11 @@ struct JsonProcFromJson : public JsonProcFrom {
         return ret;
     }
     procObj(LinuxptpUnicastMaster_t)
+    bool procValue(const char *key, servoState_e &d) override {
+        if(!isType(key, JT_STR))
+            return false;
+        return Message::findServoState(valsMap[key].strV, d);
+    }
     bool procBinary(const char *key, Binary &d, uint16_t &len) override {
         if(!isType(key, JT_STR) || !d.fromId(valsMap[key].strV) ||
             d.size() == 0)
