@@ -1225,6 +1225,7 @@ C1(TIME_STATUS_NP)
     a.fractional_nanoseconds = d.fractional_nanoseconds;
     a.gmPresent = d.gmPresent;
     memcpy(a.gmIdentity.v, d.gmIdentity.v, ClockIdentity_t::size());
+    a.servo_state = (ptpmgmt_servoState_e)d.servo_state;
 }
 C1(GRANDMASTER_SETTINGS_NP)
 {
@@ -1713,6 +1714,7 @@ C2(TIME_STATUS_NP)
     a.fractional_nanoseconds = d.fractional_nanoseconds;
     a.gmPresent = d.gmPresent;
     memcpy(a.gmIdentity.v, d.gmIdentity.v, ClockIdentity_t::size());
+    a.servo_state = (servoState_e)d.servo_state;
 }
 C2(GRANDMASTER_SETTINGS_NP)
 {
