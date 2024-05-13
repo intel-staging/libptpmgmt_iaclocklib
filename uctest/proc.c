@@ -1145,7 +1145,7 @@ Test(ProcTest, TIME_STATUS_NP)
     cr_expect(eq(sz, m->getMsgLen(m), tlvLoc));
     uint8_t mb[52] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 196, 125, 70, 255, 254, 32, 172, 174
+            0, 196, 125, 70, 255, 254, 32, 172, 174, 0
         };
     cr_assert(eq(int, m->parse(m, buf, rsp(buf, 0xc000, mb, sizeof mb)),
             PTPMGMT_MNG_PARSE_ERROR_OK));
@@ -1162,6 +1162,7 @@ Test(ProcTest, TIME_STATUS_NP)
     cr_expect(eq(int, r->fractional_nanoseconds, 0));
     cr_expect(eq(int, r->gmPresent, 0));
     cr_expect(zero(memcmp(r->gmIdentity.v, clockId, 8)));
+    cr_expect(eq(u8, r->servo_state, PTPMGMT_SERVO_UNLOCKED));
     m->free(m);
 }
 

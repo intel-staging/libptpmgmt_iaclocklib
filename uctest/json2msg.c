@@ -2000,7 +2000,7 @@ Test(Json2msgTest, TIME_STATUS_NP)
     cr_expect(eq(int, t->fractional_nanoseconds, 0));
     cr_expect(eq(int, t->gmPresent, 0));
     cr_expect(zero(memcmp(t->gmIdentity.v, clockId, 8)));
-    cr_expect(eq(servoState_e, t->servo_state, PTPMGMT_SERVO_UNLOCKED));
+    cr_expect(eq(u8, t->servo_state, PTPMGMT_SERVO_UNLOCKED));
     m->free(m);
 }
 
