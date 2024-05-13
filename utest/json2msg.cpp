@@ -1840,7 +1840,8 @@ TEST(Json2msgTest, TIME_STATUS_NP)
             "\"nanoseconds_lsb\":0,"
             "\"fractional_nanoseconds\":0,"
             "\"gmPresent\":0,"
-            "\"gmIdentity\":\"c47d46.fffe.20acae\""
+            "\"gmIdentity\":\"c47d46.fffe.20acae\","
+            "\"servo_state\":\"SERVO_UNLOCKED\""
             "}}"));
     EXPECT_EQ(m.actionField(), SET);
     EXPECT_EQ(m.managementId(), TIME_STATUS_NP);
@@ -1859,6 +1860,7 @@ TEST(Json2msgTest, TIME_STATUS_NP)
     EXPECT_EQ(t->gmPresent, 0);
     ClockIdentity_t clockId = { 196, 125, 70, 255, 254, 32, 172, 174 };
     EXPECT_EQ(t->gmIdentity, clockId);
+    EXPECT_EQ(t->servo_state, SERVO_UNLOCKED);
 }
 
 // Tests GRANDMASTER_SETTINGS_NP managment ID
