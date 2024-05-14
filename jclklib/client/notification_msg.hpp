@@ -46,28 +46,18 @@ namespace JClkLibClient
 
 		virtual PARSE_RXBUFFER_TYPE(parseBuffer);
 
-		void setClientState(ClientState *newClientState);
+		static void addClientState(ClientState *newClientState);
+		static void deleteClientState(ClientState *newClientState);
 
-/*
-		void setClientPtpEvent (JClkLibCommon::client_ptp_event *currentClientPtpEvent) {
-			client_ptp_data = currentClientPtpEvent;
-		}
-*/
 	protected:
 		ClientNotificationMessage() : MESSAGE_NOTIFY() {}
 
 	private:
-		JClkLibCommon::jcl_state *jclCurrentState;
-		ClientState *currentClientState;
-		JClkLibCommon::jcl_state_event_count *jclCurrentEventCount;
-		/* client_ptp_event shd be per client */
-		//JClkLibCommon::client_ptp_event *client_ptp_data;
-		//JClkLibCommon::client_ptp_event client_ptp_data = {};
-		
+		inline static std::vector<ClientState *> ClientStateArray;
+
 		// proxy_data can be 1 only. it is ok.
 		JClkLibCommon::ptp_event proxy_data = {};
-		//JClkLibCommon::jcl_state jclCurrentState = {};
-		//JClkLibCommon::jcl_state_event_count jclCurrentEventCount = {};
+
 	};
 }
 

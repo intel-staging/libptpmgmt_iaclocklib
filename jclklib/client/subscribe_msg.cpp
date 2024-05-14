@@ -13,6 +13,7 @@
  */
 
 #include <client/subscribe_msg.hpp>
+#include <client/notification_msg.hpp>
 #include <common/serialize.hpp>
 #include <common/print.hpp>
 
@@ -163,6 +164,8 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
 		//currentClientState->set_eventState(this->getClientState()); // i cannot remember why i put this ? 
 		currentClientState->set_subscribed(true);
 
+		/* Add the current ClientState to the notification class */
+		ClientNotificationMessage::addClientState(currentClientState);
 		this->set_msgAck(ACK_NONE);
 
 		JClkLibCommon::jcl_state jclCurrentState = currentClientState->get_eventState();
@@ -173,7 +176,7 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
         return true;
 }
 
-
+/* delete the client ptp event based on session ID given */
 void ClientSubscribeMessage::deleteClientPtpEventStruct(JClkLibCommon::sessionId_t sID) {
 
 	std::map <JClkLibCommon::sessionId_t, JClkLibCommon::client_ptp_event*>::iterator it ;

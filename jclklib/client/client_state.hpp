@@ -50,8 +50,6 @@ namespace JClkLibClient {
 		void set_eventState(JClkLibCommon::jcl_state eState);
 		std::string toString();
 		JClkLibCommon::jcl_subscription &get_eventSub();
-		//void get_clientID_memcpy(JClkLibCommon::TransportClientId cID);
-		//void set_clientID_memcpy(JClkLibCommon::TransportClientId cID);
 		DECLARE_ACCESSOR(sessionId);
 		DECLARE_ACCESSOR(ptp4l_id);
 	};

@@ -16,6 +16,7 @@
 #include <client/msgq_tport.hpp>
 #include <client/connect_msg.hpp>
 #include <client/subscribe_msg.hpp>
+#include <client/notification_msg.hpp>
 #include <common/sighandler.hpp>
 #include <common/print.hpp>
 #include <mutex>
@@ -170,6 +171,12 @@ bool JClkLibClientApi::jcl_disconnect()
 		PrintDebug("Client Finalize Failed");
 		goto done;
 	}
+
+	/* delete the ClientPtpEvent inside Subscription  */
+	ClientSubscribeMessage::deleteClientPtpEventStruct(appClientState.get_sessionId());
+	/* delete the ClientState reference inside ClientNotificationMessage class */
+	ClientNotificationMessage::deleteClientState(&appClientState);
+
 	retVal = true;
 
  done:
