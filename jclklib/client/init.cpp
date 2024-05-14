@@ -36,7 +36,7 @@ std::condition_variable ClientConnectMessage::cv;
 std::mutex ClientSubscribeMessage::cv_mtx;
 std::condition_variable ClientSubscribeMessage::cv;
 
-extern JClkLibCommon::client_ptp_event client_ptp_data;
+//extern JClkLibCommon::client_ptp_event client_ptp_data;
 
 //TransportClientId globalClientID;
 
@@ -115,6 +115,7 @@ bool JClkLibClientApi::jcl_subscribe(JClkLibCommon::jcl_subscription &newSub,
 	appClientState.get_eventSub().set_event(newSub.getc_event());
 	appClientState.get_eventSub().set_value(newSub.getc_value());
 
+	// This is to copy the event Mask ( same as master_offset_low ?? )
 	cmsg->getSubscription().get_event().copyEventMask(newSub.get_event());
 
 	// Wri
@@ -196,14 +197,14 @@ int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl
 		   std::chrono::time_point<std::chrono::high_resolution_clock>::max() :
 		   start + std::chrono::seconds(timeout);
 	bool event_changes_detected = false;
+	
+	/* Get the event state and event count*/
+	//eventCount = state.get_eventStateCount();
+	//jcl_state = state.get_eventState();
+	eventCount = appClientState.get_eventStateCount();
+	jcl_state = appClientState.get_eventState();
 
 	do {
-		/* Get the event state and event count*/
-		//eventCount = state.get_eventStateCount();
-		//jcl_state = state.get_eventState();
-		eventCount = appClientState.get_eventStateCount();
-		jcl_state = appClientState.get_eventState();
-
 		/* Check if any member of eventCount is non-zero */
 		if (eventCount.offset_in_range_event_count ||
 		    eventCount.asCapable_event_count ||
@@ -222,6 +223,11 @@ int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl
 		return false;
 
 	/* Reset the atomic */
+
+	/* reduce the corresponding eventCount */
+	ClientSubscribeMessage::resetClientPtpEventStruct(appClientState.get_sessionId(), eventCount);
+
+	/*
 	client_ptp_data.offset_event_count.fetch_sub(eventCount.offset_in_range_event_count,
 						     std::memory_order_relaxed);
 	client_ptp_data.asCapable_event_count.fetch_sub(eventCount.asCapable_event_count,
@@ -232,6 +238,6 @@ int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl
 							std::memory_order_relaxed);
 	client_ptp_data.gmChanged_event_count.fetch_sub(eventCount.gm_changed_event_count,
 							std::memory_order_relaxed);
-
+	*/
 	return true;
 }

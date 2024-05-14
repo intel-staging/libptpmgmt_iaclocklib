@@ -67,6 +67,8 @@ int main()
     sleep(5);
 
     sub.get_event().writeEvent(event2Sub1, (std::size_t)sizeof(event2Sub1));
+
+    // Set the upper and lower values for gmOffset boundary.
     sub.get_value().setValue(gmOffsetValue, 100000, -100000);
     std::cout << "[CLIENT] set subscribe event : " + sub.c_get_val_event().toString() << "\n";
     cmAPI->jcl_subscribe(sub, currentState);

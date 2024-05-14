@@ -53,7 +53,7 @@ bool ClientSubscribeMessage::initMessage()
 void ClientSubscribeMessage::setClientState(ClientState *newClientState){
 	//currentClientState.set_clientState(newClientState);
 	currentClientState = newClientState;
-	jclCurrentState = &newClientState->get_eventState();
+	jclCurrentState = &(newClientState->get_eventState());
 
 }
 
@@ -79,46 +79,65 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 		data.gmIdentity[5], data.gmIdentity[6],data.gmIdentity[7]);
 	printf("asCapable = %d, ptp4l_id = %d\n\n", data.asCapable, data.ptp4l_id);
 
-	/* TODO : set the client_data per client instead of global */
-	if ((eventSub[0] & 1<<gmOffsetEvent) && (data.master_offset != client_data.master_offset)) {
-		client_data.master_offset = data.master_offset;
-		if ((client_data.master_offset > currentClientState->get_eventSub().get_value().getLower(gmOffsetValue)) &&
-		    (client_data.master_offset < currentClientState->get_eventSub().get_value().getUpper(gmOffsetValue))) {
-			client_data.master_offset_within_boundary = true;
+	/* TODO :
+	1. Remove the pair if the sessionID is terminated (disconnect) 
+	2. to move some/all processing inside the processMessage instead of here.
+	*/
+	
+	JClkLibCommon::sessionId_t currentSessionID = currentClientState->get_sessionId();
+	std::map <JClkLibCommon::sessionId_t, JClkLibCommon::client_ptp_event*>::iterator it ;
+	JClkLibCommon::client_ptp_event* client_data;
+
+	it = client_ptp_event_map.find(currentSessionID);
+
+	if (it == client_ptp_event_map.end()) {
+		/* Creation of a new map item for this new sessionID */
+		client_data = new JClkLibCommon::client_ptp_event();
+		client_ptp_event_map.insert({currentSessionID, client_data});
+	}
+	else {
+		/* Reuse the current client data */
+		client_data = it->second;
+	}
+
+	if ((eventSub[0] & 1<<gmOffsetEvent) && (data.master_offset != client_data->master_offset)) {
+		client_data->master_offset = data.master_offset;
+		if ((client_data->master_offset > currentClientState->get_eventSub().get_value().getLower(gmOffsetValue)) &&
+		    (client_data->master_offset < currentClientState->get_eventSub().get_value().getUpper(gmOffsetValue))) {
+			client_data->master_offset_within_boundary = true;
 		}
 	}
 
-	if ((eventSub[0] & 1<<servoLockedEvent) && (data.servo_state != client_data.servo_state)) {
-		client_data.servo_state = data.servo_state;
+	if ((eventSub[0] & 1<<servoLockedEvent) && (data.servo_state != client_data->servo_state)) {
+		client_data->servo_state = data.servo_state;
 	}
 
-	if ((eventSub[0] & 1<<gmChangedEvent) && (memcmp(client_data.gmIdentity, data.gmIdentity, sizeof(data.gmIdentity))) != 0) {
-		memcpy(client_data.gmIdentity, data.gmIdentity, sizeof(data.gmIdentity));
+	if ((eventSub[0] & 1<<gmChangedEvent) && (memcmp(client_data->gmIdentity, data.gmIdentity, sizeof(data.gmIdentity))) != 0) {
+		memcpy(client_data->gmIdentity, data.gmIdentity, sizeof(data.gmIdentity));
 		jclCurrentState->gm_changed = true;
 	}
 
-	if ((eventSub[0] & 1<<asCapableEvent) && (data.asCapable != client_data.asCapable)) {
-		client_data.asCapable = data.asCapable;
+	if ((eventSub[0] & 1<<asCapableEvent) && (data.asCapable != client_data->asCapable)) {
+		client_data->asCapable = data.asCapable;
 	}
 
-	if ((eventSub[0] & 1<<gmPresentEvent) && (data.gmPresent != client_data.gmPresent)) {
-		client_data.gmPresent = data.gmPresent;
+	if ((eventSub[0] & 1<<gmPresentEvent) && (data.gmPresent != client_data->gmPresent)) {
+		client_data->gmPresent = data.gmPresent;
 	}
 
-	printf("CLIENT master_offset = %ld, servo_state = %d gmPresent = %d\n", client_data.master_offset, client_data.servo_state, client_data.gmPresent);
+	printf("CLIENT master_offset = %ld, servo_state = %d gmPresent = %d\n", client_data->master_offset, \
+	client_data->servo_state, client_data->gmPresent);
 	printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x ",
-		client_data.gmIdentity[0], client_data.gmIdentity[1],client_data.gmIdentity[2],
-		client_data.gmIdentity[3], client_data.gmIdentity[4],
-		client_data.gmIdentity[5], client_data.gmIdentity[6],client_data.gmIdentity[7]);
-	printf("asCapable = %d\n\n", client_data.asCapable);
+		client_data->gmIdentity[0], client_data->gmIdentity[1],client_data->gmIdentity[2],
+		client_data->gmIdentity[3], client_data->gmIdentity[4],
+		client_data->gmIdentity[5], client_data->gmIdentity[6],client_data->gmIdentity[7]);
+	printf("asCapable = %d\n\n", client_data->asCapable);
 
-	jclCurrentState->gm_present = client_data.gmPresent > 0 ? true:false;
-	jclCurrentState->as_Capable = client_data.asCapable > 0 ? true:false;
-	jclCurrentState->offset_in_range = client_data.master_offset_within_boundary;
-	jclCurrentState->servo_locked = client_data.servo_state >= SERVO_LOCKED ? true:false;
-	memcpy(jclCurrentState->gmIdentity, client_data.gmIdentity, sizeof(client_data.gmIdentity));
-
-	//this->setClientState (jclCurrentState);
+	jclCurrentState->gm_present = client_data->gmPresent > 0 ? true:false;
+	jclCurrentState->as_Capable = client_data->asCapable > 0 ? true:false;
+	jclCurrentState->offset_in_range = client_data->master_offset_within_boundary;
+	jclCurrentState->servo_locked = client_data->servo_state >= SERVO_LOCKED ? true:false;
+	memcpy(jclCurrentState->gmIdentity, client_data->gmIdentity, sizeof(client_data->gmIdentity));
 	
 	return true;
 }
@@ -141,11 +160,7 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
 
         PrintDebug("[ClientSubscribeMessage]::processMessage (reply)");
 
-		//state.set_eventState(this->getClientState()); // still need this ? 
-		//state.set_subscribed(true);
-
-		
-		//currentClientState->set_eventState(this->getClientState()); // still need this ? 
+		//currentClientState->set_eventState(this->getClientState()); // i cannot remember why i put this ? 
 		currentClientState->set_subscribed(true);
 
 		this->set_msgAck(ACK_NONE);
@@ -156,4 +171,59 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
 	
 		cv.notify_one();
         return true;
+}
+
+
+void ClientSubscribeMessage::deleteClientPtpEventStruct(JClkLibCommon::sessionId_t sID) {
+
+	std::map <JClkLibCommon::sessionId_t, JClkLibCommon::client_ptp_event*>::iterator it ;
+	JClkLibCommon::client_ptp_event* client_data;
+
+	it = client_ptp_event_map.find(sID);
+
+	if (it != client_ptp_event_map.end()) {
+		client_data = it->second;
+		delete client_data;
+		client_ptp_event_map.erase(it);
+	}
+}
+
+/* get the corresponding map pair item */
+JClkLibCommon::client_ptp_event* ClientSubscribeMessage::getClientPtpEventStruct(JClkLibCommon::sessionId_t sID) {
+
+	std::map <JClkLibCommon::sessionId_t, JClkLibCommon::client_ptp_event*>::iterator it ;
+	JClkLibCommon::client_ptp_event* client_data = NULL;
+
+	it = client_ptp_event_map.find(sID);
+
+	if (it != client_ptp_event_map.end()) {
+		client_data = it->second;
+	}
+
+	return client_data;
+}
+
+/* reduce the corresponding eventCount */
+void ClientSubscribeMessage::resetClientPtpEventStruct(JClkLibCommon::sessionId_t sID, JClkLibCommon::jcl_state_event_count &eventCount) {
+
+	std::map <JClkLibCommon::sessionId_t, JClkLibCommon::client_ptp_event*>::iterator it ;
+	JClkLibCommon::client_ptp_event* client_ptp_data = NULL;
+
+	it = client_ptp_event_map.find(sID);
+
+	if (it != client_ptp_event_map.end()) {
+		client_ptp_data = it->second;
+	}
+
+	client_ptp_data->offset_event_count.fetch_sub(eventCount.offset_in_range_event_count,
+						     std::memory_order_relaxed);
+	client_ptp_data->asCapable_event_count.fetch_sub(eventCount.asCapable_event_count,
+							std::memory_order_relaxed);
+	client_ptp_data->servo_state_event_count.fetch_sub(eventCount.servo_locked_event_count,
+							  std::memory_order_relaxed);
+	client_ptp_data->gmPresent_event_count.fetch_sub(eventCount.gmPresent_event_count,
+							std::memory_order_relaxed);
+	client_ptp_data->gmChanged_event_count.fetch_sub(eventCount.gm_changed_event_count,
+							std::memory_order_relaxed);
+
 }
