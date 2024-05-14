@@ -151,6 +151,9 @@ bool JClkLibClientApi::jcl_subscribe(JClkLibCommon::jcl_subscription &newSub,
 		jclCurrentState.gmIdentity[0], jclCurrentState.gmIdentity[1],jclCurrentState.gmIdentity[2],
 		jclCurrentState.gmIdentity[3], jclCurrentState.gmIdentity[4],
 		jclCurrentState.gmIdentity[5], jclCurrentState.gmIdentity[6],jclCurrentState.gmIdentity[7]);
+
+	currentState = jclCurrentState;
+
 	return true;
 }
 
@@ -189,8 +192,8 @@ bool JClkLibClientApi::jcl_disconnect()
  * @return Returns true if there is event changes within the timeout period,
  *         and false otherwise.
  */
-int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl_state,
-				   JClkLibCommon::jcl_state_event_count &eventCount)
+int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl_state_ref,
+				   JClkLibCommon::jcl_state_event_count &eventCountRef)
 {
 	auto start = std::chrono::high_resolution_clock::now();
 	auto end = (timeout == -1) ?
@@ -198,11 +201,9 @@ int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl
 		   start + std::chrono::seconds(timeout);
 	bool event_changes_detected = false;
 	
-	/* Get the event state and event count*/
-	//eventCount = state.get_eventStateCount();
-	//jcl_state = state.get_eventState();
-	eventCount = appClientState.get_eventStateCount();
-	jcl_state = appClientState.get_eventState();
+	/* Get the event state and event count from the API*/
+	JClkLibCommon::jcl_state_event_count eventCount = appClientState.get_eventStateCount();
+	JClkLibCommon::jcl_state jcl_state = appClientState.get_eventState();
 
 	do {
 		/* Check if any member of eventCount is non-zero */
@@ -222,22 +223,12 @@ int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl
 	if (!event_changes_detected)
 		return false;
 
-	/* Reset the atomic */
+	eventCountRef = eventCount;
+	jcl_state_ref = jcl_state;
 
+	/* Reset the atomic */
 	/* reduce the corresponding eventCount */
 	ClientSubscribeMessage::resetClientPtpEventStruct(appClientState.get_sessionId(), eventCount);
 
-	/*
-	client_ptp_data.offset_event_count.fetch_sub(eventCount.offset_in_range_event_count,
-						     std::memory_order_relaxed);
-	client_ptp_data.asCapable_event_count.fetch_sub(eventCount.asCapable_event_count,
-							std::memory_order_relaxed);
-	client_ptp_data.servo_state_event_count.fetch_sub(eventCount.servo_locked_event_count,
-							  std::memory_order_relaxed);
-	client_ptp_data.gmPresent_event_count.fetch_sub(eventCount.gmPresent_event_count,
-							std::memory_order_relaxed);
-	client_ptp_data.gmChanged_event_count.fetch_sub(eventCount.gm_changed_event_count,
-							std::memory_order_relaxed);
-	*/
 	return true;
 }

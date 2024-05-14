@@ -72,7 +72,29 @@ int main()
     sub.get_value().setValue(gmOffsetValue, 100000, -100000);
     std::cout << "[CLIENT] set subscribe event : " + sub.c_get_val_event().toString() << "\n";
     cmAPI->jcl_subscribe(sub, currentState);
-    std::cout << "[CLIENT] " + cmAPI->getClientState().toString();
+    std::cout << "[CLIENT cmAPI data] " + cmAPI->getClientState().toString();
+    std::cout << "[CLIENT RETURNED currentState] ";
+    
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s | %-12s |\n", "Event", "Event Status");
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s | %-12d |\n", "offset_in_range",
+            currentState.offset_in_range);
+        printf("| %-16s | %-12d |\n", "servo_locked",
+            currentState.servo_locked);
+        printf("| %-16s | %-12d |\n", "gmPresent",
+            currentState.gm_present);
+        printf("| %-16s | %-12d |\n", "as_Capable",
+            currentState.as_Capable);
+        printf("| %-16s | %-12d |\n", "gm_Changed",
+            currentState.gm_changed);
+        printf("+------------------+--------------+-------------+\n");
+        printf("| %-16s |     %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n", "UUID",
+            currentState.gmIdentity[0], currentState.gmIdentity[1], currentState.gmIdentity[2],
+            currentState.gmIdentity[3], currentState.gmIdentity[4],
+            currentState.gmIdentity[5], currentState.gmIdentity[6], currentState.gmIdentity[7]);
+        printf("+------------------+----------------------------+\n\n");
+
 
     while (!signal_flag) {
         if (!cmAPI->jcl_status_wait(timeout, jcl_state , eventCount)) {
