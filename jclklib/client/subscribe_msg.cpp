@@ -91,22 +91,24 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 	*/
 	
 	JClkLibCommon::sessionId_t currentSessionID = currentClientState->get_sessionId();
-	std::map <JClkLibCommon::sessionId_t, std::tuple<JClkLibCommon::client_ptp_event*, JClkLibCommon::client_ptp_event*>>::iterator it ;
+	std::map <JClkLibCommon::sessionId_t, std::array<JClkLibCommon::client_ptp_event*,2>>::iterator it ;
 	JClkLibCommon::client_ptp_event* client_data , *composite_client_data;
 
 	it = client_ptp_event_map.find(currentSessionID);
 
 	if (it == client_ptp_event_map.end()) {
 		/* Creation of a new map item for this new sessionID */
-		//client_data = new JClkLibCommon::client_ptp_event();
-		//client_composite_data = new JClkLibCommon::client_ptp_event();
-		client_ptp_event_map.insert({currentSessionID, \
-		std::make_tuple(new JClkLibCommon::client_ptp_event(), new JClkLibCommon::client_ptp_event())});
+		client_data = new JClkLibCommon::client_ptp_event();
+		composite_client_data = new JClkLibCommon::client_ptp_event();
+
+		client_ptp_event_map.insert( \
+		std::pair<JClkLibCommon::sessionId_t, std::array<JClkLibCommon::client_ptp_event*,2>>\
+		(currentSessionID,{client_data, composite_client_data}));
 	}
 	else {
 		/* Reuse the current client data */
-		client_data = std::get<0>(it->second);
-		composite_client_data = std::get<1>(it->second);
+		client_data = it->second[0];
+		composite_client_data = it->second[1];
 	}
 
 	if ((eventSub[0] & 1<<gmOffsetEvent) && (data.master_offset != client_data->master_offset)) {
@@ -210,14 +212,15 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
 /* delete the client ptp event based on session ID given */
 void ClientSubscribeMessage::deleteClientPtpEventStruct(JClkLibCommon::sessionId_t sID) {
 
-	std::map <JClkLibCommon::sessionId_t, std::tuple<JClkLibCommon::client_ptp_event*, JClkLibCommon::client_ptp_event*>>::iterator it;
+	std::map <JClkLibCommon::sessionId_t, std::array<JClkLibCommon::client_ptp_event*, 2>>::iterator it;
 	JClkLibCommon::client_ptp_event* client_data, *composite_data;
 
 	it = client_ptp_event_map.find(sID);
 
 	if (it != client_ptp_event_map.end()) {
-		client_data = std::get<0>(it->second);
-		composite_data = std::get<1>(it->second);
+		client_data = it->second[0];
+		composite_data = it->second[1];
+
 		delete client_data;
 		delete composite_data;
 		client_ptp_event_map.erase(it);
@@ -230,13 +233,13 @@ void ClientSubscribeMessage::deleteClientPtpEventStruct(JClkLibCommon::sessionId
 /* get the corresponding ClientPtpEvent */
 JClkLibCommon::client_ptp_event* ClientSubscribeMessage::getClientPtpEventStruct(JClkLibCommon::sessionId_t sID) {
 
-	std::map <JClkLibCommon::sessionId_t, std::tuple<JClkLibCommon::client_ptp_event*, JClkLibCommon::client_ptp_event*>>::iterator it ;
+	std::map <JClkLibCommon::sessionId_t, std::array<JClkLibCommon::client_ptp_event*, 2>>::iterator it ;
 	JClkLibCommon::client_ptp_event* client_data = NULL;
 
 	it = client_ptp_event_map.find(sID);
 
 	if (it != client_ptp_event_map.end()) {
-		client_data = std::get<0>(it->second);;
+		client_data = it->second[0];
 	}
 
 	return client_data;
@@ -245,13 +248,13 @@ JClkLibCommon::client_ptp_event* ClientSubscribeMessage::getClientPtpEventStruct
 /* get the corresponding ClientPtpEvent for composite  */
 JClkLibCommon::client_ptp_event* ClientSubscribeMessage::getClientPtpEventCompositeStruct(JClkLibCommon::sessionId_t sID) {
 
-	std::map <JClkLibCommon::sessionId_t, std::tuple<JClkLibCommon::client_ptp_event*, JClkLibCommon::client_ptp_event*>>::iterator it ;
+	std::map <JClkLibCommon::sessionId_t, std::array<JClkLibCommon::client_ptp_event*, 2>>::iterator it ;
 	JClkLibCommon::client_ptp_event* client_data = NULL;
 
 	it = client_ptp_event_map.find(sID);
 
 	if (it != client_ptp_event_map.end()) {
-		client_data = std::get<1>(it->second);
+		client_data = it->second[1];
 	}
 
 	return client_data;
@@ -260,13 +263,13 @@ JClkLibCommon::client_ptp_event* ClientSubscribeMessage::getClientPtpEventCompos
 /* reduce the corresponding eventCount */
 void ClientSubscribeMessage::resetClientPtpEventStruct(JClkLibCommon::sessionId_t sID, JClkLibCommon::jcl_state_event_count &eventCount) {
 
-	std::map <JClkLibCommon::sessionId_t, std::tuple<JClkLibCommon::client_ptp_event*, JClkLibCommon::client_ptp_event*>>::iterator it ;
+	std::map <JClkLibCommon::sessionId_t, std::array<JClkLibCommon::client_ptp_event*, 2>>::iterator it ;
 	JClkLibCommon::client_ptp_event* client_ptp_data = NULL;
 
 	it = client_ptp_event_map.find(sID);
 
 	if (it != client_ptp_event_map.end()) {
-		client_ptp_data = std::get<0>(it->second);
+		client_ptp_data = it->second[0];
 	}
 
 	client_ptp_data->offset_event_count.fetch_sub(eventCount.offset_in_range_event_count,
