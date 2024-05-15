@@ -59,8 +59,6 @@ PARSE_RXBUFFER_TYPE(ClientConnectMessage::parseBuffer) {
 
 	currentClientState->set_ptp4l_id(data.ptp4l_id);
 
-	printf("ptp4l_id = %d\n\n",currentClientState->get_ptp4l_id());
-
 	return true;
 }
 

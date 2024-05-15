@@ -47,8 +47,8 @@ bool JClkLibClientApi::jcl_connect()
 	Message0 connectMsg(new ClientConnectMessage());
 	TransportClientId newClientID;
 
-	
 	ClientConnectMessage *cmsg = dynamic_cast<decltype(cmsg)>(connectMsg.get());
+
 	cmsg->setClientState(&appClientState);
 
 	//BlockStopSignal();

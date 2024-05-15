@@ -24,12 +24,10 @@ namespace JClkLibClient
 				     virtual public ClientMessage
 	{
 	private:
-		JClkLibCommon::jcl_state *jclCurrentState;
-		ClientState *currentClientState;
+		inline static JClkLibCommon::jcl_state *jclCurrentState;
+		inline static ClientState *currentClientState;
 		//JClkLibCommon::client_ptp_event composite_client_data = {};
-		//inline static std::map <JClkLibCommon::sessionId_t, JClkLibCommon::client_ptp_event*, JClkLibCommon::client_ptp_event *> client_ptp_event_map;
-		//std::map<int, std::tuple<std::wstring, float, float>> map;
-		inline static std::map <JClkLibCommon::sessionId_t, std::tuple<JClkLibCommon::client_ptp_event*, JClkLibCommon::client_ptp_event *>> client_ptp_event_map;
+		inline static std::map <JClkLibCommon::sessionId_t, std::array<JClkLibCommon::client_ptp_event*, 2>> client_ptp_event_map;
 
 	public:
 		ClientSubscribeMessage() : MESSAGE_SUBSCRIBE() {};

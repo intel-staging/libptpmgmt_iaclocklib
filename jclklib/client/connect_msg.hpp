@@ -26,7 +26,7 @@ namespace JClkLibClient
 				     virtual public ClientMessage
 	{
 	private:
-		ClientState *currentClientState;
+		inline static ClientState *currentClientState;
 	public:
 
 		ClientConnectMessage() : MESSAGE_CONNECT() {};
