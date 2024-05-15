@@ -283,7 +283,9 @@ int Connect::connect()
     }
     m_sk.reset(sku);
 
-    while (system("ls /var/run/ptp4l*") != 0) {
+    //Check whether there is client connected and ptp4l running
+    while ((Client::GetSessionIdAt(0) == JClkLibCommon::InvalidSessionId) ||
+        (system("ls /var/run/ptp4l*") != 0)) {
         //sleep for 2 seconds and keep looping until there is ptp4l available
         sleep(2);
     }
