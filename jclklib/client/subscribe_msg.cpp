@@ -282,6 +282,6 @@ void ClientSubscribeMessage::resetClientPtpEventStruct(JClkLibCommon::sessionId_
 							std::memory_order_relaxed);
 	client_ptp_data->gmChanged_event_count.fetch_sub(eventCount.gm_changed_event_count,
 							std::memory_order_relaxed);
-
-	/* TODO : reset the composite data count as well*/
+	client_ptp_data->composite_event_count.fetch_sub(eventCount.composite_event_count,
+							std::memory_order_relaxed);
 }
