@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GFDL-1.3-no-invariants-or-later
+     SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. All rights reserved. -->
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge
