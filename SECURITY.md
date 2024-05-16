@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GFDL-1.3-no-invariants-or-later
+     SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. All rights reserved. -->
 # Security Policy
 Intel is committed to rapidly addressing security vulnerabilities affecting our customers and providing clear guidance on the solution, impact, severity and mitigation. 
 
