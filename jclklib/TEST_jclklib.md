@@ -40,6 +40,7 @@ Then we compile the clock manager inside the jclklib folder. This will give us :
 	Libtool-bin
 	
 	3. Run this at the github root directory to compile libptpmgmt :
+		autoheader
 		autoconf
 		./configure
 		make
