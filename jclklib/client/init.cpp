@@ -86,6 +86,10 @@ bool JClkLibClientApi::jcl_connect()
 
 	appClientState.set_clientID(newClientID);
 
+	/* Add in the map */
+	clientStateMap.insert(std::pair<JClkLibCommon::sessionId_t,ClientState*>\
+		(appClientState.get_sessionId(),&appClientState));
+
 	return true;
 }
 
@@ -158,6 +162,7 @@ bool JClkLibClientApi::jcl_subscribe(JClkLibCommon::jcl_subscription &newSub,
 
 bool JClkLibClientApi::jcl_disconnect()
 {
+	std::map <JClkLibCommon::sessionId_t, JClkLibClient::ClientState*>::iterator it;
 	bool retVal = false;
 
 	// Send a disconnect message
@@ -174,6 +179,13 @@ bool JClkLibClientApi::jcl_disconnect()
 	ClientSubscribeMessage::deleteClientPtpEventStruct(appClientState.get_sessionId());
 	/* delete the ClientState reference inside ClientNotificationMessage class */
 	ClientNotificationMessage::deleteClientState(&appClientState);
+
+	it = clientStateMap.find(appClientState.get_sessionId());
+
+	if (it != clientStateMap.end()) {
+		delete it->second;
+		clientStateMap.erase(it);
+	}
 
 	retVal = true;
 

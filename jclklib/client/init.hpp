@@ -25,7 +25,7 @@ namespace JClkLibClient {
 class JClkLibClientApi {
     private :
         //std::map<PortIdentity_t, port_info> ports;
-        static std::map <JClkLibCommon::sessionId_t, ClientState> clientStateMap;
+        inline static std::map <JClkLibCommon::sessionId_t, ClientState*> clientStateMap;
         ClientState appClientState;
     public :
         JClkLibClientApi() {
