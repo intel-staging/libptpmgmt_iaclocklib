@@ -231,5 +231,7 @@ int JClkLibClientApi::jcl_status_wait(int timeout, JClkLibCommon::jcl_state &jcl
 	/* Reset the atomic count by reducing the corresponding eventCount */
 	ClientSubscribeMessage::resetClientPtpEventStruct(appClientState.get_sessionId(), eventCount);
 
+	appClientState.set_eventStateCount(eventCount);
+
 	return true;
 }
