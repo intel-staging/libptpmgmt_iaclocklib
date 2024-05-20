@@ -29,8 +29,8 @@ class Init
     ConfigFile m_cfg;
     Message m_msg;
     std::unique_ptr<SockBase> m_sk;
-    char m_net_select;
-    bool m_use_uds;
+    char m_net_select = 0;
+    bool m_use_uds = false;
 
   public:
     /**
