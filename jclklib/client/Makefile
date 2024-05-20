@@ -63,11 +63,11 @@ build-all: build-prep
 
 jclklib.so: $(OBJ_FILES) $(COMMON_OBJ_FILES)
 	echo "[LINK]" $@ "{" $(call pathof_relative_to,$^,$(JCLKLIB_TOPLEVEL_DIR)) "}" | fold -s
-	g++ -g -shared -o $@ $^ $(LIBS_FLAGS) -fdiagnostics-color=always
+	g++ -shared -o $@ $^ $(LIBS_FLAGS) -fdiagnostics-color=always
 
 test: test.o jclklib.so
-	g++ -g -o test test.o -L $(JCLKLIB_CLIENT_DIR) -l:jclklib.so
+	g++ -o test test.o -L $(JCLKLIB_CLIENT_DIR) -l:jclklib.so
 
 %.o : %.cpp
 	echo "[COMPILE]" $<
-	g++ -c $< -g -I $(JCLKLIB_TOPLEVEL_DIR) -fPIC -fdiagnostics-color=always
+	g++ -c $< -I $(JCLKLIB_TOPLEVEL_DIR) -fPIC -fdiagnostics-color=always
