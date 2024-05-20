@@ -17,11 +17,8 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <client/client_state.hpp>
-#include <client/connect_msg.hpp>
-#include <common/jclklib_import.hpp>
 
-#include "init.hpp"
+#include "jclk_init.hpp"
 
 using namespace JClkLibClient;
 using namespace JClkLibCommon;
