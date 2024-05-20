@@ -78,13 +78,6 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
 	if (!PARSE_RX(FIELD, data, LxContext))
 		return false;
 
-	printf("master_offset = %ld, servo_state = %d\n", data.master_offset, data.servo_state);
-	printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x ",
-		data.gmIdentity[0], data.gmIdentity[1],data.gmIdentity[2],
-		data.gmIdentity[3], data.gmIdentity[4],
-		data.gmIdentity[5], data.gmIdentity[6],data.gmIdentity[7]);
-	printf("asCapable = %d, ptp4l_id = %d\n\n", data.asCapable, data.ptp4l_id);
-
 	/* TODO :
 	1. Remove the pair if the sessionID is terminated (disconnect) 
 	2. to move some/all processing inside the processMessage instead of here.
@@ -154,14 +147,6 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer) {
         composite_client_data->composite_event &= data.asCapable > 0 ? true:false;
     }
 
-	printf("CLIENT master_offset = %ld, servo_state = %d\n", client_data->master_offset, \
-	client_data->servo_state);
-	printf("gmIdentity = %02x%02x%02x.%02x%02x.%02x%02x%02x ",
-		client_data->gmIdentity[0], client_data->gmIdentity[1],client_data->gmIdentity[2],
-		client_data->gmIdentity[3], client_data->gmIdentity[4],
-		client_data->gmIdentity[5], client_data->gmIdentity[6],client_data->gmIdentity[7]);
-	printf("asCapable = %d\n\n", client_data->asCapable);
-
 	jclCurrentState->as_Capable = client_data->asCapable > 0 ? true:false;
 	jclCurrentState->offset_in_range = client_data->master_offset_within_boundary;
 	jclCurrentState->servo_locked = client_data->servo_state >= SERVO_LOCKED ? true:false;
@@ -197,8 +182,6 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
 		this->set_msgAck(ACK_NONE);
 
 		JClkLibCommon::jcl_state jclCurrentState = currentClientState->get_eventState();
-		printf("[ClientSubscribeMessage]::processMessage : state -  offset in range = %d, servo_locked = %d as_Capable = %d\n", \
-		jclCurrentState.offset_in_range, jclCurrentState.servo_locked, jclCurrentState.as_Capable);
 	
 		cv.notify_one();
         return true;
