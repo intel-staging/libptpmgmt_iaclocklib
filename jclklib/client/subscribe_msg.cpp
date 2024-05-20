@@ -260,4 +260,10 @@ void ClientSubscribeMessage::resetClientPtpEventStruct(JClkLibCommon::sessionId_
 							std::memory_order_relaxed);
 	client_ptp_data->composite_event_count.fetch_sub(eventCount.composite_event_count,
 							std::memory_order_relaxed);
+
+	eventCount.offset_in_range_event_count = client_ptp_data->offset_event_count;
+	eventCount.asCapable_event_count = client_ptp_data->asCapable_event_count;
+	eventCount.servo_locked_event_count = client_ptp_data->servo_state_event_count;
+	eventCount.gm_changed_event_count = client_ptp_data->gmChanged_event_count;
+	eventCount.composite_event_count = client_ptp_data->composite_event_count;
 }
