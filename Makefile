@@ -198,6 +198,7 @@ PUB:=pub
 PUB_C:=$(PUB)/c
 PMC_DIR:=ptp-tools
 JSON_SRC:=json
+JCLKLIB_SRC:=jclklib
 OBJ_DIR:=objs
 
 CONF_FILES:=configure src/config.h.in
@@ -225,11 +226,16 @@ HEADERS_INST:=$(HEADERS_PUB) $(HEADERS_GEN_PUB)
 HEADERS_INST_C:=$(HEADERS_PUB_C) $(HEADERS_GEN_PUB_C)
 SRCS:=$(wildcard $(SRC)/*.cpp)
 SRCS_JSON:=$(wildcard $(JSON_SRC)/*.cpp)
+SRCS_JCLKLIB:=$(wildcard $(JCLKLIB_SRC)/*.cpp)
 COMP_DEPS:=$(OBJ_DIR) $(HEADERS_GEN_COMP)
 # json-c
 JSONC_LIB:=$(LIB_NAME)_jsonc.so
 JSONC_LIBA:=$(LIB_NAME)_jsonc.a
 JSONC_FLIB:=$(JSONC_LIB)$(SONAME)
+# jclklib
+JCLKLIB_LIB:=jclklib.so
+#JSONC_LIBA:=$(LIB_NAME)_jsonc.a
+JCLKLIB_FLIB:=$(JCLKLIB_LIB)$(SONAME)
 # fastjson
 FJSON_LIB:=$(LIB_NAME)_fastjson.so
 FJSON_LIBA:=$(LIB_NAME)_fastjson.a
@@ -257,7 +263,9 @@ endif
 SRC_FILES_DIR:=$(wildcard scripts/* *.md t*/*.pl */*/*.m4 .reuse/* */gitlab*\
   */github* */*.opt config.guess config.sub configure.ac install-sh */*.m4\
   t*/*.sh */*/*.sh swig/*.md swig/*/* */*.i */*/msgCall.i */*/warn.i man/*\
-  $(PMC_DIR)/phc_ctl $(PMC_DIR)/*.[ch]* $(JSON_SRC)/* */Makefile w*/*/Makefile\
+  $(PMC_DIR)/phc_ctl $(PMC_DIR)/*.[ch]* $(JSON_SRC)/*\
+  $(JCLKLIB_SRC)/common/* $(JCLKLIB_SRC)/proxy/* $(JCLKLIB_SRC)/client/*\
+  */Makefile w*/*/Makefile\
   */*/*test*/*.go LICENSES/* *.in tools/*.in) src/ver.h.in src/name.h.in\
   $(SRCS) $(HEADERS_SRCS) LICENSE $(MAKEFILE_LIST) credits
 ifeq ($(INSIDE_GIT),true)
@@ -392,6 +400,7 @@ endif # VALGRIND
 
 # JSON libraries
 include $(JSON_SRC)/Makefile
+include $(JCLKLIB_SRC)/Makefile
 
 # Compile library source code
 $(LIB_OBJS): $(OBJ_DIR)/%.o: $(SRC)/%.cpp | $(COMP_DEPS)
@@ -444,7 +453,7 @@ CPPCHECK_OPT+=--suppress=preprocessorErrorDirective
 EXTRA_C_SRCS:=$(wildcard uctest/*.c)
 EXTRA_SRCS:=$(wildcard $(foreach n,sample utest uctest,$n/*.cpp $n/*.h))
 EXTRA_SRCS+=$(EXTRA_C_SRCS)
-format: $(HEADERS_GEN) $(HEADERS_SRCS) $(SRCS) $(EXTRA_SRCS) $(SRCS_JSON)
+format: $(HEADERS_GEN) $(HEADERS_SRCS) $(SRCS) $(EXTRA_SRCS) $(SRCS_JSON) $(SRCS_JCLKLIB)
 	$(Q_FRMT)
 	r=`$(ASTYLE) --project=none --options=tools/astyle.opt $^`
 	test -z "$$r" || echo "$$r";./tools/format.pl $^
@@ -554,13 +563,13 @@ checkall: format doxygen
 
 ifneq ($(CTAGS),)
 tags: $(filter-out $(SRC)/ids.h,$(HEADERS_GEN_COMP)) $(HEADERS_SRCS) $(SRCS)\
-	$(SRCS_JSON)
+	$(SRCS_JSON) $(SRCS_JCLKLIB)
 	$(Q_TAGS)$(CTAGS) -R $^
 ALL+=tags
 endif # CTAGS
 
 .DEFAULT_GOAL=all
-all: $(COMP_DEPS) $(ALL)
+all: $(COMP_DEPS) $(ALL) jclklib
 	$(NOP)
 
 ####### installation #######
@@ -751,7 +760,7 @@ DISTCLEAN:=$(addprefix config.,log status) configure configure~ defs.mk\
   $(wildcard src/config.h*)
 DISTCLEAN_DIRS:=autom4te.cache
 
-clean: deb_clean
+clean: deb_clean jclklib_clean
 	$(Q_CLEAN)$(RM) $(CLEAN)
 	$(RM) -R $(CLEAN_DIRS)
 distclean: deb_clean

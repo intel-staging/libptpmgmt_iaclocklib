@@ -11,14 +11,20 @@
 
 CWD := $(shell pwd)
 
-.PHONY: all
-all:
-	$(MAKE) -C $(CWD)/common default
-	$(MAKE) -C $(CWD)/proxy default
-	$(MAKE) -C $(CWD)/client default
+.PHONY: jclklib
+jclklib:
+	$(MAKE) -C $(CWD)/jclklib/common default
+	$(MAKE) -C $(CWD)/jclklib/proxy default
+	$(MAKE) -C $(CWD)/jclklib/client default
+#	$(MAKE) -C $(CWD)/jclklib/test default
 
-.PHONY: clean
-clean:
-	$(MAKE) -C $(CWD)/client clean
-	$(MAKE) -C $(CWD)/proxy clean
-	$(MAKE) -C $(CWD)/common clean
+.PHONY: jclklib_test
+jclklib_test:
+	$(MAKE) -C $(CWD)/jclklib/test default
+
+.PHONY: jclklib_clean
+jclklib_clean:
+	$(MAKE) -C $(CWD)/jclklib/client clean
+	$(MAKE) -C $(CWD)/jclklib/proxy clean
+	$(MAKE) -C $(CWD)/jclklib/common clean
+#	$(MAKE) -C $(CWD)/jclklib/test clean
