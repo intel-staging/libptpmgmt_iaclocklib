@@ -811,9 +811,11 @@ DISTCLEAN:=configure configure~ defs.mk aclocal.m4 libtool install-sh\
   ltmain.sh $(wildcard src/config.h* config.*)
 DISTCLEAN_DIRS:=autom4te.cache m4
 
-clean: deb_clean jclklib_clean
+clean: deb_clean jclk_clean
 	$(Q_CLEAN)$(RM) $(CLEAN)
 	$(RM) -R $(CLEAN_DIRS)
+jclk_clean:
+	$(MAKE) -C $(JCLKLIB_SRC) jclklib_clean
 distclean: deb_clean
 	$(Q_DISTCLEAN)$(RM) $(CLEAN) $(DISTCLEAN)
 	$(RM) -R $(CLEAN_DIRS) $(DISTCLEAN_DIRS)
