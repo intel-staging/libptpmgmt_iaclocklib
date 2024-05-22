@@ -21,8 +21,6 @@
 #include <string>
 #include <map>
 #include <ptpmgmt/init.h>
-//#include <ptpmgmt/init.h>
-#include <pub/init.h>
 
 using namespace ptpmgmt;
 
