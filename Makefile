@@ -198,6 +198,7 @@ PUB:=pub
 PUB_C:=$(PUB)/c
 PMC_DIR:=ptp-tools
 JSON_SRC:=json
+JCLKLIB_SRC:=jclklib
 OBJ_DIR:=objs
 
 CONF_FILES:=configure src/config.h.in
@@ -258,6 +259,7 @@ SRC_FILES_DIR:=$(wildcard scripts/* *.md t*/*.pl */*/*.m4 .reuse/* */gitlab*\
   */github* */*.opt config.guess config.sub configure.ac install-sh */*.m4\
   t*/*.sh */*/*.sh swig/*.md swig/*/* */*.i */*/msgCall.i */*/warn.i man/*\
   $(PMC_DIR)/phc_ctl $(PMC_DIR)/*.[ch]* $(JSON_SRC)/* */Makefile w*/*/Makefile\
+  $(JCLKLIB_SRC)/*.md $(JCLKLIB_SRC)/*/Makefile $(JCLKLIB_SRC)/*/*.[ch]*\
   */*/*test*/*.go LICENSES/* *.in tools/*.in) src/ver.h.in src/name.h.in\
   $(SRCS) $(HEADERS_SRCS) LICENSE $(MAKEFILE_LIST) credits
 ifeq ($(INSIDE_GIT),true)
