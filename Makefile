@@ -200,6 +200,7 @@ LIB_D:=.libs
 PUB_C:=$(PUB)/c
 PMC_DIR:=ptp-tools
 HMAC_SRC:=hmac
+JCLKLIB_SRC:=jclklib
 OBJ_DIR:=objs
 
 CONF_FILES:=configure src/config.h.in
@@ -227,6 +228,7 @@ HEADERS_INST:=$(HEADERS_PUB) $(HEADERS_GEN_PUB)
 HEADERS_INST_C:=$(HEADERS_PUB_C) $(HEADERS_GEN_PUB_C)
 SRCS:=$(wildcard $(SRC)/*.cpp)
 SRCS_HMAC:=$(wildcard $(HMAC_SRC)/*.cpp)
+SRCS_JCLKLIB:=$(wildcard $(JCLKLIB_SRC)/*.cpp)
 COMP_DEPS:=$(OBJ_DIR) $(HEADERS_GEN_COMP)
 # hmac
 SSL_NAME:=$(LIB_NAME)_openssl
@@ -251,6 +253,9 @@ NETTLE_DL:=$(NETTLE_NAME).so$(SONAME)
 NETTLE_LA:=$(NETTLE_NAME).la
 
 HMAC_FLIBS:=$(SSL_LIB) $(GNUTLS_LIB) $(NETTLE_LIB) $(GCRYPT_LIB)
+# jclklib
+JCLKLIB_LIB:=libjclk.so
+JCLKLIB_FLIB:=$(JCLKLIB_LIB)$(SONAME)
 TGT_LNG:=perl5 lua python3 ruby php tcl go
 UTEST_CPP_TGT:=$(addprefix utest_,no_sys sys auth pmc hmac)
 UTEST_C_TGT:=$(addprefix uctest_,no_sys sys auth)
@@ -275,6 +280,7 @@ SRC_FILES_DIR:=$(wildcard README.md t*/*.pl */*/*.m4 .reuse/* */gitlab*\
   */github* */*.opt configure.ac src/*.m4 doc/*.md\
   t*/*.sh */*/*.sh swig/*.md swig/*/* */*.i */*/msgCall.i */*/warn.i man/*\
   $(PMC_DIR)/phc_ctl $(PMC_DIR)/*.[ch]* */Makefile w*/*/Makefile\
+  $(JCLKLIB_SRC)/*.md $(JCLKLIB_SRC)/*/Makefile $(JCLKLIB_SRC)/*/*.[ch]*\
   */*/*test*/*.go LICENSES/* *.in tools/*.in $(HMAC_SRC)/*.cpp)\
   src/ver.h.in src/name.h.in $(SRCS) $(HEADERS_SRCS) LICENSE\
   $(MAKEFILE_LIST) credits
@@ -424,6 +430,9 @@ endif # VALGRIND
 # HMAC libraries
 include $(HMAC_SRC)/Makefile
 
+# JCLK libraries
+include $(JCLKLIB_SRC)/Makefile
+
 # Compile library source code
 $(LIB_OBJS): $(OBJ_DIR)/%.lo: $(SRC)/%.cpp | $(COMP_DEPS)
 	$(LIBTOOL_CC) $(CXX) -c $(CXXFLAGS) $< -o $@
@@ -475,7 +484,8 @@ CPPCHECK_OPT+=$(CPPCHECK_OPT_BASE)
 EXTRA_C_SRCS:=$(wildcard uctest/*.c)
 EXTRA_SRCS:=$(wildcard $(foreach n,sample utest uctest,$n/*.cpp $n/*.h))
 EXTRA_SRCS+=$(EXTRA_C_SRCS)
-format: $(HEADERS_GEN) $(HEADERS_SRCS) $(SRCS) $(EXTRA_SRCS) $(SRCS_HMAC)
+format: $(HEADERS_GEN) $(HEADERS_SRCS) $(SRCS) $(EXTRA_SRCS) $(SRCS_HMAC)\
+	$(SRCS_JCLKLIB)
 	$(Q_FRMT)
 	r=`$(ASTYLE) --project=none --options=tools/astyle.opt $^`
 	test -z "$$r" || echo "$$r";./tools/format.pl $^
@@ -581,13 +591,13 @@ checkall: format doxygen
 
 ifdef CTAGS
 tags: $(filter-out $(SRC)/ids.h,$(HEADERS_GEN_COMP)) $(HEADERS_SRCS) $(SRCS)\
-	$(SRCS_HMAC)
+	$(SRCS_HMAC) $(SRCS_JCLKLIB)
 	$(Q_TAGS)$(CTAGS) -R $^
 ALL+=tags
 endif # CTAGS
 
 .DEFAULT_GOAL=all
-all: $(COMP_DEPS) $(ALL)
+all: $(COMP_DEPS) $(ALL) jclklib
 	$(NOP)
 
 ####### installation #######
@@ -819,9 +829,11 @@ DISTCLEAN:=configure configure~ defs.mk aclocal.m4 libtool install-sh\
   ltmain.sh $(wildcard src/config.h* config.*)
 DISTCLEAN_DIRS:=autom4te.cache m4
 
-clean: deb_clean
+clean: deb_clean jclk_clean
 	$(Q_CLEAN)$(RM) $(CLEAN)
 	$(RM) -R $(CLEAN_DIRS)
+jclk_clean:
+	$(MAKE) -C $(JCLKLIB_SRC) jclklib_clean
 distclean: deb_clean
 	$(Q_DISTCLEAN)$(RM) $(CLEAN) $(DISTCLEAN)
 	$(RM) -R $(CLEAN_DIRS) $(DISTCLEAN_DIRS)
