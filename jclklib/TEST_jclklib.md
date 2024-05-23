@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: GFDL-1.3-no-invariants-or-later
      SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. All rights reserved. -->
-# The diagram of Clock Manager  usage in system : 
+# The diagram of Clock Manager  usage in system :
 
 Test app <----> client runtime(libjclk.so) <----> jclklib_proxy <----> libptpmgmt.so <----> ptp4l
 
@@ -25,7 +25,7 @@ together with this Clock Manager application.
 3. Build the application:
     ```bash
     make
-    ```               
+    ```
 
 # How to Clone and Build the Clock Manager together with libptpmgmt:
 
@@ -126,4 +126,5 @@ Usage of sample application (jclk_test) :
         Default: -100000 ns
     -t timeout in waiting notification event (s)
         Default: 10 s
-```
+    ```
+
