@@ -33,13 +33,8 @@ jobs:
       run: autoconf
     - name: configure
       run: ./configure
-    - name: make
-      run: make
-    - name: install
-      run: sudo make install
     - uses: vapier/coverity-scan-action@2068473c7bdf8c2fb984a6a40ae76ee7facd7a85 # v1.8.0
       with:
-        working-directory: jclklib
         email: ${{ secrets.COVERITY_SCAN_EMAIL }}
         token: ${{ secrets.COVERITY_SCAN_TOKEN }}
         project: libptpmgmt_iaclocklib
