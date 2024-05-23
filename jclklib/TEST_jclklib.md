@@ -107,24 +107,23 @@ reference.
     ```
 
 Usage of sample application (jclk_test) :
-    ```bash
-    Options:
-    -s subscribe_event_mask
-        Default: 0xf
-        Bit 0: gmOffsetEvent
-        Bit 1: servoLockedEvent
-        Bit 2: asCapableEvent
-        Bit 3: gmChangedEvent
-    -c composite_event_mask
-        Default: 0x7
-        Bit 0: gmOffsetEvent
-        Bit 1: servoLockedEvent
-        Bit 2: asCapableEvent
-    -u upper master offset (ns)
-        Default: 100000 ns
-    -l lower master offset (ns)
-        Default: -100000 ns
-    -t timeout in waiting notification event (s)
-        Default: 10 s
-    ```
-
+```bash
+Options:
+-s subscribe_event_mask
+    Default: 0xf
+    Bit 0: gmOffsetEvent
+    Bit 1: servoLockedEvent
+    Bit 2: asCapableEvent
+    Bit 3: gmChangedEvent
+-c composite_event_mask
+    Default: 0x7
+    Bit 0: gmOffsetEvent
+    Bit 1: servoLockedEvent
+    Bit 2: asCapableEvent
+-u upper master offset (ns)
+    Default: 100000 ns
+-l lower master offset (ns)
+    Default: -100000 ns
+-t timeout in waiting notification event (s)
+    Default: 10 s
+```
