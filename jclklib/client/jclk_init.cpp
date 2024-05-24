@@ -173,6 +173,11 @@ bool check_proxy_liveness(ClientState &appClientState, int timeout)
     Message0 connectMsg(new ClientConnectMessage());
     ClientConnectMessage *cmsg = dynamic_cast<decltype(cmsg)>(connectMsg.get());
 
+    if (cmsg == nullptr) {
+        PrintDebug("[CONNECT] Failed to cast to ClientConnectMessage");
+        return false;
+    }
+
     appClientState.set_connected(false);
     cmsg->setClientState(&appClientState);
     cmsg->set_sessionId(appClientState.get_sessionId());
