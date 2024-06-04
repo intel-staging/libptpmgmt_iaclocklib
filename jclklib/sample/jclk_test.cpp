@@ -53,11 +53,11 @@ int main(int argc, char *argv[])
     JClkLibCommon::jcl_state_event_count eventCount = {};
     JClkLibCommon::jcl_subscription sub = {};
     JClkLibCommon::jcl_state jcl_state = {};
-    int lower_master_offset = -100000;
-    int upper_master_offset = 100000;
+    int lower_master_offset = -100;
+    int upper_master_offset = 100;
     int ret = EXIT_SUCCESS;
     int idle_time = 1;
-    int timeout = 10;
+    int timeout = -1;
     int retval;
     int opt;
 
@@ -227,8 +227,8 @@ int main(int argc, char *argv[])
     sleep(1);
 
     while (!signal_flag) {
-        printf("[jclklib][%.3f] Waiting for Notification Event...\n",
-            getMonotonicTime());
+        //printf("[jclklib][%.3f] Waiting for Notification Event...\n",
+        //    getMonotonicTime());
         retval = cmAPI->jcl_status_wait(timeout, jcl_state , eventCount);
         if (!retval) {
             printf("[jclklib][%.3f] No event status changes identified in %d seconds.\n\n",
@@ -242,6 +242,24 @@ int main(int argc, char *argv[])
                 getMonotonicTime());
             return EXIT_SUCCESS;
         }
+
+        printf("\033c");
+        if (jcl_state.composite_event) {
+            printf("\033[1;32m"); // Set the text color to Green
+            printf("PTP Hardware Clock in sync.\n");
+            printf("master offset within a range of [%d, %d] ns\n",
+                lower_master_offset, upper_master_offset);
+            printf("\033[0m"); // Reset the text color
+            printf("\n");
+        } else {
+            printf("\033[1;31m\033[5m"); // Set the text color to Red and blinking
+            printf("WARNING! PTP Hardware Clock out of sync.\n");
+            printf("master offset out of range of [%d, %d] ns\n",
+                lower_master_offset, upper_master_offset);
+            printf("\033[0m"); // Reset the text color
+            printf("\n");
+        }
+        continue;
 
         printf("[jclklib][%.3f] Obtained data from Notification Event:\n",
             getMonotonicTime());
