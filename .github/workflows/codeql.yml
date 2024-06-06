@@ -66,6 +66,9 @@ jobs:
           # Prefix the list here with "+" to use these queries and those in the config file.
 
       - name: Install dependencies
+        run: git clone https://github.com/dvhart/librtpi.git && cd librtpi && autoreconf --install && ./configure && sudo make install
+
+      - name: Install dependencies
         run: sudo apt-get install -y swig libtool-bin
       - name: autoheader
         run: autoheader
