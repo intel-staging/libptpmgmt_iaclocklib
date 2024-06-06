@@ -117,9 +117,6 @@ namespace JClkLibCommon
         jcl_value        value;
         jcl_event        composite_event;
     public:
-        std::uint8_t *parse(std::uint8_t *buf, std::size_t &length);
-        std::uint8_t *write(std::uint8_t *buf, std::size_t &length);
-
         DECLARE_ACCESSOR(event);
         DECLARE_ACCESSOR(value);
         DECLARE_ACCESSOR(composite_event);
