@@ -37,6 +37,9 @@ jobs:
 
     steps:
 
+    - name: Install dependencies
+      run: git clone https://github.com/dvhart/librtpi.git && cd librtpi && autoreconf --install && ./configure && make install
+
     - name: checkout repository
       uses: actions/checkout@v4
 
@@ -64,6 +67,9 @@ jobs:
 
     steps:
 
+    - name: Install dependencies
+      run: git clone https://github.com/dvhart/librtpi.git && cd librtpi && autoreconf --install && ./configure && make install
+
     - name: checkout repository
       uses: actions/checkout@v4
 
@@ -84,6 +90,9 @@ jobs:
       GITHUB_CONTAINER: ${{ matrix.names }}
 
     steps:
+
+    - name: Install dependencies
+      run: git clone https://github.com/dvhart/librtpi.git && cd librtpi && autoreconf --install && ./configure && make install
 
     - name: checkout linuxptp repository
       uses: actions/checkout@v4
