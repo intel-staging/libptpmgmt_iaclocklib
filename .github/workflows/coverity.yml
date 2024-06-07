@@ -25,7 +25,7 @@ jobs:
         egress-policy: audit
 
     - name: Install dependencies
-      run: git clone https://github.com/dvhart/librtpi.git && cd librtpi && autoreconf --install && ./configure && sudo make install
+      run: git clone https://github.com/dvhart/librtpi.git && cd librtpi && autoreconf --install && ./configure && sudo make install && cd - && sudo rm -rf librtpi
 
     - name: Install dependencies
       run: sudo apt-get install -y swig libtool-bin
