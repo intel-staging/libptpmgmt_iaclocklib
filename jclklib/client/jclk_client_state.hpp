@@ -51,6 +51,7 @@ namespace JClkLibClient {
         jcl_state eventState = {};
         jcl_state_event_count eventStateCount ={};
         JClkLibCommon::jcl_subscription eventSub ={};
+        double second;
 
     public:
         ClientState();
@@ -66,6 +67,8 @@ namespace JClkLibClient {
         jcl_state &get_eventState();
         void set_eventStateCount(jcl_state_event_count eCount);
         void set_eventState(jcl_state eState);
+        void set_proxy_liveness(double sec);
+        double get_proxy_liveness();
         std::string toString();
         JClkLibCommon::jcl_subscription &get_eventSub();
         DECLARE_ACCESSOR(sessionId);

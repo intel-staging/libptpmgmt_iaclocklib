@@ -104,6 +104,14 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
 
         ClientState *currentClientState = *it;
 
+        struct timespec timeSpec;
+
+        if (clock_gettime(CLOCK_MONOTONIC, &timeSpec) == -1) {
+            perror("clock_gettime failed");
+        }
+
+        currentClientState->set_proxy_liveness(timeSpec.tv_sec);
+
         jcl_state &jclCurrentState =
             currentClientState->get_eventState();
         jcl_state_event_count &jclCurrentEventCount =
