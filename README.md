@@ -168,12 +168,14 @@ The project more documents
 # <u>Licence</u>
 The Licence of this project is
 
-  * The library is under LGPL v3 or later.
+  * The libptpmgmt library is under LGPL v3 or later.
+  * The clock manager library is under BSD-3-Clause.
   * The pmc and phc_ctl tools and the testing scripts are under GPL v3 or later.
   * Documentation is under under GFDL v1.3 or later without invariants sections.
 
 # <u>Disclaimer</u>
-This project is under development. All source code and features on the main branch are for the purpose of testing or evaluation and not production ready.
+This project is under development. All source code and features on the main branch is for the purpose of testing or evaluation and not production ready.
+We will upstream the code into https://github.com/erezgeva/libptpmgmt/ and archive this GitHub repo thereafter (making it Read-only).
 
 # <u>Coverity Scan</u>
 <a href="https://scan.coverity.com/projects/libptpmgmt_iaclocklib">
