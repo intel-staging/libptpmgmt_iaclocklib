@@ -124,3 +124,13 @@ JClkLibCommon::jcl_subscription &ClientState::get_eventSub()
 {
     return eventSub;
 }
+
+void ClientState::set_proxy_liveness(double sec)
+{
+    second = sec;
+}
+
+double ClientState::get_proxy_liveness()
+{
+    return second;
+}

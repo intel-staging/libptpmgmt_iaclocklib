@@ -171,34 +171,16 @@ bool JClkLibClientApi::jcl_disconnect()
 
 bool check_proxy_liveness(ClientState &appClientState)
 {
-    unsigned int timeout_sec = (unsigned int) DEFAULT_LIVENESS_TIME_OUT;
-    Message0 connectMsg(new ClientConnectMessage());
-    ClientConnectMessage *cmsg = dynamic_cast<decltype(cmsg)>(connectMsg.get());
+    struct timespec timeSpec;
 
-    if (cmsg == nullptr) {
-        PrintDebug("[CONNECT] Failed to cast to ClientConnectMessage");
-        return false;
+    if (clock_gettime(CLOCK_MONOTONIC, &timeSpec) == -1) {
+        perror("clock_gettime failed");
+        return -1;
     }
 
-    appClientState.set_connected(false);
-    cmsg->setClientState(&appClientState);
-    cmsg->set_sessionId(appClientState.get_sessionId());
-    ClientMessageQueue::writeTransportClientId(connectMsg.get());
-    ClientMessageQueue::sendMessage(connectMsg.get());
-
-    /* Wait for connection result */
-    auto endTime = std::chrono::system_clock::now() + std::chrono::seconds(timeout_sec);
-    std::unique_lock<rtpi::mutex> lck(ClientConnectMessage::cv_mtx);
-    while (appClientState.get_connected() == false) {
-        auto res = ClientConnectMessage::cv.wait_until(lck, endTime);
-        if (res == std::cv_status::timeout) {
-            if (appClientState.get_connected() == false) {
-                PrintDebug("[CONNECT] Connect reply timeout!!");
-                return false;
-            }
-        } else {
-            PrintDebug("[CONNECT] Connect reply received.");
-        }
+    if ((timeSpec.tv_sec - appClientState.get_proxy_liveness()) > DEFAULT_LIVENESS_TIME_OUT) {
+        PrintDebug("[CONNECT] Connect reply timeout!!");
+        return false;
     }
 
     return true;
