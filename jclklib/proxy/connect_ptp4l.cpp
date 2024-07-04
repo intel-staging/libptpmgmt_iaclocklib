@@ -215,14 +215,51 @@ bool event_subscription(struct jcl_handle **handle)
     return ret;
 }
 
-bool is_ptp4l_running() {
+void *is_ptp4l_running( void *arg) {
     FILE *fp;
     char result[8];
-    fp = popen("pgrep ptp4l", "r");
+    
+    while (1) {
+        fp = popen("pgrep ptp4l", "r");
 
-    bool resultExists = fgets(result, sizeof(result) - 1, fp) != NULL;
-    pclose(fp);
-    return resultExists;
+        if (fp != NULL) {
+            Connect::monitor_hdle.is_ptp4l_alive = \
+            fgets(result, sizeof(result) - 1, fp) != NULL;
+            pclose(fp);
+        }
+        sleep(1);
+    }
+
+    return 0;
+}
+
+
+/** @brief Establishes a connection to the local PTP (Precision Time Protocol) daemon.
+ *
+ * This method initializes a Unix socket connection to the local PTP daemon. It sets up
+ * the message parameters, including the boundary hops and the process ID as part of the
+ * clock identity. It also configures the epoll instance to monitor the socket for incoming
+ * data or errors.
+ *
+ * @return An integer indicating the status of the connection attempt.
+ *         Returns 0 on success, or -1 if an error occurs during socket initialization,
+ *         address setting, or epoll configuration.
+ */
+
+int Connect::start_monitoring_threads()
+{
+    int ret = 0;
+    pthread_attr_t tattr;
+
+    /* initialized with detached attributes. We are not waiting for this thread */
+    ret = pthread_attr_init(&tattr);
+    ret = pthread_attr_setdetachstate(&tattr,PTHREAD_CREATE_DETACHED);
+
+    if(( ret = -pthread_create (&Connect::monitor_hdle.ptp4l_monitor_thread, &tattr, is_ptp4l_running,
+        NULL)) < 0)
+        return ret;
+
+    return ret;
 }
 
 /**
@@ -267,7 +304,7 @@ void *ptp4l_event_loop( void *arg)
     event_subscription(NULL);
 
     while (1) {
-        if(is_ptp4l_running()) {
+        if (Connect::monitor_hdle.is_ptp4l_alive) {
             if (epoll_wait( epd, &epd_event, 1, 100) != -1) {
                 const auto cnt = sk->rcv(buf, bufSize);
                 MNG_PARSE_ERROR_e err = msg.parse(buf, cnt);
@@ -290,7 +327,7 @@ void *ptp4l_event_loop( void *arg)
             notify_client();
 
             while (1) {
-                if(is_ptp4l_running()) {
+                if (Connect::monitor_hdle.is_ptp4l_alive) {
                     PrintInfo("Connected to ptp4l via /var/run/ptp4l.");
                     std::string uds_address;
                     m_sk.reset(sku);
@@ -330,7 +367,7 @@ int Connect::connect()
     }
     m_sk.reset(sku);
 
-    while (is_ptp4l_running() != 1) {
+    while (!Connect::monitor_hdle.is_ptp4l_alive){
         /* sleep for 2 seconds and keep looping until there is ptp4l available */
         PrintError("Failed to connect to ptp4l. Retrying...");
         sleep(2);

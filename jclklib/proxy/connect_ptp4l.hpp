@@ -14,6 +14,9 @@
 
 #include <common/connect_msg.hpp>
 #include <proxy/message.hpp>
+#include <atomic>
+
+using namespace std;
 
 namespace JClkLibProxy
 {
@@ -21,6 +24,12 @@ namespace JClkLibProxy
     {
     private:
     public:
+        struct monitor_handle {
+            atomic<bool> is_ptp4l_alive = false;
+            pthread_t ptp4l_monitor_thread;
+        };
         static int connect();
+        static int start_monitoring_threads();
+        static monitor_handle monitor_hdle;
     };
 }
