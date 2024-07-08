@@ -19,6 +19,7 @@
 #include <proxy/connect_ptp4l.hpp>
 #include <proxy/message.hpp>
 #include <proxy/transport.hpp>
+#include <unistd.h>
 
 using namespace JClkLibCommon;
 using namespace JClkLibProxy;
@@ -35,6 +36,8 @@ int main()
         cout << "Message init failed" << endl;
         return -1;
     }
+    Connect::start_monitoring_threads();
+    sleep(1);
     Connect::connect();
     WaitForStopSignal();
     PrintDebug("Got stop signal");
