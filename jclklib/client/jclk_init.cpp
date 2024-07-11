@@ -34,10 +34,10 @@ using namespace JClkLibClient;
 using namespace JClkLibCommon;
 using namespace std;
 
-rtpi::mutex ClientConnectMessage::cv_mtx;
-rtpi::condition_variable ClientConnectMessage::cv;
-rtpi::mutex ClientSubscribeMessage::cv_mtx;
-rtpi::condition_variable ClientSubscribeMessage::cv;
+rtpi::mutex ClientConnectMessage::cv_mtx{};
+rtpi::condition_variable ClientConnectMessage::cv{};
+rtpi::mutex ClientSubscribeMessage::cv_mtx{};
+rtpi::condition_variable ClientSubscribeMessage::cv{};
 
 bool JClkLibClientApi::jcl_connect()
 {

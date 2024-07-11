@@ -101,6 +101,7 @@ PROCESS_MESSAGE_TYPE(ClientConnectMessage::processMessage)
 
     this->set_msgAck(ACK_NONE);
 
+    lock.unlock();
     cv.notify_one(lock);
 
     return true;

@@ -74,6 +74,13 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer)
     if (!PARSE_RX(FIELD, data, LxContext))
         return false;
 
+    struct timespec last_notification_time;
+
+    if (clock_gettime(CLOCK_MONOTONIC, &last_notification_time) == -1)
+        PrintDebug("ClientNotificationMessage::processMessage clock_gettime failed.\n");
+    else
+        currentClientState->set_last_notification_time(last_notification_time);
+
     /* TODO :
     1. Remove the pair if the sessionID is terminated (disconnect) 
     2. to move some/all processing inside the processMessage instead of here.
@@ -173,6 +180,7 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
 
     jcl_state jclCurrentState = currentClientState->get_eventState();
 
+    lock.unlock(); // Unlock the mutex before calling notify_one
     cv.notify_one(lock);
     return true;
 }
