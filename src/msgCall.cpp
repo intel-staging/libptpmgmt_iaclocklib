@@ -28,12 +28,14 @@ void MessageDispatcher::callHadler(const Message &msg, mng_vals_e tlv_id,
         noTlv(msg);
         return;
     }
-    _noTlv(); /* Clear the flag */
-    switch(tlv_id) {
+    bool noTlvSuccess = _noTlv(); /* Clear the flag */
+    if (noTlvSuccess) {
+        switch(tlv_id) {
 #include "ids.h"
-        default:
-            noTlv(msg);
-            break;
+            default:
+                noTlv(msg);
+                break;
+        }
     }
 }
 bool MessageBuilder::buildTlv(actionField_e actionField, mng_vals_e tlv_id)

@@ -125,7 +125,8 @@ bool ConfigSection::set_val(char *line)
             long ret = strtol(val, &endptr, 0);
             if(*endptr != 0 || ret < ranges[idx].min || ret > ranges[idx].max)
                 return false;
-            m_vals[idx - val_base_val] = ret;
+            if (idx >= val_base_val && idx < last_val)
+                m_vals[idx - val_base_val] = ret;
             break;
         }
     }
@@ -162,14 +163,16 @@ bool ConfigFile::read_cfg(const string &_file)
             cur = skip_spaces(cur + 1);
             char *end = strchr(cur, ']');
             if(end == nullptr) {
-                PTPMGMT_ERROR("wrong line %s(%d)", file, lineNum);
+                PTPMGMT_ERROR("wrong line %s(%zu)", file, lineNum);
+                fclose(f); // Close the file pointer before returning
                 return false;
             }
             strip_end_spaces(end);
             curSection = cur;
         } else if(*cur != 0 && *cur != '#' &&
             !cfgSec[curSection].set_val(cur)) {
-            PTPMGMT_ERROR("wrong line %s(%d)", file, lineNum);
+            PTPMGMT_ERROR("wrong line %s(%zu)", file, lineNum);
+            fclose(f);
             return false;
         }
     }

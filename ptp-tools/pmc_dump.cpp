@@ -829,6 +829,8 @@ class MsgBuild : public MessageBuilder
             return false; // No errors!
         }
         // Fallback into integer
+        if (tkn == nullptr)
+            return true;
         char *end;
         key.num = strtol(tkn, &end, 0);
         if(tkn == end || *end != 0 || key.num < 0 || key.num > NO_MECHANISM)

@@ -33,6 +33,7 @@
 #endif
 #include "ptp.h"
 #include "timeCvrt.h"
+#include <utility>
 
 __PTPMGMT_NAMESPACE_BEGIN
 
@@ -230,7 +231,8 @@ bool IfInfo::initUsingName(const string &ifName)
     ifreq ifr;
     memset(&ifr, 0, sizeof ifr);
     // ifName is shorter than IFNAMSIZ
-    strcpy(ifr.ifr_name, ifName.c_str());
+    strncpy(ifr.ifr_name, ifName.c_str(), IFNAMSIZ - 1);
+    ifr.ifr_name[IFNAMSIZ - 1] = '\0';
     if(ioctl(fd, SIOCGIFINDEX, &ifr) == -1) {
         PTPMGMT_ERROR_P("SIOCGIFINDEX");
         close(fd);
@@ -469,7 +471,7 @@ bool PtpClock::initUsingIndex(int ptpIndex, bool readonly)
     if(!init(dev.c_str(), readonly))
         return false;
     m_ptpIndex = ptpIndex;
-    m_device = dev;
+    m_device = std::move(dev);
     PTPMGMT_ERROR_CLR;
     return true;
 }

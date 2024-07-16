@@ -112,6 +112,7 @@ static inline int rcv()
             if(!use_uds)
                 // We got the wrong message, wait for the next one
                 return 1;
+            break;
         default:
             DUMPS("Parse error %s\n", msg.err2str_c(err));
             break;

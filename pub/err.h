@@ -36,7 +36,7 @@ class Error
     std::string m_fmsg;
     std::string m_emsg;
     void doClear();
-    Error() : m_line(0) {}
+    Error() : m_errno(0), m_line(0) {}
     void doError(bool use_errno, const char *file, int line, const char *func,
         const std::string &msg);
     const std::string &fetch();
