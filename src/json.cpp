@@ -357,8 +357,7 @@ JS(TIME_STATUS_NP)
         PROC_VAL(nanoseconds_lsb) &&
         PROC_VAL(fractional_nanoseconds) &&
         PROC_VAL(gmPresent) &&
-        PROC_VAL(gmIdentity) &&
-        PROC_VAL(servo_state);
+        PROC_VAL(gmIdentity);
 }
 JS(GRANDMASTER_SETTINGS_NP)
 {
