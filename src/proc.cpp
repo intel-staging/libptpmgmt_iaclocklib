@@ -829,7 +829,7 @@ A(TIME_STATUS_NP)
         proc(d.scaledLastGmPhaseChange) || proc(d.gmTimeBaseIndicator) ||
         proc(d.nanoseconds_msb) || proc(d.nanoseconds_lsb) ||
         proc(d.fractional_nanoseconds) || proc(d.gmPresent) ||
-        proc(d.gmIdentity) || proc(d.servo_state);
+        proc(d.gmIdentity);
 }
 A(GRANDMASTER_SETTINGS_NP)
 {
