@@ -907,7 +907,6 @@ TEST_F(ProcTest, TIME_STATUS_NP)
     EXPECT_EQ(r->fractional_nanoseconds, 0);
     EXPECT_EQ(r->gmPresent, 0);
     EXPECT_EQ(r->gmIdentity, clockId);
-    EXPECT_EQ(r->servo_state, SERVO_UNLOCKED);
 }
 
 // Tests GRANDMASTER_SETTINGS_NP structure

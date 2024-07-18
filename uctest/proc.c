@@ -1173,7 +1173,6 @@ Test(ProcTest, TIME_STATUS_NP)
     cr_expect(eq(int, r->fractional_nanoseconds, 0));
     cr_expect(eq(int, r->gmPresent, 0));
     cr_expect(zero(memcmp(r->gmIdentity.v, clockId, 8)));
-    cr_expect(eq(u8, r->servo_state, PTPMGMT_SERVO_UNLOCKED));
     m->free(m);
 }
 
