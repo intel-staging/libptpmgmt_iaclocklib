@@ -441,7 +441,6 @@ strc(TIME_STATUS_NP_t) sz(: public BaseMngTlv) {
     uint16_t fractional_nanoseconds;
     Integer32_t gmPresent; /**< Flag for grandmaster presence */
     strcc(ClockIdentity_t) gmIdentity; /**< Grandmaster clock ID */
-    enmc(servoState_e) servo_state; /**< Servo state */
 };
 /** Grandmaster settings TLV
  * @note linuxptp implementation specific
@@ -480,10 +479,6 @@ cnst_st() int NM(NOTIFY_TIME_SYNC) = 1;
 cnst_st() int NM(NOTIFY_PARENT_DATA_SET) = 2;
 /** Notify Common Mean Link Delay Information in SUBSCRIBE_EVENTS_NP.bitmask */
 cnst_st() int NM(NOTIFY_CMLDS) = 3;
-/** Notify NP parent state offset in SUBSCRIBE_EVENTS_NP.bitmask */
-cnst_st() int NM(NOTIFY_PORT_STATE_NP) = 4;
-/** Notify all event in SUBSCRIBE_EVENTS_NP.bitmask */
-cnst_st() int NM(NOTIFY_ALL) = 5;
 /** Subscribe events TLV
  * @note linuxptp implementation specific
  */

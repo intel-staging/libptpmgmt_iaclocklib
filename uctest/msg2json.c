@@ -1623,7 +1623,6 @@ Test(Tlv2JsonTest, TIME_STATUS_NP)
     t.gmIdentity.v[5] = 32;
     t.gmIdentity.v[6] = 172;
     t.gmIdentity.v[7] = 174;
-    t.servo_state = PTPMGMT_SERVO_UNLOCKED;
     char *ret = ptpmgmt_json_tlv2json(PTPMGMT_TIME_STATUS_NP, &t, 0);
     cr_assert(not(zero(ptr, ret)));
     cr_assert(eq(str, (char *)ret,
@@ -1637,8 +1636,7 @@ Test(Tlv2JsonTest, TIME_STATUS_NP)
             "  \"nanoseconds_lsb\" : 0,\n"
             "  \"fractional_nanoseconds\" : 0,\n"
             "  \"gmPresent\" : 0,\n"
-            "  \"gmIdentity\" : \"c47d46.fffe.20acae\",\n"
-            "  \"servo_state\" : \"SERVO_UNLOCKED\"\n"
+            "  \"gmIdentity\" : \"c47d46.fffe.20acae\"\n"
             "}"));
     free(ret);
 }

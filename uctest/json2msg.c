@@ -1981,8 +1981,7 @@ Test(Json2msgTest, TIME_STATUS_NP)
             "\"nanoseconds_lsb\":0,"
             "\"fractional_nanoseconds\":0,"
             "\"gmPresent\":0,"
-            "\"gmIdentity\":\"c47d46.fffe.20acae\","
-            "\"servo_state\":\"SERVO_UNLOCKED\""
+            "\"gmIdentity\":\"c47d46.fffe.20acae\""
             "}}"));
     cr_expect(eq(int, m->actionField(m), PTPMGMT_SET));
     cr_expect(eq(int, m->managementId(m), PTPMGMT_TIME_STATUS_NP));
@@ -2000,7 +1999,6 @@ Test(Json2msgTest, TIME_STATUS_NP)
     cr_expect(eq(int, t->fractional_nanoseconds, 0));
     cr_expect(eq(int, t->gmPresent, 0));
     cr_expect(zero(memcmp(t->gmIdentity.v, clockId, 8)));
-    cr_expect(eq(u8, t->servo_state, PTPMGMT_SERVO_UNLOCKED));
     m->free(m);
 }
 

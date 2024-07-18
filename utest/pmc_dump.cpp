@@ -764,7 +764,6 @@ TEST(PmcDumpTest, TIME_STATUS_NP)
     t.gmPresent = 0;
     ClockIdentity_t clockId = { 196, 125, 70, 255, 254, 32, 172, 174 };
     t.gmIdentity = clockId;
-    t.servo_state = SERVO_UNLOCKED;
     useTestMode(true);
     call_dump(m, TIME_STATUS_NP, &t);
     EXPECT_STREQ(getPmcOut(),
@@ -775,8 +774,7 @@ TEST(PmcDumpTest, TIME_STATUS_NP)
         IDENT "gmTimeBaseIndicator        0"
         IDENT "lastGmPhaseChange          0x0000'0000000000000000.0000"
         IDENT "gmPresent                  false"
-        IDENT "gmIdentity                 c47d46.fffe.20acae"
-        IDENT "servo_state                SERVO_UNLOCKED");
+        IDENT "gmIdentity                 c47d46.fffe.20acae");
 }
 
 // Tests dump GRANDMASTER_SETTINGS_NP tlv
