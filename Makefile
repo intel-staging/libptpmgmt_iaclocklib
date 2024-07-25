@@ -264,6 +264,7 @@ SRC_FILES_DIR:=$(wildcard scripts/* *.md t*/*.pl */*/*.m4 .reuse/* */gitlab*\
   t*/*.sh */*/*.sh swig/*.md swig/*/* */*.i */*/msgCall.i */*/warn.i man/*\
   $(PMC_DIR)/phc_ctl $(PMC_DIR)/*.[ch]* $(JSON_SRC)/* */Makefile w*/*/Makefile\
   $(JCLKLIB_SRC)/*.md $(JCLKLIB_SRC)/*/Makefile $(JCLKLIB_SRC)/*/*.[ch]*\
+  $(JCLKLIB_SRC)/image/*.png\
   */*/*test*/*.go LICENSES/* *.in tools/*.in) src/ver.h.in src/name.h.in\
   $(SRCS) $(HEADERS_SRCS) LICENSE $(MAKEFILE_LIST) credits
 ifeq ($(INSIDE_GIT),true)
