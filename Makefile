@@ -452,10 +452,16 @@ CPPCHECK_OPT:=--quiet --force --error-exitcode=-1
 # Ignore '#error'
 CPPCHECK_OPT+=--suppress=preprocessorErrorDirective
 EXTRA_C_SRCS:=$(wildcard uctest/*.c)
+EXTRA_JCLKLIB_SRCS:=$(wildcard jclklib/common/*.c*)
+EXTRA_JCLKLIB_SRCS+=$(wildcard jclklib/proxy/*.c*)
+EXTRA_JCLKLIB_SRCS+=$(wildcard jclklib/client/*.c*)
+
 EXTRA_SRCS:=$(wildcard $(foreach n,sample utest uctest,$n/*.cpp $n/*.h))
 EXTRA_SRCS+=$(EXTRA_C_SRCS)
+EXTRA_SRCS+=$(EXTRA_JCLKLIB_SRCS)
+
 format: $(HEADERS_GEN) $(HEADERS_SRCS) $(SRCS) $(EXTRA_SRCS) $(SRCS_JSON)
-	$(Q_FRMT) $(SRCS_JCLKLIB)
+	$(Q_FRMT)
 	r=`$(ASTYLE) --project=none --options=tools/astyle.opt $^`
 	test -z "$$r" || echo "$$r";./tools/format.pl $^
 	if test $$? -ne 0 || test -n "$$r"; then echo '';exit 1;fi
