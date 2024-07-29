@@ -450,7 +450,7 @@ class SockBaseIf : public SockBase
     int m_ifIndex;
     bool m_have_if;
     bool setInt(const IfInfo &ifObj);
-    SockBaseIf() : m_have_if(false) {}
+    SockBaseIf() : m_ifIndex(-1), m_have_if(false) {}
     virtual bool setAllBase(const ConfigFile &cfg, const std::string &section) = 0;
     /**< @endcond */
 

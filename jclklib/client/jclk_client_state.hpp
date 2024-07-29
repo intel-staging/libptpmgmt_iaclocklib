@@ -51,7 +51,7 @@ namespace JClkLibClient {
         jcl_state eventState = {};
         jcl_state_event_count eventStateCount ={};
         JClkLibCommon::jcl_subscription eventSub ={};
-        struct timespec last_notification_time;
+        struct timespec last_notification_time ={};
 
     public:
         ClientState();

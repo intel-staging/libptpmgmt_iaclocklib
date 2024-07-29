@@ -250,8 +250,8 @@ class Token
         if(m_alloc)
             free(m_buf);
     }
-    Token(const char *sep, char *buf = nullptr) : m_buf(buf), m_sep(sep),
-        m_alloc(false) {}
+    Token(const char *sep, char *buf = nullptr) : m_buf(buf), m_save(buf),
+        m_sep(sep), m_alloc(false) {}
     bool dup(const string &str) {
         m_buf = strdup(str.c_str());
         m_alloc = (m_buf != nullptr);
@@ -384,9 +384,8 @@ template <class T> class mapStackStr
         char *m_key;
         T m_elem;
         elem_t *m_hashNext, *m_topNext;
-        elem_t(const char *key) {
-            m_key = strdup(key);
-        }
+        elem_t(const char *key) : m_key(strdup(key)), m_hashNext(nullptr),
+            m_topNext(nullptr) {}
         ~elem_t() {
             free(m_key);
         }
@@ -399,7 +398,7 @@ template <class T> class mapStackStr
         map_t *m_nextMap; /* For heap of maps */
         elem_t *m_topElem; /* List of all elements, for cleanup */
         elem_t *m_elemHash[UINT8_MAX]; /* Hash for finding */
-        map_t() : m_topElem(nullptr) {
+        map_t() : m_nextMap(nullptr), m_topElem(nullptr) {
             memset(m_elemHash, 0, sizeof m_elemHash);
         }
         void freeElems() {

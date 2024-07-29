@@ -638,6 +638,8 @@ bool SockIp6::setAllBase(const ConfigFile &cfg, const string &section)
 SockRaw::SockRaw() :
     m_socket_priority(-1),
     m_addr{0},
+    m_iov_tx{nullptr, 0},
+    m_iov_rx{nullptr, 0},
     m_msg_tx{0},
     m_msg_rx{0},
     m_init(m_hdr)

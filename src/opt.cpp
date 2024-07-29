@@ -59,7 +59,8 @@ string Options::helpStore::get(size_t length) const
 }
 
 Options::Options(bool useDef) : m_max_arg_name(0), m_last_strings(0),
-    m_net_select(0), m_useDef(false), helpUpdate(false)
+    m_net_select(0), m_argc(0), m_end_optind(0), m_useDef(false),
+    helpUpdate(false)
 {
     if(useDef)
         useDefOption();

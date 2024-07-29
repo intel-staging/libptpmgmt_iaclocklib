@@ -185,7 +185,7 @@ Message::Message() :
     m_replyAction(RESPONSE),
     m_replayTlv_id(NULL_PTP_MANAGEMENT),
     m_init(m_peer),
-    m_init(m_target)
+    m_errorId(static_cast<ptpmgmt::managementErrorId_e>(0))
 {
 }
 Message::Message(const MsgParams &prms) :
@@ -199,7 +199,7 @@ Message::Message(const MsgParams &prms) :
     m_replayTlv_id(NULL_PTP_MANAGEMENT),
     m_prms(prms),
     m_init(m_peer),
-    m_init(m_target)
+    m_errorId(static_cast<ptpmgmt::managementErrorId_e>(0))
 {
     if(m_prms.transportSpecific > 0xf)
         m_prms.transportSpecific = 0;
@@ -478,8 +478,10 @@ MNG_PARSE_ERROR_e Message::parse(const void *buf, ssize_t bufSize)
                 tlvOrg = new SMPTE_ORGANIZATION_EXTENSION_t;
                 if(tlvOrg == nullptr)
                     return MNG_PARSE_ERROR_MEM;
-                if(mp.SMPTE_ORGANIZATION_EXTENSION_f(*tlvOrg))
+                if(mp.SMPTE_ORGANIZATION_EXTENSION_f(*tlvOrg)) {
+                    delete tlvOrg;
                     return mp.m_err;
+                }
                 m_dataGet.reset(tlvOrg);
                 m_replayTlv_id = SMPTE_MNG_ID;
                 return MNG_PARSE_ERROR_SMPTE;

@@ -68,7 +68,7 @@ struct JsonVal {
         double fltV;
         JSON_POBJ objV;
     };
-    JsonVal() : allow(JT_NULL), found(false), strV(nullptr) {}
+    JsonVal() : allow(JT_NULL), type(JT_NULL), found(false), strV(nullptr) {}
     ~JsonVal() { free(strV); }
     bool isAllowed() { return allow != JT_NULL; }
     JSON_TYPE &operator()() { return allow; }
@@ -85,11 +85,15 @@ struct JsonVal {
         if(type == to)
             return true;
         char *end, strBuf[100];
+        double temp;
         switch(type) {
             case JT_INT:
                 switch(to) {
                     case JT_DOUBLE:
-                        fltV = intV;
+                        {
+                            temp = intV;
+                            fltV = temp;
+                        }
                         break;
                     case JT_BOOL:
                         intV = intV != 0;
@@ -125,7 +129,8 @@ struct JsonVal {
                     case JT_INT:
                         break;
                     case JT_DOUBLE:
-                        fltV = intV;
+                        temp = static_cast<double>(intV);
+                        fltV = temp;
                         break;
                     case JT_STR:
                         if(intV == 0)
