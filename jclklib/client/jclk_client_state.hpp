@@ -23,16 +23,17 @@
 #include <common/transport.hpp>
 #include <common/util.hpp>
 
-namespace JClkLibClient
-{
-struct jcl_state {
-    uint8_t  gm_identity[8];
-    bool     as_capable;
-    bool     offset_in_range;
-    bool     synced_to_primary_clock;
-    bool     gm_changed;
-    bool     composite_event;
-};
+namespace JClkLibClient {
+    struct jcl_state {
+        uint8_t  gm_identity[8];
+        bool     as_capable;
+        bool     offset_in_range;
+        bool     synced_to_primary_clock;
+        bool     gm_changed;
+        bool     composite_event;
+        int64_t  offset;
+        uint64_t timestamp;
+    };
 
 struct jcl_state_event_count {
     uint64_t offset_in_range_event_count;

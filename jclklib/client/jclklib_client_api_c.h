@@ -50,6 +50,8 @@ struct jcl_c_state {
     bool    synced_to_primary_clock;
     bool    gm_changed;
     bool    composite_event;
+    int64_t offset;
+    int64_t timestamp;
 };
 
 struct jcl_c_event_count {

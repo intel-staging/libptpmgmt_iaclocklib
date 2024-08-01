@@ -199,28 +199,28 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
                 proxy_data.synced_to_primary_clock;
         if(composite_eventSub[0] & 1 << asCapableEvent)
             composite_client_ptp_data->composite_event &= proxy_data.as_capable;
-        if(composite_eventSub[0] &&
-            (old_composite_event != composite_client_ptp_data->composite_event))
-            client_ptp_data->composite_event_count.fetch_add(1,
-                std::memory_order_relaxed);
+
+        if (composite_eventSub[0] && (old_composite_event != composite_client_ptp_data->composite_event))
+            client_ptp_data->composite_event_count.fetch_add(1, std::memory_order_relaxed);
+
+        if (clock_gettime(CLOCK_REALTIME, &last_notification_time) == -1)
+            PrintDebug("ClientNotificationMessage::processMessage clock_gettime failed.\n");
+
         jclCurrentState.as_capable = client_ptp_data->as_capable;
         jclCurrentState.offset_in_range = client_ptp_data->master_offset_in_range;
-        jclCurrentState.synced_to_primary_clock =
-            client_ptp_data->synced_to_primary_clock;
-        jclCurrentState.composite_event =
-            composite_client_ptp_data->composite_event;
-        memcpy(jclCurrentState.gm_identity, client_ptp_data->gm_identity,
-            sizeof(client_ptp_data->gm_identity));
-        jclCurrentEventCount.offset_in_range_event_count =
-            client_ptp_data->offset_in_range_event_count;
-        jclCurrentEventCount.as_capable_event_count =
-            client_ptp_data->as_capable_event_count;
-        jclCurrentEventCount.synced_to_primary_clock_event_count =
-            client_ptp_data->synced_to_primary_clock_event_count;
-        jclCurrentEventCount.gm_changed_event_count =
-            client_ptp_data->gm_changed_event_count;
-        jclCurrentEventCount.composite_event_count =
-            client_ptp_data->composite_event_count;
+        jclCurrentState.synced_to_primary_clock = client_ptp_data->synced_to_primary_clock;
+        jclCurrentState.composite_event = composite_client_ptp_data->composite_event;
+        memcpy(jclCurrentState.gm_identity, client_ptp_data->gm_identity, sizeof(client_ptp_data->gm_identity));
+	jclCurrentState.offset = client_ptp_data->master_offset;
+	jclCurrentState.timestamp  = last_notification_time.tv_sec*NSEC_PER_SEC;
+	jclCurrentState.timestamp *= NSEC_PER_SEC;
+	jclCurrentState.timestamp += last_notification_time.tv_nsec;
+
+        jclCurrentEventCount.offset_in_range_event_count = client_ptp_data->offset_in_range_event_count;
+        jclCurrentEventCount.as_capable_event_count = client_ptp_data->as_capable_event_count;
+        jclCurrentEventCount.synced_to_primary_clock_event_count = client_ptp_data->synced_to_primary_clock_event_count;
+        jclCurrentEventCount.gm_changed_event_count = client_ptp_data->gm_changed_event_count;
+        jclCurrentEventCount.composite_event_count = client_ptp_data->composite_event_count;
     }
     return true;
 }
