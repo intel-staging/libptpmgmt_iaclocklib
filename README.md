@@ -157,6 +157,9 @@ The project comes with packaging:
 # <u>More Documentation</u>
 The project more documents
 
+  * [Contributor Covenant Code of Conduct](./doc/CODE_OF_CONDUCT.md)
+  * [Contributing](./doc/CONTRIBUTING.md)
+  * [Security Policy](./doc/SECURITY.md)
   * [Build project documentation](./doc/Build.md)
   * [C++ std::vector<> map in Scripts Languages](./doc/std_vectors.md)
   * [Frequently asked questions](./doc/FAQs.md)
