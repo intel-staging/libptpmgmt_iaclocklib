@@ -201,6 +201,7 @@ PUB_C:=$(PUB)/c
 PMC_DIR:=ptp-tools
 HMAC_SRC:=hmac
 JSON_SRC:=json
+JCLKLIB_SRC:=jclklib
 OBJ_DIR:=objs
 
 CONF_FILES:=configure src/config.h.in
