@@ -250,21 +250,6 @@ class Message
      */
     static const char *type2str_c(msgType_e type);
     /**
-     * Convert servo state to string
-     * @param[in] state
-     * @return string with the servo state
-     */
-    static const char *servo2str_c(servoState_e state);
-    /**
-     * Convert string to servo state
-     * @param[in] str string to search
-     * @param[out] state servo state
-     * @param[in] caseSens perform case sensetive match
-     * @return true if found
-     */
-    static const bool findServoState(const std::string &str,
-        servoState_e &state, bool caseSens = true);
-    /**
      * Convert TLV type to string
      * @param[in] type
      * @return string with the TLV type

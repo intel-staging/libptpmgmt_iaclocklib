@@ -1156,7 +1156,7 @@ Test(ProcTest, TIME_STATUS_NP)
     cr_expect(eq(sz, m->getMsgLen(m), tlvLoc));
     uint8_t mb[52] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 196, 125, 70, 255, 254, 32, 172, 174, 0
+            0, 196, 125, 70, 255, 254, 32, 172, 174
         };
     cr_assert(eq(int, m->parse(m, buf, rsp(buf, 0xc000, mb, sizeof mb)),
             PTPMGMT_MNG_PARSE_ERROR_OK));

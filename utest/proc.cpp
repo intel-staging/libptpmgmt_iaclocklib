@@ -892,7 +892,7 @@ TEST_F(ProcTest, TIME_STATUS_NP)
     EXPECT_EQ(getMsgLen(), tlvLoc);
     uint8_t m[52] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 196, 125, 70, 255, 254, 32, 172, 174, 0
+            0, 196, 125, 70, 255, 254, 32, 172, 174
         };
     ASSERT_EQ(parse(buf, rsp(0xc000, m, sizeof m)), MNG_PARSE_ERROR_OK);
     EXPECT_EQ(getTlvId(), TIME_STATUS_NP);
