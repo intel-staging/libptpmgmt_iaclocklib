@@ -1,11 +1,10 @@
-# SPDX-License-Identifier: LGPL-3.0-or-later
-# SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. All rights reserved.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: Copyright © 2024 Erez Geva <ErezGeva2@gmail.com>
 #
-# @author Song Yoong Siang <yoong.siang.song@intel.com>
-# @copyright © 2024 Intel Corporation. All rights reserved.
-# @license LGPL-3.0-or-later
+# @author Erez Geva <ErezGeva2@@gmail.com>
+# @copyright © 2024 Erez Geva
 #
-# Visit https://scan.coverity.com/projects/libptpmgmt_iaclocklib for coverity result
+# GitHub Coverity Scan
 ###############################################################################
 
 name: Coverity Scan
@@ -30,10 +29,8 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get install -y swig libtool-bin
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-    - name: autoheader
-      run: autoheader
-    - name: autoconf
-      run: autoconf
+    - name: autoreconf
+      run: autoreconf -i
     - name: configure
       run: ./configure
     - uses: vapier/coverity-scan-action@2068473c7bdf8c2fb984a6a40ae76ee7facd7a85 # v1.8.0
