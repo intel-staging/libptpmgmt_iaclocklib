@@ -163,6 +163,7 @@ PROCESS_MESSAGE_TYPE(ClientSubscribeMessage::processMessage)
     ClientNotificationMessage::addClientState(currentClientState);
     this->set_msgAck(ACK_NONE);
     jcl_state jclCurrentState = currentClientState->get_eventState();
+    lock.unlock();
     cv.notify_one(lock);
     return true;
 }
