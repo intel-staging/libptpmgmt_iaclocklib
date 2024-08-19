@@ -231,7 +231,13 @@ HEADERS_INST:=$(HEADERS_PUB) $(HEADERS_GEN_PUB)
 HEADERS_INST_C:=$(HEADERS_PUB_C) $(HEADERS_GEN_PUB_C)
 SRCS:=$(wildcard $(SRC)/*.cpp)
 SRCS_HMAC:=$(wildcard $(HMAC_SRC)/*.cpp)
-SRCS_JCLKLIB:=$(wildcard $(JCLKLIB_SRC)/*.cpp)
+SRCS_JCLKLIB:=$(wildcard $(JCLKLIB_SRC)/common/*.c*)
+SRCS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/client/*.c*)
+SRCS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/proxy/*.c*)
+HEADERS_JCLKLIB:=$(wildcard $(JCLKLIB_SRC)/common/*.h*)
+HEADERS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/client/*.h*)
+HEADERS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/proxy/*.h*)
+
 COMP_DEPS:=$(OBJ_DIR) $(HEADERS_GEN_COMP)
 # hmac
 SSL_NAME:=$(LIB_NAME)_openssl
@@ -489,7 +495,7 @@ EXTRA_C_SRCS:=$(wildcard uctest/*.c)
 EXTRA_SRCS:=$(wildcard $(foreach n,sample utest uctest,$n/*.cpp $n/*.h))
 EXTRA_SRCS+=$(EXTRA_C_SRCS)
 format: $(HEADERS_GEN) $(HEADERS_SRCS) $(SRCS) $(EXTRA_SRCS) $(SRCS_HMAC)\
-	$(SRCS_JCLKLIB)
+	$(SRCS_JCLKLIB) $(HEADERS_JCLKLIB)
 	$(Q_FRMT)
 	r=`$(ASTYLE) --project=none --options=tools/astyle.opt $^`
 	test -z "$$r" || echo "$$r";./tools/format.pl $^
