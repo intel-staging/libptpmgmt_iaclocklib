@@ -29,12 +29,24 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        names: [deb.forky, deb.trixie, deb.bookworm, rpmbuild, pacmanbuild, portage]
+        include:
+          - name: deb.forky
+            sha: fe6dcd99d5f97d24a13cdb59040ce131647381bf604854d68c2f7f259f84e03c
+          - name: deb.trixie
+            sha: 49391f56cd7fdbadfd178504718040e546f87a3382079c0962d802b46b62291e
+          - name: deb.bookworm
+            sha: 549cf623d65e90f9bd3165c349ba33a2da80c60dd89fa717e7f33f219b1b948b
+          - name: rpmbuild
+            sha: 5a0c44a7752755385102da021551fa703932ff2208312aa99101e8506376f49d
+          - name: pacmanbuild
+            sha: 8c90cb4f3ad1c261d6cd852cfb6e281b96d7cd64632a3fcf7490ebd70ac90cca
+          - name: portage
+            sha: 59a4e0d118f790366876f1fb8cacf196564339a553f2a0b1208c67248d8d4ed0
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+      image: ghcr.io/erezgeva/${{ matrix.name }}@sha256:${{ matrix.sha }}
     env:
-      GITHUB_CONTAINER: ${{ matrix.names }}
+      GITHUB_CONTAINER: ${{ matrix.name }}
 
     steps:
 
@@ -60,10 +72,16 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        names: [deb.forky, deb.trixie, deb.bookworm]
+        include:
+          - name: deb.forky
+            sha: fe6dcd99d5f97d24a13cdb59040ce131647381bf604854d68c2f7f259f84e03c
+          - name: deb.trixie
+            sha: 49391f56cd7fdbadfd178504718040e546f87a3382079c0962d802b46b62291e
+          - name: deb.bookworm
+            sha: 549cf623d65e90f9bd3165c349ba33a2da80c60dd89fa717e7f33f219b1b948b
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+      image: ghcr.io/erezgeva/${{ matrix.name }}@sha256:${{ matrix.sha }}
 
     steps:
 
@@ -81,12 +99,24 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        names: [deb.forky, deb.trixie, deb.bookworm, rpmbuild, pacmanbuild, portage]
+        include:
+          - name: deb.forky
+            sha: fe6dcd99d5f97d24a13cdb59040ce131647381bf604854d68c2f7f259f84e03c
+          - name: deb.trixie
+            sha: 49391f56cd7fdbadfd178504718040e546f87a3382079c0962d802b46b62291e
+          - name: deb.bookworm
+            sha: 549cf623d65e90f9bd3165c349ba33a2da80c60dd89fa717e7f33f219b1b948b
+          - name: rpmbuild
+            sha: 5a0c44a7752755385102da021551fa703932ff2208312aa99101e8506376f49d
+          - name: pacmanbuild
+            sha: 8c90cb4f3ad1c261d6cd852cfb6e281b96d7cd64632a3fcf7490ebd70ac90cca
+          - name: portage
+            sha: 59a4e0d118f790366876f1fb8cacf196564339a553f2a0b1208c67248d8d4ed0
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+      image: ghcr.io/erezgeva/${{ matrix.name }}@sha256:${{ matrix.sha }}
     env:
-      GITHUB_CONTAINER: ${{ matrix.names }}
+      GITHUB_CONTAINER: ${{ matrix.name }}
 
     steps:
 
@@ -131,7 +161,7 @@ jobs:
       run: timeout 50 libptpmgmt/clkmgr/tool/sim.sh 0
 
     - name: test with linuxptp without the development package
-      if: ${{ matrix.names != 'portage' }}
+      if: ${{ matrix.name != 'portage' }}
       run: libptpmgmt/tools/ci_pkgs_no_dev.sh
 
     - name: test clock manager with clknetsim without the development package
@@ -140,7 +170,7 @@ jobs:
   abi:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/erezgeva/deb.forky:latest
+      image: ghcr.io/erezgeva/deb.forky@sha256:fe6dcd99d5f97d24a13cdb59040ce131647381bf604854d68c2f7f259f84e03c
 
     steps:
 
