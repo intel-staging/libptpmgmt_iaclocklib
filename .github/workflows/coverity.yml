@@ -31,7 +31,8 @@ jobs:
       run: tools/ci_coverity.sh
 
     - name: coverity scan
-      uses: vapier/coverity-scan-action@v1
+      uses: vapier/coverity-scan-action@2068473c7bdf8c2fb984a6a40ae76ee7facd7a85 # v1
       with:
         email: ${{ secrets.COVERITY_SCAN_EMAIL }}
         token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        project: libptpmgmt_iaclocklib
