@@ -10,6 +10,7 @@
 ###############################################################################
 
 name: coverity scan
+permissions: read-all
 
 # Start manually
 on: workflow_dispatch
@@ -18,15 +19,18 @@ jobs:
   coverity:
     runs-on: ubuntu-latest
     steps:
+    - name: Install dependencies
+      run: git clone https://github.com/dvhart/librtpi.git && cd librtpi && autoreconf --install && ./configure && sudo make install && cd - && sudo rm -rf librtpi
 
-    - name: checkout repository
-      uses: actions/checkout@v4
-
+    - name: Install dependencies
+      run: sudo apt-get install -y swig libtool-bin
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: autoreconf
+      run: autoreconf -i
     - name: configure
-      run: tools/ci_coverity.sh
-
-    - name: coverity scan
-      uses: vapier/coverity-scan-action@v1
+      run: ./configure
+    - uses: vapier/coverity-scan-action@2068473c7bdf8c2fb984a6a40ae76ee7facd7a85 # v1.8.0
       with:
         email: ${{ secrets.COVERITY_SCAN_EMAIL }}
         token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        project: libptpmgmt_iaclocklib
