@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. All rights reserved.
+#
+# @author Song Yoong Siang <yoong.siang.song@intel.com>
+# @copyright © 2024 Intel Corporation. All rights reserved.
+# @license LGPL-3.0-or-later
+#
+# scan virus
+###############################################################################
+
+name: "Virus Scan"
+permissions: read-all
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  job_id:
+    name: Scan Virus
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.0.0
+        with:
+          fetch-depth: 0
+      - name: Scan Repository
+        uses: hugoalh/scan-virus-ghaction@v0.20.0
+        with:
+          statistics_summary: True
