@@ -8,6 +8,7 @@
 ###############################################################################
 
 name: build gentoo docker image
+permissions: read-all
 
 # Start manually
 on: workflow_dispatch
@@ -18,10 +19,6 @@ env:
 jobs:
   gentoo:
     runs-on: ubuntu-24.04
-    # Sets permissions of the GITHUB_TOKEN to allow upload new container
-    permissions:
-      contents: read
-      packages: write
 
     steps:
 
