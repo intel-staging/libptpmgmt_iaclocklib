@@ -201,7 +201,7 @@ PUB_C:=$(PUB)/c
 PMC_DIR:=ptp-tools
 HMAC_SRC:=hmac
 JSON_SRC:=json
-JCLKLIB_SRC:=jclklib
+CLKMGR_SRC:=clkmgr
 OBJ_DIR:=objs
 
 CONF_FILES:=configure src/config.h.in
@@ -230,12 +230,12 @@ HEADERS_INST_C:=$(HEADERS_PUB_C) $(HEADERS_GEN_PUB_C)
 SRCS:=$(wildcard $(SRC)/*.cpp)
 SRCS_HMAC:=$(wildcard $(HMAC_SRC)/*.cpp)
 SRCS_JSON:=$(wildcard $(JSON_SRC)/*.cpp)
-SRCS_JCLKLIB:=$(wildcard $(JCLKLIB_SRC)/common/*.c*)
-SRCS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/client/*.c*)
-SRCS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/proxy/*.c*)
-HEADERS_JCLKLIB:=$(wildcard $(JCLKLIB_SRC)/common/*.h*)
-HEADERS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/client/*.h*)
-HEADERS_JCLKLIB+=$(wildcard $(JCLKLIB_SRC)/proxy/*.h*)
+SRCS_CLKMGR:=$(wildcard $(CLKMGR_SRC)/common/*.c*)
+SRCS_CLKMGR+=$(wildcard $(CLKMGR_SRC)/client/*.c*)
+SRCS_CLKMGR+=$(wildcard $(CLKMGR_SRC)/proxy/*.c*)
+HEADERS_CLKMGR:=$(wildcard $(CLKMGR_SRC)/common/*.h*)
+HEADERS_CLKMGR+=$(wildcard $(CLKMGR_SRC)/client/*.h*)
+HEADERS_CLKMGR+=$(wildcard $(CLKMGR_SRC)/proxy/*.h*)
 
 COMP_DEPS:=$(OBJ_DIR) $(HEADERS_GEN_COMP)
 # hmac
@@ -267,9 +267,9 @@ JSONC_LIBA:=$(LIB_D)/$(JSONC_NAME).a
 JSONC_LIB:=$(LIB_D)/$(JSONC_NAME).so
 JSONC_DL:=$(JSONC_NAME).so$(SONAME)
 JSONC_LA:=$(JSONC_NAME).la
-# jclklib
-JCLKLIB_LIB:=libjclk.so
-JCLKLIB_FLIB:=$(JCLKLIB_LIB)$(SONAME)
+# CLKMGR
+CLKMGR_LIB:=libclkmgr.so
+CLKMGR_FLIB:=$(CLKMGR_LIB)$(SONAME)
 # fastjson
 FJSON_NAME:=$(LIB_NAME)_fastjson
 FJSON_LIBA:=$(LIB_D)/$(FJSON_NAME).a
@@ -300,8 +300,8 @@ SRC_FILES_DIR:=$(wildcard README.md t*/*.pl */*/*.m4 .reuse/* */gitlab*\
   */github* */*.opt configure.ac src/*.m4 doc/*.md\
   t*/*.sh */*/*.sh swig/*.md swig/*/* */*.i */*/msgCall.i */*/warn.i man/*\
   $(PMC_DIR)/phc_ctl $(PMC_DIR)/*.[ch]* $(JSON_SRC)/* */Makefile w*/*/Makefile\
-  $(JCLKLIB_SRC)/*.md $(JCLKLIB_SRC)/*/Makefile $(JCLKLIB_SRC)/*/*.[ch]*\
-  $(JCLKLIB_SRC)/image/*.png\
+  $(CLKMGR_SRC)/*.md $(CLKMGR_SRC)/*/Makefile $(CLKMGR_SRC)/*/*.[ch]*\
+  $(CLKMGR_SRC)/image/*.png\
   */*/*test*/*.go LICENSES/* *.in tools/*.in $(HMAC_SRC)/*.cpp)\
   src/ver.h.in src/name.h.in $(SRCS) $(HEADERS_SRCS) LICENSE\
   $(MAKEFILE_LIST) credits
@@ -455,8 +455,8 @@ include $(HMAC_SRC)/Makefile
 # JSON libraries
 include $(JSON_SRC)/Makefile
 
-# JCLK libraries
-include $(JCLKLIB_SRC)/Makefile
+# CLKMGR libraries
+include $(CLKMGR_SRC)/Makefile
 
 # Compile library source code
 $(LIB_OBJS): $(OBJ_DIR)/%.lo: $(SRC)/%.cpp | $(COMP_DEPS)
@@ -510,7 +510,7 @@ EXTRA_C_SRCS:=$(wildcard uctest/*.c)
 EXTRA_SRCS:=$(wildcard $(foreach n,sample utest uctest,$n/*.cpp $n/*.h))
 EXTRA_SRCS+=$(EXTRA_C_SRCS)
 format: $(HEADERS_GEN) $(HEADERS_SRCS) $(SRCS) $(EXTRA_SRCS) $(SRCS_JSON)\
-	$(SRCS_HMAC) $(SRCS_JCLKLIB) $(HEADERS_JCLKLIB)
+	$(SRCS_HMAC) $(SRCS_CLKMGR) $(HEADERS_CLKMGR)
 	$(Q_FRMT)
 	r=`$(ASTYLE) --project=none --options=tools/astyle.opt $^`
 	test -z "$$r" || echo "$$r";./tools/format.pl $^
@@ -616,13 +616,13 @@ checkall: format doxygen
 
 ifdef CTAGS
 tags: $(filter-out $(SRC)/ids.h,$(HEADERS_GEN_COMP)) $(HEADERS_SRCS) $(SRCS)\
-	$(SRCS_JSON) $(SRCS_HMAC) $(SRCS_JCLKLIB)
+	$(SRCS_JSON) $(SRCS_HMAC) $(SRCS_CLKMGR)
 	$(Q_TAGS)$(CTAGS) -R $^
 ALL+=tags
 endif # CTAGS
 
 .DEFAULT_GOAL=all
-all: $(COMP_DEPS) $(ALL) jclklib
+all: $(COMP_DEPS) $(ALL) clkmgr
 	$(NOP)
 
 ####### installation #######
@@ -854,11 +854,11 @@ DISTCLEAN:=configure configure~ defs.mk aclocal.m4 libtool install-sh\
   ltmain.sh $(wildcard src/config.h* config.*)
 DISTCLEAN_DIRS:=autom4te.cache m4
 
-clean: deb_clean jclk_clean
+clean: deb_clean libclkmgr_clean
 	$(Q_CLEAN)$(RM) $(CLEAN)
 	$(RM) -R $(CLEAN_DIRS)
-jclk_clean:
-	$(MAKE) -C $(JCLKLIB_SRC) jclklib_clean
+libclkmgr_clean:
+	$(MAKE) -C $(CLKMGR_SRC) clkmgr_clean
 distclean: deb_clean
 	$(Q_DISTCLEAN)$(RM) $(CLEAN) $(DISTCLEAN)
 	$(RM) -R $(CLEAN_DIRS) $(DISTCLEAN_DIRS)
