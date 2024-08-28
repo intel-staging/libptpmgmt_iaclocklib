@@ -287,7 +287,7 @@ SRC_FILES_DIR:=$(wildcard README.md t*/*.pl */*/*.m4 .reuse/* */gitlab*\
   t*/*.sh */*/*.sh swig/*.md swig/*/* */*.i */*/msgCall.i */*/warn.i man/*\
   $(PMC_DIR)/phc_ctl $(PMC_DIR)/*.[ch]* */Makefile w*/*/Makefile\
   $(CLKMGR_SRC)/*.md $(CLKMGR_SRC)/*/Makefile $(CLKMGR_SRC)/*/*.[ch]*\
-  $(CLKMGR_SRC)/image/*.png\
+  $(CLKMGR_SRC)/image/*.png $(CLKMGR_SRC)/pub/*/*.h\
   */*/*test*/*.go LICENSES/* *.in tools/*.in $(HMAC_SRC)/*.cpp)\
   src/ver.h.in src/name.h.in $(SRCS) $(HEADERS_SRCS) LICENSE\
   $(MAKEFILE_LIST) credits
