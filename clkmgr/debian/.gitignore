@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation.
 #
-# @author Christopher Hall <christopher.s.hall@intel.com>
+# @author Noor Azura Ahmad Tarmizi <noor.azura.ahmad.tarmizi@intel.com>
 # @copyright © 2024 Intel Corporation.
-# @license BSD-3-Clause
 #
 ###############################################################################
-
-sample/clkmgr_test
-sample/clkmgr_c_test
-proxy/clkmgr_proxy
-client/libclkmgr.so*
+/files
+/*.substvars
+/.*debhelper*
+/*debhelper*
+/tmp/
+/autoreconf.*

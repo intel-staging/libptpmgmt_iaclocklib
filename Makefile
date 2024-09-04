@@ -297,7 +297,7 @@ SRC_FILES_DIR:=$(wildcard README.md t*/*.pl */*/*.m4 .reuse/* */gitlab*\
 ifeq ($(INSIDE_GIT),true)
 SRC_FILES!=git ls-files $(foreach n,archlinux debian rpm sample gentoo\
   utest/*.[chj]* uctest/*.[ch]* .github/workflows/* .gitlab/*,':!/:$n')\
-  ':!:*.gitignore' ':!*/*/test.*' ':!*/*/utest.*'
+  ':!:*.gitignore' ':!*/*/test.*' ':!*/*/utest.*' ':!:$(CLKMGR_SRC)/debian'
 GIT_ROOT!=git rev-parse --show-toplevel
 ifeq ($(GIT_ROOT),$(CURDIR))
 # compare manual source list to git based:
@@ -439,9 +439,6 @@ endif # VALGRIND
 
 # HMAC libraries
 include $(HMAC_SRC)/Makefile
-
-# CLKMGR libraries
-include $(CLKMGR_SRC)/Makefile
 
 # Compile library source code
 $(LIB_OBJS): $(OBJ_DIR)/%.lo: $(SRC)/%.cpp | $(COMP_DEPS)
@@ -609,7 +606,7 @@ ALL+=tags
 endif # CTAGS
 
 .DEFAULT_GOAL=all
-all: $(COMP_DEPS) $(ALL) clkmgr
+all: $(COMP_DEPS) $(ALL) libclkmgr_make
 	$(NOP)
 
 ####### installation #######
@@ -642,7 +639,7 @@ Cflags:
 Libs: -l$(SWIG_LNAME)
 endef
 
-install: $(INS_TGT)
+install: $(INS_TGT) libclkmgr_make_install
 install_main:
 	$(Q)$(INSTALL_FOLDER) $(DLIBDIR) $(PKGCFGDIR)
 	cp -a $(LIB_D)/$(LIB_NAME)*.so* $(DLIBDIR)
@@ -729,7 +726,7 @@ endif # dpkg-architecture -qDEB_TARGET_ARCH
 endif # $(NONPHONY_TGT)
 endif # $(DEB_ARC)
 endif # filter deb_arc,$(MAKECMDGOALS)
-deb:
+deb: libclkmgr_deb
 	$(Q)MAKEFLAGS=$(MAKE_NO_DIRS) Q=$Q dpkg-buildpackage -b --no-sign
 ifneq ($(DEB_ARC),)
 deb_arc:
@@ -848,11 +845,30 @@ DISTCLEAN_DIRS:=autom4te.cache m4
 clean: deb_clean libclkmgr_clean
 	$(Q_CLEAN)$(RM) $(CLEAN)
 	$(RM) -R $(CLEAN_DIRS)
-libclkmgr_clean:
-	$(MAKE) -C $(CLKMGR_SRC) clkmgr_clean
-distclean: deb_clean
+
+distclean: deb_clean libclkmgr_distclean
 	$(Q_DISTCLEAN)$(RM) $(CLEAN) $(DISTCLEAN)
 	$(RM) -R $(CLEAN_DIRS) $(DISTCLEAN_DIRS)
+
+.PHONY: libclkmgr_clean
+libclkmgr_clean:
+	$(MAKE) -C $(CLKMGR_SRC) clean
+
+.PHONY: libclkmgr_make
+libclkmgr_make:
+	$(MAKE) -C $(CLKMGR_SRC)
+
+.PHONY: libclkmgr_make_install
+libclkmgr_make_install:
+	$(MAKE) -C $(CLKMGR_SRC) install
+
+.PHONY: libclkmgr_deb
+libclkmgr_deb:
+	$(MAKE) -C $(CLKMGR_SRC) deb
+
+.PHONY: libclkmgr_distclean
+libclkmgr_distclean:
+	$(MAKE) -C $(CLKMGR_SRC) distclean
 
 help:
 	$(NOP)$(info $(help))

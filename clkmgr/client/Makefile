@@ -22,7 +22,10 @@ OBJ_FILES = $(foreach f,$(OBJ),$(f).o)
 DEPENDS = $(foreach f,$(OBJ),$(f).d)
 COMMON_OBJ_DIR = $(CLKMGR_COMMON_DIR)/obj
 COMMON_OBJ_FILES = $(foreach obj,$(COMMON_OBJ),$(COMMON_OBJ_DIR)/$(obj).o)
-REAL_TARGETS = libclkmgr.so
+LIB_NAME:=libclkmgr
+LIB_NAME_SO:=$(LIB_NAME).so
+REAL_TARGETS = $(LIB_NAME).so
+include $(CLKMGR_TOPLEVEL_DIR)/../tools/version
 
 .PHONY: default
 default:
@@ -33,14 +36,13 @@ build-prep:
 	echo "Running" $@
 	$(MAKE) -C $(CLKMGR_CLIENT_DIR) $(DEPENDS) 2>&1
 
-
 %.d : %.cpp
 	echo "[MAKEDEP]" $@
 	g++ -I $(CLKMGR_TOPLEVEL_DIR) -I $(CLKMGR_PUB_DIR) -MM -MF $@ $<
 
 .PHONY: clean
 clean:
-	$(RM) -rf *.o *.d $(REAL_TARGETS)
+	$(RM) -rf *.o *.d $(REAL_TARGETS) $(LIB_NAME_SO).*
 
 ifneq ($(MAKECMDGOALS),)
 ifeq ($(findstring build-prep,$(MAKECMDGOALS)),)
@@ -61,6 +63,11 @@ $(shell realpath --relative-to="$2" $(abpth)))
 build-all: build-prep
 	echo "Running" $@
 	$(MAKE) -C $(CLKMGR_CLIENT_DIR) $(REAL_TARGETS)
+	cd $(CLKMGR_CLIENT_DIR)
+	mv -f $(LIB_NAME_SO) $(LIB_NAME_SO).$(ver_maj).$(ver_min)
+	chmod 644 $(LIB_NAME_SO).$(ver_maj).$(ver_min)
+	ln -sf $(LIB_NAME_SO).$(ver_maj).$(ver_min) $(LIB_NAME_SO).$(ver_maj)
+	ln -sf $(LIB_NAME_SO).$(ver_maj).$(ver_min) $(LIB_NAME).so
 
 libclkmgr.so: $(OBJ_FILES) $(COMMON_OBJ_FILES)
 	echo "[LINK]" $@ "{" $(call pathof_relative_to,$^,$(CLKMGR_TOPLEVEL_DIR)) "}" | fold -s

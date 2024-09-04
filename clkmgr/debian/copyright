@@ -1,0 +1,20 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: clkmgr
+Upstream-Contact: Ahmad Tarmizi, Noor Azura <noor.azura.ahmad.tarmizi@intel.com>, Song, Yoong Siang <yoong.siang.song@intel.com>, Lai, Peter Jun Ann <peter.jun.ann.lai@intel.com>
+Source: https://libptpmgmt.nwtime.org
+Source: https://github.com/erezgeva/libptpmgmt
+Source: https://sf.net/p/libptpmgmt
+
+Files: *
+Copyright: 2024 © Intel
+License: BSD-3-clause
+
+Files: *.md
+Copyright: 2024 © Intel
+License: GFDL-1.3+ without invariant sections
+
+License: BSD-3-clause
+    See: /usr/share/common-licenses/BSD-3-clause
+
+License: GFDL-1.3+
+    See: /usr/share/common-licenses/GFDL-1.3
