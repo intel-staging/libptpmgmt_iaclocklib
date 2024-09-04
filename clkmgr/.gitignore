@@ -10,3 +10,4 @@
 sample/clkmgr_test
 sample/clkmgr_c_test
 proxy/clkmgr_proxy
+client/libclkmgr.so*

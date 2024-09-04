@@ -440,9 +440,6 @@ endif # VALGRIND
 # HMAC libraries
 include $(HMAC_SRC)/Makefile
 
-# CLKMGR libraries
-include $(CLKMGR_SRC)/Makefile
-
 # Compile library source code
 $(LIB_OBJS): $(OBJ_DIR)/%.lo: $(SRC)/%.cpp | $(COMP_DEPS)
 	$(LIBTOOL_CC) $(CXX) -c $(CXXFLAGS) $< -o $@
@@ -609,7 +606,7 @@ ALL+=tags
 endif # CTAGS
 
 .DEFAULT_GOAL=all
-all: $(COMP_DEPS) $(ALL) clkmgr
+all: $(COMP_DEPS) $(ALL) libclkmgr_make
 	$(NOP)
 
 ####### installation #######
@@ -642,7 +639,7 @@ Cflags:
 Libs: -l$(SWIG_LNAME)
 endef
 
-install: $(INS_TGT)
+install: $(INS_TGT) libclkmgr_make_install
 install_main:
 	$(Q)$(INSTALL_FOLDER) $(DLIBDIR) $(PKGCFGDIR)
 	cp -a $(LIB_D)/$(LIB_NAME)*.so* $(DLIBDIR)
@@ -848,11 +845,22 @@ DISTCLEAN_DIRS:=autom4te.cache m4
 clean: deb_clean libclkmgr_clean
 	$(Q_CLEAN)$(RM) $(CLEAN)
 	$(RM) -R $(CLEAN_DIRS)
-libclkmgr_clean:
-	$(MAKE) -C $(CLKMGR_SRC) clkmgr_clean
+
 distclean: deb_clean
 	$(Q_DISTCLEAN)$(RM) $(CLEAN) $(DISTCLEAN)
 	$(RM) -R $(CLEAN_DIRS) $(DISTCLEAN_DIRS)
+
+.PHONY: libclkmgr_clean
+libclkmgr_clean:
+	$(MAKE) -C $(CLKMGR_SRC) clkmgr_clean
+
+.PHONY: libclkmgr_make
+libclkmgr_make:
+	$(MAKE) -C $(CLKMGR_SRC)
+
+.PHONY: libclkmgr_make_install
+libclkmgr_make_install:
+	$(MAKE) -C $(CLKMGR_SRC) install
 
 help:
 	$(NOP)$(info $(help))
