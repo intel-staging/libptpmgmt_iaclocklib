@@ -163,12 +163,12 @@ int main(int argc, char *argv[])
     subscription.define_threshold(thresholdGMOffset, gmOffsetUpperLimit,
         gmOffsetLowerLimit);
     subscription.set_composite_event_mask(composite_event);
-    std::cout << "[clkmgr] set subscribe event : "
+    std::cout << "[clkmgr] set subscribe event : 0x"
         << std::hex << subscription.c_get_val_event_mask() <<  "\n";
-    std::cout << "[clkmgr] set composite event : "
+    std::cout << "[clkmgr] set composite event : 0x"
         << std::hex << subscription.c_get_val_composite_event_mask() <<  "\n";
-    std::cout << "GM Offset upper limit: " << gmOffsetUpperLimit << " ns\n";
-    std::cout << "GM Offset lower limit: " << gmOffsetLowerLimit << " ns\n\n";
+    std::cout << "GM Offset upper limit: " << std::dec << gmOffsetUpperLimit << " ns\n";
+    std::cout << "GM Offset lower limit: " << std::dec << gmOffsetLowerLimit << " ns\n\n";
 
     if (cm->clkmgr_subscribe(subscription, eventState) == false) {
         std::cerr << "[clkmgr] Failure in subscribing to clkmgr Proxy !!!\n";
