@@ -1,0 +1,25 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: clkmgr
+Upstream-Contact: Noor Azura <noor.azura.ahmad.tarmizi@intel.com>, Siang <yoong.siang.song@intel.com>, Peter <peter.jun.ann.lai@intel.com>
+Source: https://libptpmgmt.nwtime.org
+Source: https://github.com/intel-staging/libptpmgmt_iaclocklib
+
+Files: *
+Copyright: 2024 © Intel
+License: LGPL-3+
+
+Files: doc *.md
+Copyright: 2024 © Intel
+License: GFDL-1.3+ without invariant sections
+
+License: LGPL-3+
+    See: /usr/share/common-licenses/LGPL-3
+
+License: GPL-2+
+    See: /usr/share/common-licenses/GPL-2
+
+License: GPL-3+
+    See: /usr/share/common-licenses/GPL-3
+
+License: GFDL-1.3+
+    See: /usr/share/common-licenses/GFDL-1.3

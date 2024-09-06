@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: Copyright © 2021 Erez Geva <ErezGeva2@gmail.com>
+#
+# @author Noor Azura Ahmad Tarmizi <noor.azura.ahmad.tarmizi@intel.com>
+# @copyright © 2024 Intel
+#
+###############################################################################
+/files
+/*.substvars
+/.*debhelper*
+/*debhelper*
+/tmp/
+/autoreconf.*

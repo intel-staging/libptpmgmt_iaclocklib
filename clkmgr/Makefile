@@ -44,3 +44,16 @@ install:
 	mkdir -p $(INSTALL_DIR)/bin
 	cp -a $(CWD)/proxy/clkmgr_proxy $(INSTALL_DIR)/bin
 	chmod +x $(INSTALL_DIR)/bin/clkmgr_proxy
+
+.PHONY: deb
+deb:
+	$(Q)MAKEFLAGS=$(MAKE_NO_DIRS) Q=$Q dpkg-buildpackage -b --no-sign
+
+.PHONY: deb_clean
+deb_clean:
+	$Q$(MAKE) $(MAKE_NO_DIRS) -f debian/rules deb_clean Q=$Q
+
+.PHONY: 
+distclean: deb_clean
+	$(Q_DISTCLEAN)$(RM) $(CLEAN) $(DISTCLEAN)
+	$(RM) -R $(CLEAN_DIRS) $(DISTCLEAN_DIRS)

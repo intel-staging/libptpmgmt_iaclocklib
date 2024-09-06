@@ -50,3 +50,5 @@
 /obj-*/pkg/mod/cache/lock
 /obj-*/go-build
 /_site/
+clkmgr_*
+clkmgr-*

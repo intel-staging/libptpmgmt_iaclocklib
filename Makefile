@@ -726,7 +726,7 @@ endif # dpkg-architecture -qDEB_TARGET_ARCH
 endif # $(NONPHONY_TGT)
 endif # $(DEB_ARC)
 endif # filter deb_arc,$(MAKECMDGOALS)
-deb:
+deb: libclkmgr_deb
 	$(Q)MAKEFLAGS=$(MAKE_NO_DIRS) Q=$Q dpkg-buildpackage -b --no-sign
 ifneq ($(DEB_ARC),)
 deb_arc:
@@ -846,7 +846,7 @@ clean: deb_clean libclkmgr_clean
 	$(Q_CLEAN)$(RM) $(CLEAN)
 	$(RM) -R $(CLEAN_DIRS)
 
-distclean: deb_clean
+distclean: deb_clean libclkmgr_distclean
 	$(Q_DISTCLEAN)$(RM) $(CLEAN) $(DISTCLEAN)
 	$(RM) -R $(CLEAN_DIRS) $(DISTCLEAN_DIRS)
 
@@ -861,6 +861,14 @@ libclkmgr_make:
 .PHONY: libclkmgr_make_install
 libclkmgr_make_install:
 	$(MAKE) -C $(CLKMGR_SRC) install
+
+.PHONY: libclkmgr_deb
+libclkmgr_deb:
+	$(MAKE) -C $(CLKMGR_SRC) deb
+
+.PHONY: libclkmgr_distclean
+libclkmgr_distclean:
+	$(MAKE) -C $(CLKMGR_SRC) distclean
 
 help:
 	$(NOP)$(info $(help))

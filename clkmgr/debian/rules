@@ -1,0 +1,82 @@
+#!/usr/bin/make -f
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: Copyright © 2024 Intel
+# Makefile to create Debian packages
+#
+# @author Noor Azura Ahmad Tarmizi <noor.azura.ahmad.tarmizi@intel.com>
+# @copyright © 2024 Intel
+#
+###############################################################################
+
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#DH_VERBOSE = 1
+
+# dh_* command outputs which commands it is executing
+#export DH_OPTIONS=-v
+# Make linker verbose
+#LDFLAGS+=-Wl,--verbose
+#export LDFLAGS
+
+%:
+	$(Q)dh $@ --parallel
+
+deb_clean:
+	$Q$(RM) -R $(addprefix debian/,$(shell dh_listpackages) files tmp\
+	*debhelper* .*debhelper* *.substvars autoreconf.*)
+
+override_dh_auto_clean:
+	$Q$(MAKE) distclean
+
+#MV:=mv
+#LIBDIR:=/usr/lib/$(DEB_TARGET_MULTIARCH)
+#DSRC:=debian/tmp/usr/
+#SLIBDIR:=debian/tmp$(LIBDIR)
+
+# Call doxygen, for the document package
+#override_dh_prep:
+#	$Q$(MAKE) doxygen
+
+#override_dh_auto_install:
+#	$Q$(MAKE) -j4 install $(DESTDIR)/usr AM_UPDATE_INFO_DIR=no
+
+# Make create all targets, we just move them from temporary to proper package
+override_dh_install:
+#	$Q$(MAKE) DESTDIR=/usr/local install
+#	$(Q)install -d $(addprefix debian/,python3-ptpmgmt/usr/lib\
+#	  libptpmgmt-dev/usr libptpmgmt-dev/usr/share/doc\
+#	  libptpmgmt-doc/usr/share pmc-ptpmgmt/usr/share php-ptpmgmt/usr/lib\
+#	  tcl-ptpmgmt/usr/lib golang-ptpmgmt/usr/lib\
+#	  phc-ctl-ptpmgmt/usr/share/man/man8 phc-ctl-ptpmgmt/usr/sbin\
+#	  $(addsuffix $(LIBDIR),lua-ptpmgmt ruby-ptpmgmt libptpmgmt\
+#	  $(addprefix libptpmgmt-,perl dev openssl gcrypt gnutls\
+#	  nettle)))
+#	$Q$(MV) $(DSRC)include debian/libptpmgmt-dev/usr
+#	$Q$(MV) $(DSRC)share/doc/libptpmgmt-dev debian/libptpmgmt-dev/usr/share/doc
+#	$Q$(MV) $(DSRC)share/doc debian/libptpmgmt-doc/usr/share
+#	$Q$(MV) $(DSRC)share/man/man8/phc* debian/phc-ctl-ptpmgmt/usr/share/man/man8
+#	$Q$(MV) $(DSRC)share/man debian/pmc-ptpmgmt/usr/share
+#	$Q$(MV) $(DSRC)sbin/phc* debian/phc-ctl-ptpmgmt/usr/sbin
+#	$Q$(MV) $(DSRC)sbin debian/pmc-ptpmgmt/usr
+#	$Q$(MV) $(DSRC)lib/python3* debian/python3-ptpmgmt/usr/lib
+#	$Q$(MV) $(SLIBDIR)/lua* $(SLIBDIR)/liblua* debian/lua-ptpmgmt$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/perl* debian/libptpmgmt-perl$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/ruby* debian/ruby-ptpmgmt$(LIBDIR)
+#ifneq ($(wildcard $(DSRC)lib/php),)
+#	$Q$(MV) $(DSRC)lib/php debian/php-ptpmgmt/usr/lib
+#endif
+#	$Q$(MV) $(DSRC)/lib/tcltk debian/tcl-ptpmgmt/usr/lib
+#	$Q$(MV) $(SLIBDIR)/*.a debian/libptpmgmt-dev$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/*.so debian/libptpmgmt-dev$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/pkgconfig debian/libptpmgmt-dev$(LIBDIR)
+#ifneq ($(wildcard $(DSRC)lib/go*),)
+#	$Q$(MV) $(DSRC)lib/go* debian/golang-ptpmgmt/usr/lib
+#endif
+#	$Q$(MV) $(SLIBDIR)/libptpmgmt_openssl* debian/libptpmgmt-openssl$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/libptpmgmt_gcrypt* debian/libptpmgmt-gcrypt$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/libptpmgmt_gnutls* debian/libptpmgmt-gnutls$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/libptpmgmt_nettle* debian/libptpmgmt-nettle$(LIBDIR)
+#	$Q$(MV) $(SLIBDIR)/* debian/libptpmgmt$(LIBDIR)
+
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
