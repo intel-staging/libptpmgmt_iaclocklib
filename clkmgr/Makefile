@@ -35,8 +35,12 @@ clkmgr_clean:
 
 .PHONY: install
 install:
-	echo "$(LIB_NAME) will be installed here: $(INSTALL_DIR) lib, include and bin folders"
-	mkdir -p $(INSTALL_DIR)/lib && cp -a $(CWD)/client/$(LIB_NAME_SO)* $(INSTALL_DIR)/lib
-	mkdir -p $(INSTALL_DIR)/include && cp -aR $(CWD)/pub/* $(INSTALL_DIR)/include
-	mkdir -p $(INSTALL_DIR)/bin && cp -a $(CWD)/proxy/clkmgr_proxy $(INSTALL_DIR)/bin
+	echo "$(LIB_NAME) will be installed here:"
+	echo "$(INSTALL_DIR) lib, include and bin folders"
+	mkdir -p $(INSTALL_DIR)/lib
+	cp -a $(CWD)/client/$(LIB_NAME_SO)* $(INSTALL_DIR)/lib
+	mkdir -p $(INSTALL_DIR)/include
+	cp -aR $(CWD)/pub/* $(INSTALL_DIR)/include
+	mkdir -p $(INSTALL_DIR)/bin
+	cp -a $(CWD)/proxy/clkmgr_proxy $(INSTALL_DIR)/bin
 	chmod +x $(INSTALL_DIR)/bin/clkmgr_proxy
