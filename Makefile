@@ -852,7 +852,7 @@ distclean: deb_clean
 
 .PHONY: libclkmgr_clean
 libclkmgr_clean:
-	$(MAKE) -C $(CLKMGR_SRC) clkmgr_clean
+	$(MAKE) -C $(CLKMGR_SRC) clean
 
 .PHONY: libclkmgr_make
 libclkmgr_make:

@@ -27,8 +27,8 @@ clkmgr:
 	$(MAKE) -C $(CWD)/proxy default
 	$(MAKE) -C $(CWD)/client default
 
-.PHONY: clkmgr_clean
-clkmgr_clean:
+.PHONY: clean
+clean:
 	$(MAKE) -C $(CWD)/client clean
 	$(MAKE) -C $(CWD)/proxy clean
 	$(MAKE) -C $(CWD)/common clean
