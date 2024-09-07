@@ -103,40 +103,39 @@ reference.
     sudo ./ptp4l -i <interface name> -f configs/igc.cfg
     ```
 
-2. Run the clkmgr_proxy application at DUT:
+2. Run the clkmgr_proxy application on DUT:
     ```bash
     cd libptpmgmt_iaclocklib/clkmgr/proxy
     sudo ./run_proxy.sh  -t 1
     ```
+3. Run the sample application on DUT:
 
-3a. Run the cpp sample application at DUT
+3a. c++ sample application:
     ```bash
     cd libptpmgmt_iaclocklib/clkmgr/client
     sudo ./run_clkmgr_test.sh <optional arguments>
 
     ```
-3b. Run the c sample application at DUT
+3b. c sample application:
     ```bash
     cd libptpmgmt_iaclocklib/clkmgr/client
     sudo ./run_clkmgr_c_test.sh <optional arguments>
     ```
 
-# Snapshot of result :
+# Examples of result :
 
 Usage of proxy daemon (clkmgr_proxy) :
 ```bash
-root@ubuntu-Alder-Lake-Client-Platform:~/libptpmgmt_iaclocklib/clkmgr/proxy#
-./run_proxy.sh -h
+~/libptpmgmt_iaclocklib/clkmgr/proxy# ./run_proxy.sh -h
 Usage of ./clkmgr_proxy :
 Options:
-  -t transport specific
-     Default: 0x
+ -t transport specific
+    Default: 0x0
 ```
 
-Usage of sample application (clkmgr_test) :
+Usage of c++ sample application (clkmgr_test) :
 ```bash
-root@ubuntu-Alder-Lake-Client-Platform:~/libptpmgmt_iaclocklib/clkmgr/sample#
-./run_clkmgr_test.sh -h
+~/libptpmgmt_iaclocklib/clkmgr/sample# ./run_clkmgr_test.sh -h
 Usage of ./clkmgr_test :
 Options:
   -s subscribe_event_mask
@@ -160,10 +159,9 @@ Options:
      Default: 10 s
 ```
 
-Example output of cpp sample application (clkmgr_test) :
+Example output of c++ sample application (clkmgr_test) :
 ```bash
-root@ubuntu-Alder-Lake-Client-Platform:~/libptpmgmt_iaclocklib/clkmgr/sample#
-./run_clkmgr_test.sh -l -100 -u 100 -t 0
+~/libptpmgmt_iaclocklib/clkmgr/sample# ./run_clkmgr_test.sh -l -100 -u 100 -t 0
 [clkmgr] Connected. Session ID : 0
 [clkmgr] set subscribe event : 0xf
 [clkmgr] set composite event : 0x7
@@ -189,6 +187,8 @@ GM Offset lower limit: -100 ns
 | - as_capable              |                    |
 +---------------------------+--------------------+
 
+[...]
+
 [clkmgr][22582.071] Waiting for Notification Event...
 [clkmgr][22582.071] Obtained data from Notification Event:
 +---------------------------+--------------+-------------+
@@ -211,10 +211,9 @@ GM Offset lower limit: -100 ns
 
 ```
 
-Example output of c sample application (clkmgr_test) :
+Example output of c sample application (clkmgr_c_test) :
 ```bash
-root@ubuntu-Alder-Lake-Client-Platform:~/libptpmgmt_iaclocklib/clkmgr/sample#
-./run_clkmgr_c_test.sh -l -100 -u 100 -t 0
+~/libptpmgmt_iaclocklib/clkmgr/sample# ./run_clkmgr_c_test.sh -l -100 -u 100 -t 0
 [clkmgr][20271.775] Obtained data from Subscription Event:
 +---------------------------+--------------------+
 | Event                     | Event Status       |
@@ -233,6 +232,8 @@ root@ubuntu-Alder-Lake-Client-Platform:~/libptpmgmt_iaclocklib/clkmgr/sample#
 | - synced_to_primary_clock |                    |
 | - as_capable              |                    |
 +---------------------------+--------------------+
+
+[...]
 
 [clkmgr][20325.321] Obtained data from Notification Event:
 +---------------------------+--------------+-------------+
