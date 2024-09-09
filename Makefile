@@ -728,6 +728,7 @@ endif # $(DEB_ARC)
 endif # filter deb_arc,$(MAKECMDGOALS)
 deb:
 	$(Q)MAKEFLAGS=$(MAKE_NO_DIRS) Q=$Q dpkg-buildpackage -b --no-sign
+	$(MAKE) -C $(CLKMGR_SRC) deb
 ifneq ($(DEB_ARC),)
 deb_arc:
 	$(Q)MAKEFLAGS=$(MAKE_NO_DIRS) Q=$Q DEB_BUILD_OPTIONS=nocheck\
