@@ -13,10 +13,10 @@
 #DH_VERBOSE = 1
 
 # dh_* command outputs which commands it is executing
-#export DH_OPTIONS=-v
+export DH_OPTIONS=-v
 # Make linker verbose
-#LDFLAGS+=-Wl,--verbose
-#export LDFLAGS
+LDFLAGS+=-Wl,--verbose
+export LDFLAGS
 
 %:
 	$(Q)dh $@ --parallel
@@ -79,4 +79,4 @@ override_dh_install:
 #	$Q$(MV) $(SLIBDIR)/* debian/libptpmgmt$(LIBDIR)
 
 override_dh_shlibdeps:
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info -l../../.libs/
