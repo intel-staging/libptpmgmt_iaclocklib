@@ -726,7 +726,7 @@ endif # dpkg-architecture -qDEB_TARGET_ARCH
 endif # $(NONPHONY_TGT)
 endif # $(DEB_ARC)
 endif # filter deb_arc,$(MAKECMDGOALS)
-deb: libclkmgr_deb
+deb:
 	$(Q)MAKEFLAGS=$(MAKE_NO_DIRS) Q=$Q dpkg-buildpackage -b --no-sign
 ifneq ($(DEB_ARC),)
 deb_arc:
