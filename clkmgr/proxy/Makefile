@@ -14,8 +14,9 @@ CLKMGR_TOPLEVEL_DIR = $(CLKMGR_PROXY_DIR)/..
 CLKMGR_COMMON_DIR = $(CLKMGR_TOPLEVEL_DIR)/common
 CLKMGR_PUB_DIR = $(CLKMGR_TOPLEVEL_DIR)/pub/
 PTPMGMT_DIR := $(CLKMGR_TOPLEVEL_DIR)/../.libs
+PTPMGMT_SRC_DIR := $(CLKMGR_TOPLEVEL_DIR)/..
 LIBS = pthread rt ptpmgmt rtpi
-LIBS_FLAGS = $(foreach lib,$(LIBS),-l$(lib)) -L$(PTPMGMT_DIR)
+LIBS_FLAGS = -L$(PTPMGMT_DIR) $(foreach lib,$(LIBS),-l$(lib))
 OBJ = client main message msgq_tport notification_msg null_tport connect_msg subscribe_msg transport connect_ptp4l thread
 COMMON_OBJ = print sighandler transport msgq_tport subscription message connect_msg subscribe_msg notification_msg
 OBJ_FILES = $(foreach f,$(OBJ),$(f).o)
@@ -64,7 +65,7 @@ build-all: build-prep
 
 clkmgr_proxy: $(OBJ_FILES) $(COMMON_OBJ_FILES)
 	echo "[LINK]" $@ "{" $(call pathof_relative_to,$^,$(CLKMGR_TOPLEVEL_DIR)) "}" | fold -s
-	g++ -o $@ $^ $(LIBS_FLAGS) -fdiagnostics-color=always
+	g++ -o $@ $^ -L$(PTPMGMT_DIR) $(LIBS_FLAGS) -fdiagnostics-color=always
 
 %.o : %.cpp
 	echo "[COMPILE]" $<
