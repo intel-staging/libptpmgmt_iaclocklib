@@ -78,7 +78,7 @@ class ClockManager
      * @return true on success, false on failure
      */
     bool clkmgr_subscribe(ClkMgrSubscription &newSub,
-      clkmgr_event_state &currentState);
+        clkmgr_event_state &currentState);
 
     /**
      * @brief Waits for a specified timeout period for any event changes.
@@ -91,7 +91,7 @@ class ClockManager
      * and false otherwise.
      */
     int clkmgr_status_wait(int timeout, clkmgr_event_state &currentState,
-      clkmgr_event_count &currentCount);
+        clkmgr_event_count &currentCount);
 };
 
 __CLKMGR_NAMESPACE_END
