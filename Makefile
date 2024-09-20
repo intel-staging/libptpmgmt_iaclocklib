@@ -204,6 +204,7 @@ PUB_C:=$(PUB)/c
 PMC_DIR:=ptp-tools
 HMAC_SRC:=hmac
 CLKMGR_DIR:=clkmgr
+CLKMGR_PUB:=$(CLKMGR_DIR)/pub
 OBJ_DIR:=objs
 
 CONF_FILES:=configure src/config.h.in
@@ -233,6 +234,9 @@ SRCS:=$(wildcard $(SRC)/*.cpp)
 SRCS_HMAC:=$(wildcard $(HMAC_SRC)/*.cpp)
 SRCS_CLKMGR:=$(wildcard $(CLKMGR_DIR)/[cupi]*/*.[ch]* $(CLKMGR_DIR)/*/*/*.h)
 COMP_DEPS:=$(OBJ_DIR) $(HEADERS_GEN_COMP)
+CLKMGR_LIB_NAME:=libclkmgr
+CLKMGR_PUB_MAIN_HEADER:=$(wildcard $(CLKMGR_PUB)/*.h)
+CLKMGR_PUB_HEADERS:=$(wildcard $(CLKMGR_PUB)/$(CLKMGR_DIR)/*.h)
 # hmac
 SSL_NAME:=$(LIB_NAME)_openssl
 SSL_LIBA:=$(LIB_D)/$(SSL_NAME).a
@@ -674,6 +678,15 @@ endif
 	$(INSTALL_FOLDER) $(DOCDIR)
 	cp README.md doc/*.md $(DOCDIR)
 	$(SED) -i  's!\./doc/!./!' $(DOCDIR)/README.md
+ifndef SKIP_CLKMGR
+	cp -af $(LIB_D)/$(CLKMGR_NAME)*.so* $(DLIBDIR)
+	$(INSTALL_LIB) $(LIB_D)/$(CLKMGR_NAME)*.so.*.*.* $(DLIBDIR)
+	$(call RMRPATH,$(DLIBDIR)/$(CLKMGR_NAME)*.so.*.*.*)
+	$(INSTALL_LIB) $(LIB_D)/$(CLKMGR_NAME)*.a $(DLIBDIR)
+	$(INSTALL_DATA) -D $(CLKMGR_PUB_MAIN_HEADER) -t $(DESTDIR)$(includedir)
+	$(INSTALL_DATA) -D $(CLKMGR_PUB_HEADERS) -t $(DESTDIR)$(includedir)/$(CLKMGR_DIR)
+	$(INSTALL_PROGRAM) -D $(CLKMGR_DIR)/proxy/clkmgr_proxy $(DESTDIR)$(sbindir)
+endif
 ifdef DOXYGEN_MINVER
 	$(MKDIR_P) "doc/html"
 	$(RM) doc/html/*.md5 doc/html/*.map

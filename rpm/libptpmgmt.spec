@@ -167,6 +167,8 @@ autoreconf -i
 
 %files
 %{_libdir}/%{name}.so.*
+%{_libdir}/libclkmgr.*
+%{_sbindir}/clkmgr_proxy
 
 %files openssl
 %{_libdir}/%{name}_openssl.so.*
