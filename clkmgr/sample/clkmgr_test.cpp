@@ -18,16 +18,24 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <thread>
 
 #include <clockmanager.h>
 
 using namespace clkmgr;
 
 volatile sig_atomic_t signal_flag = 0;
+uint32_t idleTime;
+std::atomic<bool> running(true);
+std::uint32_t event2Sub = {};
+std::uint32_t composite_event = {};
 
 void signal_handler(int sig)
 {
     signal_flag = 1;
+    if (sig == SIGINT) {
+        running = false;
+    }
 }
 
 double getMonotonicTime() {
@@ -44,27 +52,101 @@ double getMonotonicTime() {
     return seconds + nanoseconds;
 }
 
+int listen_clkmgr_status_wait(ClockManager* cm, unsigned int timeout,
+    clkmgr_event_state eventState, clkmgr_event_count eventCount) {
+    while (running) {
+        int retval = cm->clkmgr_status_wait(timeout, eventState, eventCount);
+        if (!retval) {
+            printf("[clkmgr][%.3f] No event status changes identified in %d seconds.\n\n",
+                getMonotonicTime(), timeout);
+            printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
+                getMonotonicTime(), idleTime);
+            continue;
+        } else if (retval < 0) {
+            printf("[clkmgr][%.3f] Terminating: lost connection to clkmgr Proxy\n",
+                getMonotonicTime());
+            running = false;
+            break;
+        }
+
+        printf("[clkmgr][%.3f] Obtained data from Notification Event:\n",
+            getMonotonicTime());
+        printf("+---------------------------+--------------+-------------+\n");
+        printf("| %-25s | %-12s | %-11s |\n", "Event", "Event Status",
+            "Event Count");
+        if (event2Sub) {
+        printf("+---------------------------+--------------+-------------+\n");
+        }
+        if (event2Sub & eventGMOffset) {
+            printf("| %-25s | %-12d | %-11d |\n", "offset_in_range",
+                eventState.offset_in_range,
+                eventCount.offset_in_range_event_count);
+        }
+        if (event2Sub & eventSyncedToGM) {
+            printf("| %-25s | %-12d | %-11d |\n", "synced_to_primary_clock",
+               eventState.synced_to_primary_clock, eventCount.synced_to_gm_event_count);
+        }
+        if (event2Sub & eventASCapable) {
+            printf("| %-25s | %-12d | %-11d |\n", "as_capable",
+                eventState.as_capable, eventCount.as_capable_event_count);
+        }
+        if (event2Sub & eventGMChanged) {
+            printf("| %-25s | %-12d | %-11d |\n", "gm_Changed",
+                eventState.gm_changed, eventCount.gm_changed_event_count);
+        }
+        printf("+---------------------------+--------------+-------------+\n");
+        printf("| %-25s |     %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n",
+            "UUID", eventState.gm_identity[0], eventState.gm_identity[1],
+            eventState.gm_identity[2], eventState.gm_identity[3],
+            eventState.gm_identity[4], eventState.gm_identity[5],
+            eventState.gm_identity[6], eventState.gm_identity[7]);
+        printf("| %-25s |     %-19ld ns |\n",
+            "clock_offset", eventState.clock_offset);
+        printf("| %-25s |     %-19ld ns |\n",
+            "notification_timestamp", eventState.notification_timestamp);
+        printf("+---------------------------+--------------+-------------+\n");
+        if (composite_event) {
+            printf("| %-25s | %-12d | %-11d |\n", "composite_event",
+                   eventState.composite_event, eventCount.composite_event_count);
+        }
+        if (composite_event & eventGMOffset) {
+            printf("| - %-23s | %-12s | %-11s |\n", "offset_in_range", "", "");
+        }
+        if (composite_event & eventSyncedToGM) {
+            printf("| - %-19s | %-12s | %-11s |\n", "synced_to_primary_clock", "", "");
+        }
+        if (composite_event & eventASCapable) {
+            printf("| - %-23s | %-12s | %-11s |\n", "as_capable", "", "");
+        }
+        if (composite_event) {
+            printf("+---------------------------+--------------+-------------+\n\n");
+        } else {
+            printf("\n");
+        }
+
+        printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
+            getMonotonicTime(), idleTime);
+    }
+    return EXIT_FAILURE;
+}
+
 int main(int argc, char *argv[])
 {
     ClkMgrSubscription subscription = {};
     clkmgr_event_count eventCount = {};
     clkmgr_event_state eventState = {};
+
     int32_t  gmOffsetLowerLimit = -100000;
     int32_t  gmOffsetUpperLimit = 100000;
     int ret = EXIT_SUCCESS;
-    uint32_t idleTime = 1;
+    idleTime = 1;
     uint32_t timeout = 10;
-    int retval;
     int option;
 
-    std::uint32_t event2Sub = {
-        (eventGMOffset | eventSyncedToGM | eventASCapable |
-        eventGMChanged)
-    };
+    event2Sub = {(eventGMOffset | eventSyncedToGM | eventASCapable |
+    eventGMChanged)};
 
-    std::uint32_t composite_event = {
-        (eventGMOffset | eventSyncedToGM | eventASCapable)
-    };
+    composite_event = {(eventGMOffset | eventSyncedToGM | eventASCapable)};
 
     while ((option = getopt(argc, argv, "s:c:u:l:i:t:h")) != -1) {
         switch (option) {
@@ -147,8 +229,7 @@ int main(int argc, char *argv[])
 
     if (cm->clkmgr_connect() == false) {
         std::cout << "[clkmgr] Failure in connecting !!!\n";
-        ret = EXIT_FAILURE;
-        goto do_exit;
+        return EXIT_FAILURE;
     } else {
         std::cout << "[clkmgr] Connected. Session ID : " <<
             myState.get_sessionId() << "\n";
@@ -225,84 +306,12 @@ int main(int argc, char *argv[])
 
     sleep(1);
 
-    while (!signal_flag) {
-        printf("[clkmgr][%.3f] Waiting for Notification Event...\n",
-            getMonotonicTime());
-        retval = cm->clkmgr_status_wait(timeout, eventState , eventCount);
-        if (!retval) {
-            printf("[clkmgr][%.3f] No event status changes identified in %d seconds.\n\n",
-                getMonotonicTime(), timeout);
-            printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
-                getMonotonicTime(), idleTime);
-            sleep(idleTime);
-            continue;
-        } else if (retval < 0) {
-            printf("[clkmgr][%.3f] Terminating: lost connection to clkmgr Proxy\n",
-                getMonotonicTime());
-            return EXIT_SUCCESS;
-        }
-
-        printf("[clkmgr][%.3f] Obtained data from Notification Event:\n",
-            getMonotonicTime());
-        printf("+---------------------------+--------------+-------------+\n");
-        printf("| %-25s | %-12s | %-11s |\n", "Event", "Event Status",
-            "Event Count");
-        if (event2Sub) {
-        printf("+---------------------------+--------------+-------------+\n");
-        }
-        if (event2Sub & eventGMOffset) {
-            printf("| %-25s | %-12d | %-11d |\n", "offset_in_range",
-                eventState.offset_in_range,
-                eventCount.offset_in_range_event_count);
-        }
-        if (event2Sub & eventSyncedToGM) {
-            printf("| %-25s | %-12d | %-11d |\n", "synced_to_primary_clock",
-               eventState.synced_to_primary_clock, eventCount.synced_to_gm_event_count);
-        }
-        if (event2Sub & eventASCapable) {
-            printf("| %-25s | %-12d | %-11d |\n", "as_capable",
-                eventState.as_capable, eventCount.as_capable_event_count);
-        }
-        if (event2Sub & eventGMChanged) {
-            printf("| %-25s | %-12d | %-11d |\n", "gm_Changed",
-                eventState.gm_changed, eventCount.gm_changed_event_count);
-        }
-        printf("+---------------------------+--------------+-------------+\n");
-        printf("| %-25s |     %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n",
-            "UUID", eventState.gm_identity[0], eventState.gm_identity[1],
-            eventState.gm_identity[2], eventState.gm_identity[3],
-            eventState.gm_identity[4], eventState.gm_identity[5],
-            eventState.gm_identity[6], eventState.gm_identity[7]);
-        printf("| %-25s |     %-19ld ns |\n",
-            "clock_offset", eventState.clock_offset);
-        printf("| %-25s |     %-19ld ns |\n",
-            "notification_timestamp", eventState.notification_timestamp);
-        printf("+---------------------------+--------------+-------------+\n");
-        if (composite_event) {
-            printf("| %-25s | %-12d | %-11d |\n", "composite_event",
-                   eventState.composite_event, eventCount.composite_event_count);
-        }
-        if (composite_event & eventGMOffset) {
-            printf("| - %-23s | %-12s | %-11s |\n", "offset_in_range", "", "");
-        }
-        if (composite_event & eventSyncedToGM) {
-            printf("| - %-19s | %-12s | %-11s |\n", "synced_to_primary_clock", "", "");
-        }
-        if (composite_event & eventASCapable) {
-            printf("| - %-23s | %-12s | %-11s |\n", "as_capable", "", "");
-        }
-        if (composite_event) {
-            printf("+---------------------------+--------------+-------------+\n\n");
-        } else {
-            printf("\n");
-        }
-
-        printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
-            getMonotonicTime(), idleTime);
-        sleep(idleTime);
+    std::thread listener_thread(listen_clkmgr_status_wait, cm, timeout, eventState, eventCount);
+    listener_thread.detach();
+    while (running) {
+        sleep(1);
     }
 
-do_exit:
     cm->clkmgr_disconnect();
 
     return ret;
