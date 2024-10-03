@@ -45,6 +45,16 @@ $(GO_D)/gtest/go.mod $(GO_D)/unit_test/go.mod: $(GO_D)/$(SWIG_LNAME)/go.mod\
 $(GO_D)/gtest/gtest: $(GO_D)/gtest/go.mod $(GO_D)/gtest/gtest.go $(GO_SRC)
 	$(Q_LD)cd $(@D) && $(GO_BIN) build .
 SWIG_ALL+=$(GO_D)/gtest/gtest
+ifndef SKIP_CLKMGR
+GO_CLKMGR_DIR:=$(GO_D)/$(CLKMGR_NAME)
+$(GO_CLKMGR_DIR)/$(CLKMGR_NAME).cpp: $(GO_D)/$(CLKMGR_NAME).cpp | $(CLKMGR_LIB_LA)
+	$Q$(MKDIR_P) $(@D)
+	cp $^ $(GO_D)/$(CLKMGR_NAME).go $(@D)
+$(GO_CLKMGR_DIR)/go.mod:
+	$(Q_GEN)if [ -f $@ ]; then touch $@; else $(MKDIR_P) $(@D);\
+	cd $(@D) && $(GO_BIN) mod init $(CLKMGR_NAME) $(Q_ERR);fi
+SWIG_ALL+=$(GO_CLKMGR_DIR)/$(CLKMGR_NAME).cpp $(GO_CLKMGR_DIR)/go.mod
+endif # SKIP_CLKMGR
 
 utest_go: $(GO_D)/unit_test/go.mod
 	$(call Q_UTEST,GO)export LD_PRELOAD="$(PWD)/$(LIB_NAME_SO)"
@@ -55,5 +65,12 @@ install_go:
 	cp -a $(GO_D)/$(SWIG_LNAME) $(DESTDIR)$(GOROOT)/src
 	$(SED) -i 's@^\s*$(c_inc) "\([^.]\+\.h\)"@$(c_inc) <$(SWIG_LNAME)/\1>@'\
 	  $(DESTDIR)$(GOROOT)/src/$(SWIG_LNAME)/$(SWIG_NAME).cpp
-	$(SED) -i '1 i/* $(SPDXLI) MIT\n   $(SPDXCY) */\n'\
+	$(SED) -i '1 i/* $(SPDXLI) $(SPDXBSD3)\n   $(SPDXCY) */\n'\
 	  $(DESTDIR)$(GOROOT)/src/$(SWIG_LNAME)/*
+ifndef SKIP_CLKMGR
+	cp -a $(GO_CLKMGR_DIR) $(DESTDIR)$(GOROOT)/src
+	$(SED) -i 's!$(c_inc)\s*\"pub/\([^"]\+\)\"!$(c_inc) <\1>!'\
+	  $(DESTDIR)$(GOROOT)/src/$(CLKMGR_NAME)/*.cpp
+	$(SED) -i '1 i/* $(SPDXLI) $(SPDXBSD3)\n   $(SPDXCY_INTEL) */\n'\
+	  $(DESTDIR)$(GOROOT)/src/$(CLKMGR_NAME)/*
+endif
