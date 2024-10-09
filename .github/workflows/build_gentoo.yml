@@ -8,6 +8,7 @@
 ###############################################################################
 
 name: build gentoo docker image
+permissions: read-all
 
 # Start manually
 on: workflow_dispatch
@@ -18,9 +19,6 @@ env:
 jobs:
   gentoo:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
 

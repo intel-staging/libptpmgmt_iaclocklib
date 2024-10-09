@@ -9,15 +9,13 @@
 ###############################################################################
 
 name: "Virus Scan"
+permissions: read-all
 
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
-
-permissions:
-  contents: read
 
 jobs:
   job_id:
