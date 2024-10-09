@@ -10,6 +10,7 @@
 ###############################################################################
 
 name: coverity scan
+permissions: read-all
 
 # Start manually
 on: workflow_dispatch
