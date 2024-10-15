@@ -30,11 +30,6 @@ __CLKMGR_NAMESPACE_USE
 
 using namespace std;
 
-rtpi::mutex ClientConnectMessage::cv_mtx;
-rtpi::condition_variable ClientConnectMessage::cv;
-rtpi::mutex ClientSubscribeMessage::cv_mtx;
-rtpi::condition_variable ClientSubscribeMessage::cv;
-
 bool ClockManager::clkmgr_connect()
 {
     unsigned int timeout_sec = (unsigned int) DEFAULT_CONNECT_TIME_OUT;
