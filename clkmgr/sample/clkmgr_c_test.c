@@ -203,6 +203,12 @@ int main(int argc, char *argv[])
     } else {
         printf("\n");
     }
+    printf("+---------------------------+------------------------+\n");
+    printf("| %-25s | %-19ld ns |\n",
+        "chrony clock_offset", event_state.chrony_clock_offset);
+    printf("| %-25s | %-19lX    |\n",
+        "chrony clock_reference_id", event_state.chrony_reference_id);
+    printf("+---------------------------+------------------------+\n\n");
 
     sleep(1);
 
@@ -277,6 +283,12 @@ int main(int argc, char *argv[])
         } else {
             printf("\n");
         }
+        printf("+---------------------------+----------------------------+\n");
+        printf("| %-25s |     %-19ld ns |\n",
+            "chrony clock_offset", event_state.chrony_clock_offset);
+        printf("| %-25s |     %-19lX    |\n",
+            "chrony clock_reference_id", event_state.chrony_reference_id);
+        printf("+---------------------------+----------------------------+\n\n");
 
         printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
             getMonotonicTime(), idle_time);

@@ -143,6 +143,12 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer)
     clkmgrCurrentState->notification_timestamp += last_notification_time.tv_nsec;
     memcpy(clkmgrCurrentState->gm_identity, client_data->gm_identity,
         sizeof(client_data->gm_identity));
+    client_data->chrony_offset = data.chrony_offset;
+    client_data->chrony_reference_id = data.chrony_reference_id;
+    //printf("client_data->chrony_offset =%ld, data.chrony_offset = %ld \n",client_data->chrony_offset,data.chrony_offset);
+    clkmgrCurrentState->chrony_clock_offset = client_data->chrony_offset;
+    clkmgrCurrentState->chrony_offset_in_range =
+        client_data->chrony_offset_in_range;
     return true;
 }
 

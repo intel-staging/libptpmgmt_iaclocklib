@@ -22,7 +22,7 @@ CLKMGR_PROXY:=$(CLKMGR_PROXY_DIR)/clkmgr_proxy
 CLKMGR_GEN_CPP=$(Q_GEN)$(M4) -I $(CLKMGR_COMMON_DIR) -D lang=cpp $< > $@
 CLKMGR_GEN_C=$(Q_GEN)$(M4) -I $(CLKMGR_COMMON_DIR) -D lang=c $< > $@
 
-CLKMGR_LDLIBS:=$(foreach lib,pthread rt rtpi,-l$(lib))
+CLKMGR_LDLIBS:=$(foreach lib,pthread rt rtpi chrony,-l$(lib))
 CLKMGR_CXXFLAGS:=-I$(CLKMGR_DIR) -I$(CLKMGR_PUB_DIR)
 
 CLKMGR_COMMON_SRCS:=$(wildcard $(CLKMGR_COMMON_DIR)/*.cpp)

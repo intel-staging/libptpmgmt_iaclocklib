@@ -25,6 +25,7 @@
 #include <string>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <chrony.h>
 
 __CLKMGR_NAMESPACE_USE
 
@@ -41,7 +42,11 @@ static SockBase *sk;
 static std::unique_ptr<SockBase> m_sk;
 
 SUBSCRIBE_EVENTS_NP_t d;
-ptp_event pe = { 0, {0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0};
+ptp_event pe = { 0, {0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0, 0};
+chrony_session *s;
+int fd;
+int report_index = 0;
+int polling_interval;
 
 void notify_client()
 {
@@ -78,12 +83,14 @@ void event_handle()
             memcpy(pe.gm_identity, timeStatus->gmIdentity.v,
                 sizeof(pe.gm_identity));
             /* Uncomment for debug data printing */
-            //printf("master_offset = %ld, synced_to_primary_clock = %d\n",
-            //      pe.master_offset, pe.synced_to_primary_clock);
-            //printf("gm_identity = %02x%02x%02x.%02x%02x.%02x%02x%02x\n\n",
-            //       pe.gm_identity[0], pe.gm_identity[1],pe.gm_identity[2],
-            //       pe.gm_identity[3], pe.gm_identity[4],
-            //       pe.gm_identity[5], pe.gm_identity[6],pe.gm_identity[7]);
+            /*
+            printf("master_offset = %ld, synced_to_primary_clock = %d\n",
+                  pe.master_offset, pe.synced_to_primary_clock);
+            printf("gm_identity = %02x%02x%02x.%02x%02x.%02x%02x%02x\n\n",
+                   pe.gm_identity[0], pe.gm_identity[1],pe.gm_identity[2],
+                   pe.gm_identity[3], pe.gm_identity[4],
+                   pe.gm_identity[5], pe.gm_identity[6],pe.gm_identity[7]);
+            */
             break;
         }
         case PORT_PROPERTIES_NP: /* Get initial port state when Proxy starts */
@@ -200,6 +207,99 @@ bool event_subscription(struct clkmgr_handle **handle)
     return ret;
 }
 
+static chrony_err process_chronyd_data(chrony_session *s)
+{
+    struct pollfd pfd = { .fd = chrony_get_fd(s), .events = POLLIN };
+    int n, timeout;
+    chrony_err r;
+    timeout = 1000;
+    while (chrony_needs_response(s)) {
+        n = poll(&pfd, 1, timeout);
+        if (n < 0) {
+            perror("poll");
+//          return -1;
+        } else if (n == 0) {
+            fprintf(stderr, "No valid response received\n");
+//          return -1;
+        }
+        r = chrony_process_response(s);
+        if (r != CHRONY_OK)
+            return r;
+    }
+    return CHRONY_OK;
+}
+
+static int subscribe_to_chronyd(chrony_session *s, int report_index)
+{
+    chrony_field_content content;
+    const char *report_name;
+    chrony_err r;
+    int i, j;
+    report_name = chrony_get_report_name(report_index);
+    i = 0;
+    r = chrony_request_record(s, report_name, i);
+    if (r != CHRONY_OK)
+        return r;
+    r = process_chronyd_data(s);
+    if (r != CHRONY_OK)
+        return r;
+    for (j = 0; j < chrony_get_record_number_fields(s); j++) {
+        content = chrony_get_field_content(s, j);
+        if (content == CHRONY_CONTENT_NONE)
+            continue;
+        const char *field_name = chrony_get_field_name(s, j);
+        if (field_name != NULL && strcmp(field_name, "Last offset") == 0) {
+            float second = (chrony_get_field_float(s, j) * 1e9);
+            pe.chrony_offset = (int)second;
+            printf("offset (chrony): %ld nanosecond \n\n", pe.chrony_offset);
+        }
+        if (field_name != NULL && strcmp(field_name, "Reference ID") == 0) {
+            pe.chrony_reference_id = chrony_get_field_uinteger(s, j);
+            printf("Reference ID: %lX\n", pe.chrony_reference_id);
+        }
+        if (field_name != NULL && strcmp(field_name, "Poll") == 0) {
+            polling_interval = chrony_get_field_integer(s, j);
+            //printf("Poll: %d\n", pe.chrony_poll);
+            printf("Pollng interval: %ld s\n",polling_interval);
+        }
+	}
+	return CHRONY_OK;
+}
+
+
+struct ThreadArgs
+{
+    chrony_session *s;
+    int report_index;
+};
+
+void* monitor_chronyd(void* arg)
+{
+    ThreadArgs* args = (ThreadArgs*)arg;
+    chrony_session *s = args->s;
+    int report_index = args->report_index;
+    while (true) {
+        if (chrony_init_session(&s, fd) == CHRONY_OK) {
+            for (int i = 0; i < 2; i++) {
+                subscribe_to_chronyd(s, i);
+               // chrony_deinit_session(s);
+            }
+        }
+        usleep(polling_interval); // Sleep duration is based on chronyd polling interval
+    }
+    return NULL;
+}
+
+void start_monitor_thread(chrony_session *s, int report_index)
+{
+    pthread_t thread_id;
+    ThreadArgs* args = new ThreadArgs{s, report_index};
+    if (pthread_create(&thread_id, NULL, monitor_chronyd, args) != 0) {
+        fprintf(stderr, "Failed to create thread\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 /**
  * @brief Runs the main event loop for handling PTP (Precision Time Protocol)
  *        events.
@@ -302,6 +402,15 @@ int Connect::connect(uint8_t transport_specific)
     prms.transportSpecific = transport_specific;
     msg.updateParams(prms);
     sk = m_sk.get();
+
+    /* connect to chronyd unix socket*/
+    fd = chrony_open_socket("/var/run/chrony/chronyd.sock");
+    chrony_session *s;
+    if (chrony_init_session(&s, fd) == CHRONY_OK) {
+        start_monitor_thread(s, report_index);
+		chrony_deinit_session(s);
+	}
+
     handle_connect();
     return 0;
 }
