@@ -32,6 +32,9 @@ struct clkmgr_event_state {
     bool gm_changed; /**< Primary clock UUID changed */
     bool composite_event; /**< Composite event */
     bool reserved[27]; /**< Reserved for future */
+    int64_t chrony_clock_offset; /**< Chrony clock offset */
+    uint64_t chrony_reference_id; /**< Chrony reference ID */
+    bool chrony_offset_in_range; /**< Chrony clock offset in range */
 };
 
 /**
@@ -45,6 +48,7 @@ struct clkmgr_event_count {
     uint32_t gm_changed_event_count; /**< Primary clock UUID changed */
     uint32_t composite_event_count; /**< Composite event */
     uint32_t reserved[27]; /**< Reserved for future */
+    uint32_t chrony_offset_in_range_event_count; /**< Chrony clock offset in range */
 };
 
 __CLKMGR_NAMESPACE_END

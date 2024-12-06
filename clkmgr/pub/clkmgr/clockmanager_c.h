@@ -44,6 +44,8 @@ struct clkmgr_c_event_state {
     bool gm_changed; /**< Primary clock UUID changed */
     bool composite_event; /**< Composite event */
     bool reserved[27]; /**< Reserved for future */
+    int64_t chrony_clock_offset; /**< Chrony clock offset */
+    uint64_t chrony_reference_id; /**< Chrony reference ID */
 };
 
 /**
