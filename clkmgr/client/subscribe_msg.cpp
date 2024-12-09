@@ -15,17 +15,17 @@
 #include "common/print.hpp"
 #include "common/serialize.hpp"
 
-__CLKMGR_NAMESPACE_USE
+__CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-clkmgr_event_state *ClientSubscribeMessage::clkmgrCurrentState = nullptr;
+Event_state *ClientSubscribeMessage::clkmgrCurrentState = nullptr;
 ClientState *ClientSubscribeMessage::currentClientState = nullptr;
 std::map<sessionId_t, std::array<client_ptp_event *, 2>>
     ClientSubscribeMessage::client_ptp_event_map;
 
-/** @brief Create the ClientSubscribeMessage object
- *
+/**
+ * Create the ClientSubscribeMessage object
  * @param msg msg structure to be fill up
  * @param LxContext client run-time transport listener context
  * @return true
@@ -37,7 +37,8 @@ MAKE_RXBUFFER_TYPE(ClientSubscribeMessage::buildMessage)
     return true;
 }
 
-/** @brief Add client's SUBSCRIBE_MSG type and its builder to transport layer.
+/**
+ * @brief Add client's SUBSCRIBE_MSG type and its builder to transport layer.
  *
  * This function will be called during init to add a map of SUBSCRIBE_MSG
  * type and its corresponding buildMessage function.
@@ -146,7 +147,8 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer)
     return true;
 }
 
-/** @brief process the reply for notification msg from proxy.
+/**
+ * @brief process the reply for notification msg from proxy.
  *
  * This function will be called when the transport layer
  * in client runtime received a SUBSCRIBE_MSG type (an echo reply from
@@ -213,7 +215,7 @@ client_ptp_event *ClientSubscribeMessage::getClientPtpEventCompositeStruct(
 
 /* reduce the corresponding eventCount */
 void ClientSubscribeMessage::resetClientPtpEventStruct(sessionId_t sID,
-    clkmgr_event_count &eventCount)
+    Event_count &eventCount)
 {
     std::map <sessionId_t, std::array<client_ptp_event *, 2>>::iterator it;
     client_ptp_event *client_ptp_data = nullptr;

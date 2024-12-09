@@ -19,14 +19,14 @@
 
 #include <algorithm>
 
-__CLKMGR_NAMESPACE_USE
+__CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
 std::vector<ClientState *> ClientNotificationMessage::ClientStateArray;
 
-/** @brief Create the ClientNotificationMessage object
- *
+/**
+ * Create the ClientNotificationMessage object
  * @param msg msg structure to be fill up
  * @param LxContext proxy transport listener context
  * @return true
@@ -37,8 +37,8 @@ MAKE_RXBUFFER_TYPE(ClientNotificationMessage::buildMessage)
     return true;
 }
 
-/** @brief Add proxy's NOTIFY_MESSAGE type and its builder to transport layer.
- *
+/**
+ * @brief Add proxy's NOTIFY_MESSAGE type and its builder to transport layer.
  * This function will be called during init to add a map of NOTIFY_MESSAGE
  * type and its corresponding buildMessage function.
  *
@@ -114,10 +114,7 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
                 clock_gettime failed.\n");
         else
             currentClientState->set_last_notification_time(last_notification_time);
-        clkmgr_event_state &clkmgrCurrentState =
-            currentClientState->get_eventState();
-        clkmgr_event_count &clkmgrCurrentEventCount =
-            currentClientState->get_eventStateCount();
+        Event_state &clkmgrCurrentState = currentClientState->get_eventState();
         eventSub = currentClientState->get_eventSub().get_event_mask();
         composite_eventSub =
             currentClientState->get_eventSub().get_composite_event_mask();
@@ -209,6 +206,9 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
             composite_client_ptp_data->composite_event;
         memcpy(clkmgrCurrentState.gm_identity, client_ptp_data->gm_identity,
             sizeof(client_ptp_data->gm_identity));
+        // Update Event_count
+        Event_count clkmgrCurrentEventCount =
+            currentClientState->get_eventStateCount();
         clkmgrCurrentEventCount.offset_in_range_event_count =
             client_ptp_data->offset_in_range_event_count;
         clkmgrCurrentEventCount.as_capable_event_count =
@@ -219,6 +219,7 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
             client_ptp_data->gm_changed_event_count;
         clkmgrCurrentEventCount.composite_event_count =
             client_ptp_data->composite_event_count;
+        currentClientState->set_eventStateCount(clkmgrCurrentEventCount);
     }
     return true;
 }

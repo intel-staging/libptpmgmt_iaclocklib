@@ -11,25 +11,61 @@
 
 #include "pub/clkmgr/subscription.h"
 
-__CLKMGR_NAMESPACE_USE
+__CLKMGR_NAMESPACE_USE;
 
-bool ClkMgrSubscription::define_threshold(std::uint8_t index,
-    std::int32_t upper, std::int32_t lower)
+ClkMgrSubscription::ClkMgrSubscription() noexcept : m_event_mask(0),
+    m_composite_event_mask(0) {}
+
+void ClkMgrSubscription::set_ClkMgrSubscription(const ClkMgrSubscription &n)
 {
-    if(index < static_cast<std::uint8_t>(thresholdLast)) {
-        m_threshold[index].upper_limit = upper;
-        m_threshold[index].lower_limit = lower;
-        return true;
-    }
-    return false;
+    m_event_mask = n.m_event_mask;
+    m_composite_event_mask = n.m_composite_event_mask;
+    m_threshold = n.m_threshold;
 }
 
-bool ClkMgrSubscription::in_range(std::uint8_t index, std::int32_t value) const
+void ClkMgrSubscription::set_event_mask(uint32_t event_mask)
 {
-    if(index < static_cast<std::uint8_t>(thresholdLast)) {
-        if(value > m_threshold[index].lower_limit &&
-            value < m_threshold[index].upper_limit)
-            return true;
-    }
-    return false;
+    m_event_mask = event_mask;
+}
+
+uint32_t ClkMgrSubscription::get_event_mask() const
+{
+    return m_event_mask;
+}
+
+void ClkMgrSubscription::set_composite_event_mask(uint32_t composite_event_mask)
+{
+    m_composite_event_mask = composite_event_mask;
+}
+
+uint32_t ClkMgrSubscription::get_composite_event_mask() const
+{
+    return m_composite_event_mask;
+}
+
+bool ClkMgrSubscription::define_threshold(ThresholdIndex index, int32_t upper,
+    int32_t lower)
+{
+    if(index >= thresholdLast || upper <= lower)
+        return false;
+    m_threshold[index].upper_limit = upper;
+    m_threshold[index].lower_limit = lower;
+    return true;
+}
+
+bool ClkMgrSubscription::get_threshold(ThresholdIndex index, int32_t &upper,
+    int32_t &lower)
+{
+    if(index >= thresholdLast)
+        return false;
+    upper = m_threshold[index].upper_limit;
+    lower = m_threshold[index].lower_limit;
+    return true;
+}
+
+bool ClkMgrSubscription::in_range(ThresholdIndex index, int32_t value) const
+{
+    return index < thresholdLast &&
+        value > m_threshold[index].lower_limit &&
+        value < m_threshold[index].upper_limit;
 }

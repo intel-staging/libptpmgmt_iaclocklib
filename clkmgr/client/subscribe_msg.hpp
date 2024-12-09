@@ -26,7 +26,7 @@ class ClientSubscribeMessage : virtual public
     virtual public ClientMessage
 {
   private:
-    static clkmgr_event_state *clkmgrCurrentState;
+    static Event_state *clkmgrCurrentState;
     static ClientState *currentClientState;
     static std::map <sessionId_t, std::array<client_ptp_event *, 2>>
         client_ptp_event_map;
@@ -37,7 +37,7 @@ class ClientSubscribeMessage : virtual public
     static rtpi::mutex cv_mtx;
     static rtpi::condition_variable cv;
     /**
-     * @brief process the reply for subscribe msg from proxy.
+     * process the reply for subscribe msg from proxy.
      * @param LxContext client run-time transport listener context
      * @param TxContext client run-time transport transmitter context
      * @return true
@@ -45,7 +45,7 @@ class ClientSubscribeMessage : virtual public
     virtual PROCESS_MESSAGE_TYPE(processMessage);
 
     /**
-     * @brief Create the ClientSubscribeMessage object
+     * Create the ClientSubscribeMessage object
      * @param msg msg structure to be fill up
      * @param LxContext client run-time transport listener context
      * @return true
@@ -53,7 +53,7 @@ class ClientSubscribeMessage : virtual public
     static MAKE_RXBUFFER_TYPE(buildMessage);
 
     /**
-     * @brief Add client's SUBSCRIBE_MSG type and its builder to transport layer.
+     * Add client's SUBSCRIBE_MSG type and its builder to transport layer.
      * @return true
      */
     static bool initMessage();
@@ -71,8 +71,7 @@ class ClientSubscribeMessage : virtual public
     static client_ptp_event *getClientPtpEventCompositeStruct(sessionId_t sID);
 
     /* Reduce the corresponding eventCount */
-    static void resetClientPtpEventStruct(sessionId_t sID,
-        clkmgr_event_count &eventCount);
+    static void resetClientPtpEventStruct(sessionId_t sID, Event_count &eventCount);
 };
 
 __CLKMGR_NAMESPACE_END

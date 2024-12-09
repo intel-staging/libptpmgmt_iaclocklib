@@ -16,14 +16,14 @@
 #include "proxy/client.hpp"
 #include "proxy/subscribe_msg.hpp"
 
-__CLKMGR_NAMESPACE_USE
+__CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
 extern ptp_event pe;
 
-/** @brief Create the ProxySubscribeMessage object
- *
+/**
+ * Create the ProxySubscribeMessage object
  * @param msg msg structure to be fill up
  * @param LxContext proxy transport listener context
  * @return true
@@ -34,7 +34,8 @@ MAKE_RXBUFFER_TYPE(ProxySubscribeMessage::buildMessage)
     return true;
 }
 
-/** @brief Add proxy's SUBSCRIBE_MSG type and its builder to transport layer.
+/**
+ * @brief Add proxy's SUBSCRIBE_MSG type and its builder to transport layer.
  *
  * This function will be called during init to add a map of SUBSCRIBE_MSG
  * type and its corresponding buildMessage function.

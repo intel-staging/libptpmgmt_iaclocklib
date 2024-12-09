@@ -17,7 +17,7 @@
 
 #ifndef __CLKMGR_NAMESPACE_USE
 /** Using clkmgr namespace */
-#define __CLKMGR_NAMESPACE_USE using namespace clkmgr;
+#define __CLKMGR_NAMESPACE_USE using namespace clkmgr
 /** Define start of clkmgr namespace block */
 #define __CLKMGR_NAMESPACE_BEGIN namespace clkmgr {
 /** Define end of clkmgr namespace block */
@@ -27,22 +27,16 @@
 __CLKMGR_NAMESPACE_BEGIN
 
 /** Maximum number of character for transport client ID */
-#define TRANSPORT_CLIENTID_LENGTH (512)
+const int TRANSPORT_CLIENTID_LENGTH = 512;
 
-/**
- * @typedef TransportClientId
- * @brief Array to store transport client ID.
- */
+/** Array to store transport client ID. */
 typedef std::array<uint8_t, TRANSPORT_CLIENTID_LENGTH> TransportClientId;
 
-/**
- * @typedef sessionId_t
- * @brief Type definition for session ID.
- */
+/** Type definition for session ID. */
 typedef uint16_t sessionId_t;
 
 /** Invalid session ID (default session ID) */
-static const sessionId_t InvalidSessionId = static_cast<sessionId_t>(-1);
+const sessionId_t InvalidSessionId = UINT16_MAX;
 
 __CLKMGR_NAMESPACE_END
 
