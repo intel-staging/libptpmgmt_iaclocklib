@@ -41,7 +41,7 @@ static SockBase *sk;
 static std::unique_ptr<SockBase> m_sk;
 
 SUBSCRIBE_EVENTS_NP_t d;
-ptp_event pe = { 0, {0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0};
+ptp_event pe = { 0, {0, 0, 0, 0, 0, 0, 0, 0}, 0, 0};
 
 void notify_client()
 {
