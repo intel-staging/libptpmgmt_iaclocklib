@@ -17,7 +17,7 @@ on: workflow_dispatch
 
 jobs:
   coverity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Install dependencies
       run: git clone https://github.com/linux-rt/librtpi.git && cd librtpi && autoreconf --install && ./configure && sudo make install && cd - && sudo rm -rf librtpi
