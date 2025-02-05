@@ -16,6 +16,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <vector>
 
 __CLKMGR_NAMESPACE_BEGIN
 
@@ -50,6 +51,37 @@ struct client_ptp_event {
     int64_t polling_interval;
     bool chrony_offset_in_range;
     std::atomic<int> chrony_offset_in_range_event_count{};
+};
+
+struct ChronyData {
+    int64_t chrony_offset;
+    uint32_t chrony_reference_id;
+    int64_t polling_interval;
+};
+
+class ChronyDataStorage {
+public:
+    // Add a ChronyData to the storage
+    void addData(const ChronyData& data) {
+        data_storage.push_back(data);
+    }
+    // Update chrony_offset by index
+    void updateChronyOffset(size_t index, int64_t new_offset) {
+        if (index < data_storage.size()) {
+            data_storage[index].chrony_offset = new_offset;
+        } else {
+            throw std::out_of_range("Index out of range");
+        }
+    }
+    // Get a ChronyData by index
+    ChronyData getData(size_t index) const {
+        if (index < data_storage.size()) {
+            return data_storage[index];
+        }
+        //throw std::out_of_range("Index out of range");
+    }
+private:
+    std::vector<ChronyData> data_storage;
 };
 
 __CLKMGR_NAMESPACE_END

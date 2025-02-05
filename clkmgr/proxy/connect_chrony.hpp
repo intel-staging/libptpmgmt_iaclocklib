@@ -17,7 +17,7 @@ __CLKMGR_NAMESPACE_BEGIN
 class ConnectChrony
 {
   public:
-    static void connect_chrony();
+    static void connect_chrony(const char *address, const char *address1);
 };
 
 __CLKMGR_NAMESPACE_END
