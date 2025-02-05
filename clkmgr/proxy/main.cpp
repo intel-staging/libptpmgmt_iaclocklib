@@ -68,7 +68,11 @@ int main(int argc, char *argv[])
         return -1;
     }
     #ifdef HAVE_LIBCHRONY
-    ConnectChrony::connect_chrony();
+    // to be remove: address will be provided by user
+    // loop here if address is not available
+    const char *address = "/var/run/chrony/chronyd.sock";
+    const char *address1 = "/var/run/chrony/chronyd-server1.sock";
+    ConnectChrony::connect_chrony(address, address1);
     #endif
     Connect::connect(transport_specific);
     WaitForStopSignal();
