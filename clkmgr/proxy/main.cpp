@@ -70,7 +70,10 @@ int main(int argc, char *argv[])
     #ifdef HAVE_LIBCHRONY
     ConnectChrony::connect_chrony();
     #endif
-    Connect::connect(transport_specific);
+    std::vector<std::string> uds_addresses = {"/var/run/master-domain-1",
+        "/var/run/master-domain-0"};
+    std::vector<int> domains = {2,0};
+    Connect::connect(transport_specific, uds_addresses, domains);
     WaitForStopSignal();
     PrintDebug("Got stop signal");
     Connect::disconnect();

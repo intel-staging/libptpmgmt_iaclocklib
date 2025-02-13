@@ -141,7 +141,7 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer)
     clkmgrCurrentState->notification_timestamp += last_notification_time.tv_nsec;
     memcpy(clkmgrCurrentState->gm_identity, client_data->gm_identity,
         sizeof(client_data->gm_identity));
-    client_data->chrony_offset = data.chrony_offset;
+/*    client_data->chrony_offset = data.chrony_offset;
     if(currentClientState->get_eventSub().in_range(thresholdChronyOffset,
             client_data->chrony_offset))
         client_data->chrony_offset_in_range = true;
@@ -152,7 +152,7 @@ PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer)
     clkmgrCurrentState->chrony_reference_id = client_data->chrony_reference_id;
     client_data->polling_interval = data.polling_interval;
     clkmgrCurrentState->polling_interval = client_data->polling_interval;
-    return true;
+ */   return true;
 }
 
 /**

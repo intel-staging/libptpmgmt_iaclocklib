@@ -28,7 +28,7 @@ using namespace std;
 
 static int fd;
 static int report_index = 0;
-extern ptp_event clockEvent;
+chrony_event chrony_data;
 
 struct ThreadArgs {
     chrony_session *s;
@@ -100,21 +100,21 @@ static int subscribe_to_chronyd(chrony_session *s, int report_index)
         const char *field_name = chrony_get_field_name(s, j);
         if(field_name != nullptr && strcmp(field_name, "Last offset") == 0) {
             float second = (chrony_get_field_float(s, j) * 1e9);
-            clockEvent.chrony_offset = (int)second;
+            chrony_data.chrony_offset = (int)second;
             #if 0
             PrintDebug("CHRONY master_offset = " +
-                to_string(clockEvent.chrony_offset));
+                to_string(chrony_data.chrony_offset));
             #endif
         }
         if(field_name != nullptr && strcmp(field_name, "Reference ID") == 0)
-            clockEvent.chrony_reference_id = chrony_get_field_uinteger(s, j);
+            chrony_data.chrony_reference_id = chrony_get_field_uinteger(s, j);
         if(field_name != nullptr && strcmp(field_name, "Poll") == 0) {
             int32_t interval = static_cast<int32_t>
                 (static_cast<int16_t>(chrony_get_field_integer(s, j)));
-            clockEvent.polling_interval = pow(2.0, interval) * 1000000;
+            chrony_data.polling_interval = pow(2.0, interval) * 1000000;
             #if 0
             PrintDebug("CHRONY polling_interval = " +
-                to_string(clockEvent.polling_interval) + " us");
+                to_string(chrony_data.polling_interval) + " us");
             #endif
         }
     }
@@ -132,7 +132,7 @@ void *monitor_chronyd(void *arg)
                 subscribe_to_chronyd(s, i);
         }
         // Sleep duration is based on chronyd polling interval
-        usleep(clockEvent.polling_interval);
+        usleep(chrony_data.polling_interval);
     }
 }
 
