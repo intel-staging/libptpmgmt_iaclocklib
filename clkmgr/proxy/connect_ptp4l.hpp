@@ -18,7 +18,9 @@ class Connect
 {
   private:
   public:
-    static int connect(uint8_t transport_specific);
+    static int connect(uint8_t transport_specific,
+      const std::vector<std::string>& uds_addresses,
+      const std::vector<int>& domains);
     static void disconnect();
 };
 

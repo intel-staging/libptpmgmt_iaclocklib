@@ -204,7 +204,7 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
             composite_client_ptp_data->composite_event;
         memcpy(clkmgrCurrentState.gm_identity, client_ptp_data->gm_identity,
             sizeof(client_ptp_data->gm_identity));
-        if(proxy_data.chrony_offset != client_ptp_data->chrony_offset) {
+/*        if(proxy_data.chrony_offset != client_ptp_data->chrony_offset) {
             client_ptp_data->chrony_offset = proxy_data.chrony_offset;
             if(currentClientState->get_eventSub().in_range(thresholdChronyOffset,
                     client_ptp_data->chrony_offset)) {
@@ -230,7 +230,7 @@ PROCESS_MESSAGE_TYPE(ClientNotificationMessage::processMessage)
         client_ptp_data->polling_interval = proxy_data.polling_interval;
         clkmgrCurrentState.polling_interval =
             client_ptp_data->polling_interval;
-        // Update Event_count
+*/        // Update Event_count
         Event_count clkmgrCurrentEventCount =
             currentClientState->get_eventStateCount();
         clkmgrCurrentEventCount.offset_in_range_event_count =

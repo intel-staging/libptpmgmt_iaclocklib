@@ -25,9 +25,14 @@ struct ptp_event {
     bool as_capable; /* 802@.1AS Capable */
     bool synced_to_primary_clock;
     uint8_t ptp4l_id;
+    uint8_t domain_number;
+};
+
+struct chrony_event {
     int64_t chrony_offset;
     uint32_t chrony_reference_id;
     int64_t polling_interval;
+    std::string uds_address;
 };
 
 struct client_ptp_event {
