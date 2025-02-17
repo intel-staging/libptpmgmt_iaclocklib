@@ -15,6 +15,7 @@
 #include "common/serialize.hpp"
 #include "proxy/client.hpp"
 #include "proxy/subscribe_msg.hpp"
+#include "proxy/connect_ptp4l.hpp"
 
 __CLKMGR_NAMESPACE_USE;
 
@@ -85,6 +86,8 @@ PARSE_RXBUFFER_TYPE(ProxySubscribeMessage::parseBuffer)
     PrintDebug("[ProxySubscribeMessage] PTP4L Domain Number: " +
         std::to_string(ptp4lDomainNumber));
     /* ToDo: communicate to Chrony and ptp4l only after get the uds addr */
+    printf("start connect to ptp4l\n");
+    Connect::connect(1);
     return true;
 }
 

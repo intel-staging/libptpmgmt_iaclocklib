@@ -69,6 +69,8 @@ PROCESS_MESSAGE_TYPE(ProxyConnectMessage::processMessage)
     sessionId_t newSessionId = this->getc_sessionId();
     PrintDebug("Processing proxy connect message");
     /* Check whether there is ptp4l available */
+    clockEvent.ptp4l_id = 1;
+    printf("set ptp4l_id: %d\n", clockEvent.ptp4l_id);
     if(!clockEvent.ptp4l_id) {
         PrintError("ptp4l_id is not available.");
         return false;

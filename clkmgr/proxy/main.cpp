@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     #ifdef HAVE_LIBCHRONY
     ConnectChrony::connect_chrony();
     #endif
-    Connect::connect(transport_specific);
+   // Connect::connect(transport_specific);
     WaitForStopSignal();
     PrintDebug("Got stop signal");
     Connect::disconnect();
