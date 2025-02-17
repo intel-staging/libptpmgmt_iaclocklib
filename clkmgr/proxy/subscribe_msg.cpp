@@ -61,9 +61,9 @@ BUILD_TXBUFFER_TYPE(ProxySubscribeMessage::makeBuffer) const
 
 PARSE_RXBUFFER_TYPE(ProxySubscribeMessage::parseBuffer)
 {
+    uint8_t ptp4lDomainNumber = 0;
     std::string chronyUDSAddr;
     std::string ptp4lUDSAddr;
-    int ptp4lDomainNumber;
     UDSAddress chronyAddr;
     UDSAddress ptp4lAddr;
     PrintDebug("[ProxySubscribeMessage]::parseBuffer ");
