@@ -40,6 +40,8 @@ int main(int argc, char *argv[])
     struct clkmgr_c_subscription subscription = {};
     struct Clkmgr_Event_state event_state = {};
     clkmgr_c_client_ptr client_ptr;
+    const char *ptp4lAddr = "/var/run/ptp4l";
+    const char *chronyAddr = "/var/run/chrony/chronyd.sock";
     int ret = EXIT_SUCCESS;
     uint32_t idle_time = 1;
     uint32_t timeout = 10;
@@ -160,6 +162,17 @@ int main(int argc, char *argv[])
     client_ptr = clkmgr_c_client_fetch();
     if (clkmgr_c_connect(client_ptr) == false) {
         printf("[clkmgr] Failure in connecting !!!\n");
+        ret = EXIT_FAILURE;
+        goto do_exit;
+    }
+
+    if (!clkmgr_c_add_ptp4l_instance(client_ptr, ptp4lAddr, 0)) {
+        printf("[clkmgr] failure in setting ptp4l UDS address !!!\n");
+        ret = EXIT_FAILURE;
+        goto do_exit;
+    }
+    if (!clkmgr_c_add_chrony_instance(client_ptr, chronyAddr)) {
+        printf("[clkmgr] failure in setting chrony UDS address !!!\n");
         ret = EXIT_FAILURE;
         goto do_exit;
     }

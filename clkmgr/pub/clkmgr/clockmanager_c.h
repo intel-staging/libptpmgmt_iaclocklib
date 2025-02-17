@@ -53,6 +53,25 @@ bool clkmgr_c_connect(clkmgr_c_client_ptr client_ptr);
 bool clkmgr_c_disconnect(clkmgr_c_client_ptr client_ptr);
 
 /**
+ * Add the Chrony instance
+ * @param[in, out] client_ptr Pointer to the client instance
+ * @param[in] udsAddr unix domain address to communicate with Chrony
+ * @return true on success, false on failure
+ */
+bool clkmgr_c_add_chrony_instance(clkmgr_c_client_ptr client_ptr,
+    const char *udsAddr);
+
+/**
+ * Add the ptp4l instance
+ * @param[in, out] client_ptr Pointer to the client instance
+ * @param[in] udsAddr unix domain address to communicate with ptp4l
+ * @param[in] domainNumber domain number used
+ * @return true on success, false on failure
+ */
+bool clkmgr_c_add_ptp4l_instance(clkmgr_c_client_ptr client_ptr,
+    const char *udsAddr, uint8_t domainNumber);
+
+/**
  * Subscribe to client events
  * @param[in, out] client_ptr Pointer to the client instance
  * @param[in] sub Subscription structure
