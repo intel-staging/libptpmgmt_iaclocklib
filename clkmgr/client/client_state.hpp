@@ -34,7 +34,7 @@ class ClientState
     Event_count eventStateCount = {}; /**< Event count */
     ClkMgrSubscription eventSub = {}; /**< Event subscription */
     timespec last_notification_time; /**< Last notification time */
-    int ptp4ldomainNumber; /**< PTP4L Domain number */
+    uint8_t ptp4ldomainNumber; /**< PTP4L Domain number */
     UDSAddress ptp4ludsAddr; /**< PTP4L UDS address */
     UDSAddress chronyudsAddr; /**< Chrony UDS address */
 
@@ -183,7 +183,7 @@ class ClientState
      * @param[in] domainNumber Domain number used
      * @return true on success, false on failure
      */
-    bool add_ptp4l_instance(const UDSAddress &udsAddr, int domainNumber);
+    bool add_ptp4l_instance(const UDSAddress &udsAddr, uint8_t domainNumber);
 
     /**
      * Get the PTP4L UDS address
@@ -201,7 +201,7 @@ class ClientState
      * Get the PTP4L Domain number
      * @return PTP4L Domain number
      */
-    int get_ptp4ldomainNumber() const;
+    uint8_t get_ptp4ldomainNumber() const;
 };
 
 __CLKMGR_NAMESPACE_END

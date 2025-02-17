@@ -165,7 +165,7 @@ bool ClientState::add_chrony_instance(const UDSAddress &udsAddr)
 }
 
 bool ClientState::add_ptp4l_instance(const UDSAddress &udsAddr,
-    int domainNumber)
+    uint8_t domainNumber)
 {
     ptp4ludsAddr = udsAddr;
     ptp4ldomainNumber = domainNumber;
@@ -182,7 +182,7 @@ UDSAddress ClientState::get_chronyudsAddr() const
     return chronyudsAddr;
 }
 
-int ClientState::get_ptp4ldomainNumber() const
+uint8_t ClientState::get_ptp4ldomainNumber() const
 {
     return ptp4ldomainNumber;
 }
