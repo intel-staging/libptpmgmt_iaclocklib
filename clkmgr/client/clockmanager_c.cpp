@@ -11,6 +11,7 @@
 
 #include "pub/clkmgr/clockmanager_c.h"
 #include "pub/clockmanager.h"
+#include <string.h>
 
 clkmgr_c_client_ptr clkmgr_c_client_fetch()
 {
@@ -31,6 +32,28 @@ bool clkmgr_c_disconnect(clkmgr_c_client_ptr client_ptr)
         return false;
     return static_cast<clkmgr::ClockManager *>
         (client_ptr)->clkmgr_disconnect();
+}
+
+bool clkmgr_c_add_chrony_instance(clkmgr_c_client_ptr client_ptr,
+    const char *udsAddr)
+{
+    if(client_ptr == nullptr || udsAddr == nullptr)
+        return false;
+    clkmgr::UDSAddress address;
+    std::copy(udsAddr, udsAddr + strlen(udsAddr), address.begin());
+    return static_cast<clkmgr::ClockManager *>
+        (client_ptr)->clkmgr_add_chrony_instance(address);
+}
+
+bool clkmgr_c_add_ptp4l_instance(clkmgr_c_client_ptr client_ptr,
+    const char *udsAddr, uint8_t domainNumber)
+{
+    if(client_ptr == nullptr || udsAddr == nullptr)
+        return false;
+    clkmgr::UDSAddress address;
+    std::copy(udsAddr, udsAddr + strlen(udsAddr), address.begin());
+    return static_cast<clkmgr::ClockManager *>
+        (client_ptr)->clkmgr_add_ptp4l_instance(address, domainNumber);
 }
 
 bool clkmgr_c_subscribe(clkmgr_c_client_ptr client_ptr,
