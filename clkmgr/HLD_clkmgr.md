@@ -89,6 +89,14 @@ notification.
 5. clkmgr_gettime()
 - This function retrieve the time of the CLOCK_REALTIME.
 
+6. clkmgr_add_ptp4l_instance()
+- This function adds a new ptp4l instance by specifying the Unix domain socket
+address (udsAddr) and the domain number.
+
+7. clkmgr_add_chrony_instance()
+- This function adds a new chrony instance by specifying the Unix domain socket
+address (udsAddr).
+
 ## Available API for c sample application
 
 1. clkmgr_c_connect()
@@ -123,3 +131,11 @@ reference for notification.
 
 6. clkmgr_c_gettime()
 - This function retrieve the time of the CLOCK_REALTIME.
+
+7. clkmgr_c_add_ptp4l_instance()
+- This function adds a new ptp4l instance by specifying the Unix domain socket
+address (udsAddr) and the domain number.
+
+8. clkmgr_c_add_chrony_instance()
+- This function adds a new chrony instance by specifying the Unix domain socket
+address (udsAddr).
