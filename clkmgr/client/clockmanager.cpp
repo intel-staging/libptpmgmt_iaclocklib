@@ -154,15 +154,31 @@ done:
     return retVal;
 }
 
-bool ClockManager::clkmgr_add_chrony_instance(const UDSAddress &udsAddr)
+bool ClockManager::clkmgr_add_chrony_instance(const std::string &udsAddr)
 {
-    return implClientState->add_chrony_instance(udsAddr);
+    UDSAddress address;
+    memset(&address, 0, sizeof(address));
+    if(udsAddr.size() > UDS_ADDRESS_LENGTH) {
+        PrintError("Maximum supported length of chrony UDS Address is " +
+            std::to_string(UDS_ADDRESS_LENGTH));
+        return false;
+    }
+    std::copy(udsAddr.begin(), udsAddr.end(), address.begin());
+    return implClientState->add_chrony_instance(address);
 }
 
-bool ClockManager::clkmgr_add_ptp4l_instance(const UDSAddress &udsAddr,
+bool ClockManager::clkmgr_add_ptp4l_instance(const std::string &udsAddr,
     uint8_t domainNumber)
 {
-    return implClientState->add_ptp4l_instance(udsAddr, domainNumber);
+    UDSAddress address;
+    memset(&address, 0, sizeof(address));
+    if(udsAddr.size() > UDS_ADDRESS_LENGTH) {
+        PrintError("Maximum supported length of ptp4l UDS Address is " +
+            std::to_string(UDS_ADDRESS_LENGTH));
+        return false;
+    }
+    std::copy(udsAddr.begin(), udsAddr.end(), address.begin());
+    return implClientState->add_ptp4l_instance(address, domainNumber);
 }
 
 int64_t timespec_delta(const timespec &last_notification_time,

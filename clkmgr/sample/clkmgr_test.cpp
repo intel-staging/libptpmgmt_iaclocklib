@@ -53,9 +53,10 @@ int main(int argc, char *argv[])
     int32_t  gmOffsetUpperLimit = 100000;
     int32_t  chronyGmOffsetLowerLimit = -100000;
     int32_t  chronyGmOffsetUpperLimit = 100000;
-    UDSAddress ptp4lAddr = {"/var/run/ptp4l"};
-    UDSAddress chronyAddr = {"/var/run/chrony/chronyd.sock"};
+    std::string ptp4lAddr = "/var/run/ptp4l";
+    std::string chronyAddr = "/var/run/chrony/chronyd.sock";
     int ret = EXIT_SUCCESS;
+    uint8_t domainNumber = 0;
     uint32_t idleTime = 1;
     uint32_t timeout = 10;
     timespec ts;
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
         (eventGMOffset | eventSyncedToGM | eventASCapable)
     };
 
-    while ((option = getopt(argc, argv, "s:c:u:l:i:t:n:m:h")) != -1) {
+    while ((option = getopt(argc, argv, "s:c:u:l:i:t:n:m:x:y:z:h")) != -1) {
         switch (option) {
         case 's':
             event2Sub = std::stoul(optarg, nullptr, 0);
@@ -96,6 +97,19 @@ int main(int argc, char *argv[])
             break;
         case 'n':
             chronyGmOffsetLowerLimit = std::stoi(optarg);
+            break;
+        case 'x':
+            ptp4lAddr = optarg;
+            break;
+        case 'y':
+            chronyAddr = optarg;
+            break;
+        case 'z':
+            if (std::stoi(optarg) < 0 || std::stoi(optarg) > 255) {
+                std::cerr << "Error: domainNumber must be between 0 and 255.\n";
+                return EXIT_FAILURE;
+            }
+            domainNumber = std::stoi(optarg);
             break;
         case 'h':
             std::cout << "Usage of " << argv[0] << " :\n"
@@ -122,7 +136,14 @@ int main(int argc, char *argv[])
                 "  -n chrony offset lower limit (ns)\n"
                 "     Default: " << chronyGmOffsetLowerLimit << " ns\n"
                 "  -t timeout in waiting notification event (s)\n"
-                "     Default: " << timeout << " s\n";
+                "     Default: " << timeout << " s\n"
+                "  -x ptp4l UDS address\n"
+                "     Default: " << ptp4lAddr << "\n"
+                "  -y chrony UDS address\n"
+                "     Default: " << chronyAddr << "\n"
+                "  -z ptp4l domain number\n"
+                "     Range: 0-255\n"
+                "     Default: " << static_cast<int>(domainNumber) << "\n";
             return EXIT_SUCCESS;
         default:
             std::cerr << "Usage of " << argv[0] << " :\n"
@@ -149,7 +170,14 @@ int main(int argc, char *argv[])
                 "  -n chrony offset lower limit (ns)\n"
                 "     Default: " << chronyGmOffsetLowerLimit << " ns\n"
                 "  -t timeout in waiting notification event (s)\n"
-                "     Default: " << timeout << " s\n";
+                "     Default: " << timeout << " s\n"
+                "  -x ptp4l UDS address\n"
+                "     Default: " << ptp4lAddr << "\n"
+                "  -y chrony UDS address\n"
+                "     Default: " << chronyAddr << "\n"
+                "  -z ptp4l domain number\n"
+                "     Range: 0-255\n"
+                "     Default: " << static_cast<int>(domainNumber) << "\n";
             return EXIT_FAILURE;
         }
     }
@@ -172,16 +200,19 @@ int main(int argc, char *argv[])
         goto do_exit;
     }
 
-    if (!cm.clkmgr_add_ptp4l_instance(ptp4lAddr, 0)) {
+    if (!cm.clkmgr_add_ptp4l_instance(ptp4lAddr, domainNumber)) {
         std::cout << "[clkmgr] failure in setting ptp4l UDS address !!!\n";
         ret = EXIT_FAILURE;
         goto do_exit;
     }
+    std::cout << "[clkmgr] domain number: " << static_cast<int>(domainNumber) << "\n";
+    std::cout << "[clkmgr] ptp4lAddr: " << ptp4lAddr.data() << "\n";
     if (!cm.clkmgr_add_chrony_instance(chronyAddr)) {
         std::cout << "[clkmgr] failure in setting chrony UDS address !!!\n";
         ret = EXIT_FAILURE;
         goto do_exit;
     }
+    std::cout << "[clkmgr] chronyAddr: " << chronyAddr.data() << "\n";
 
     sleep(1);
 
