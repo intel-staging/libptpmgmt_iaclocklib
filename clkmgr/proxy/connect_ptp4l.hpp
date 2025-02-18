@@ -18,7 +18,8 @@ class ConnectPtp4l
 {
   private:
   public:
-    static int connect_ptp4l(std::string ptp4lUdsAddress, uint8_t domain);
+    static int connect_ptp4l(std::string ptp4lUdsAddress, uint8_t domain,
+        uint8_t sessionId);
     static void disconnect_ptp4l();
 };
 

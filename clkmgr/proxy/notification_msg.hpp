@@ -24,6 +24,8 @@ __CLKMGR_NAMESPACE_BEGIN
 class ProxyNotificationMessage : virtual public ProxyMessage,
     virtual public NotificationMessage
 {
+  private:
+    sessionId_t sessionId;
   public:
     ProxyNotificationMessage() : MESSAGE_NOTIFY() {}
     virtual PROCESS_MESSAGE_TYPE(processMessage);
@@ -42,6 +44,12 @@ class ProxyNotificationMessage : virtual public ProxyMessage,
      * @return true
      */
     static bool initMessage();
+    void setSessionId(sessionId_t sessionId) {
+        this->sessionId = sessionId;
+    }
+    sessionId_t getSessionId() const {
+        return sessionId;
+    }
 };
 
 __CLKMGR_NAMESPACE_END
