@@ -16,6 +16,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <vector>
 
 __CLKMGR_NAMESPACE_BEGIN
 
@@ -28,6 +29,7 @@ struct ptp_event {
     int64_t chrony_offset;
     uint32_t chrony_reference_id;
     int64_t polling_interval;
+    uint8_t domain_number;
 };
 
 struct client_ptp_event {

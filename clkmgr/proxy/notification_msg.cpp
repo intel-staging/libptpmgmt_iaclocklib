@@ -19,7 +19,8 @@ __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-extern ptp_event clockEvent;
+extern std::map<int, ptp_event> ptp_event_map;
+extern std::map<uint8_t, std::vector<uint8_t>> session_map;
 
 /**
  * Create the ProxyNotificationMessage object
@@ -52,9 +53,17 @@ BUILD_TXBUFFER_TYPE(ProxyNotificationMessage::makeBuffer) const
     PrintDebug("[ProxyNotificationMessage]::makeBuffer");
     if(!Message::makeBuffer(TxContext))
         return false;
-    /* Add ptp data here */
-    if(!WRITE_TX(FIELD, clockEvent, TxContext))
-        return false;
+    sessionId_t currentSessionId = this->getSessionId();
+    for(auto &entry : ptp_event_map) {
+        ptp_event &event = entry.second;
+        for(const auto &SessionId : session_map[event.domain_number]) {
+            if(currentSessionId == SessionId) {
+                // Add ptp_event data to the buffer
+                if(!WRITE_TX(FIELD, event, TxContext))
+                    return false;
+            }
+        }
+    }
     return true;
 }
 
