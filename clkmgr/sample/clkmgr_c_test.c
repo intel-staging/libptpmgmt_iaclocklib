@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     const char *ptp4lAddr = "/var/run/ptp4l";
     const char *chronyAddr = "/var/run/chrony/chronyd.sock";
     int ret = EXIT_SUCCESS;
+    uint8_t domainNumber = 0;
     uint32_t idle_time = 1;
     uint32_t timeout = 10;
     struct timespec ts;
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
     subscription.threshold[Clkmgr_thresholdChronyOffset].upper_limit = 100000;
     subscription.threshold[Clkmgr_thresholdChronyOffset].lower_limit = -100000;
 
-    while ((option = getopt(argc, argv, "s:c:u:l:i:t:m:n:h")) != -1) {
+    while ((option = getopt(argc, argv, "s:c:u:l:i:t:m:n:x:y:z:h")) != -1) {
         switch (option) {
         case 's':
             subscription.event_mask = strtoul(optarg, NULL, 0);;
@@ -88,6 +89,19 @@ int main(int argc, char *argv[])
             subscription.threshold[Clkmgr_thresholdChronyOffset].lower_limit =
                 strtol(optarg, NULL, 10);
             break;
+        case 'x':
+            ptp4lAddr = optarg;
+            break;
+        case 'y':
+            chronyAddr = optarg;
+            break;
+        case 'z':
+            if (strtol(optarg, NULL, 10) < 0 || strtol(optarg, NULL, 10) > 255) {
+                printf("Error: domainNumber must be between 0 and 255.\n");
+                return EXIT_FAILURE;
+            }
+            domainNumber = strtol(optarg, NULL, 10);
+            break;
         case 'h':
             printf("Usage of %s :\n"
                    "Options:\n"
@@ -113,14 +127,21 @@ int main(int argc, char *argv[])
                    "  -n chrony offset lower limit (ns)\n"
                    "     Default: %d ns\n"
                    "  -t timeout in waiting notification event (s)\n"
-                   "     Default: %d s\n",
+                   "     Default: %d s\n"
+                   "  -x ptp4l UDS address\n"
+                   "     Default: %s \n"
+                   "  -y chrony UDS address\n"
+                   "     Default: %s \n"
+                   "  -z ptp4l domain number\n"
+                   "     Range: 0-255\n"
+                   "     Default: %d\n",
                    argv[0], subscription.event_mask,
                    subscription.composite_event_mask,
                    subscription.threshold[Clkmgr_thresholdGMOffset].upper_limit,
                    subscription.threshold[Clkmgr_thresholdGMOffset].lower_limit,
                    subscription.threshold[Clkmgr_thresholdChronyOffset].upper_limit,
                    subscription.threshold[Clkmgr_thresholdChronyOffset].lower_limit,
-                   idle_time, timeout);
+                   idle_time, timeout, ptp4lAddr, chronyAddr, domainNumber);
             return EXIT_SUCCESS;
         default:
             printf("Usage of %s :\n"
@@ -147,14 +168,21 @@ int main(int argc, char *argv[])
                    "  -n chrony offset lower limit (ns)\n"
                    "     Default: %d ns\n"
                    "  -t timeout in waiting notification event (s)\n"
-                   "     Default: %d s\n",
+                   "     Default: %d s\n"
+                   "  -x ptp4l UDS address\n"
+                   "     Default: %s \n"
+                   "  -y chrony UDS address\n"
+                   "     Default: %s \n"
+                   "  -z ptp4l domain number\n"
+                   "     Range: 0-255\n"
+                   "     Default: %d\n",
                    argv[0], subscription.event_mask,
                    subscription.composite_event_mask,
                    subscription.threshold[Clkmgr_thresholdGMOffset].upper_limit,
                    subscription.threshold[Clkmgr_thresholdGMOffset].lower_limit,
                    subscription.threshold[Clkmgr_thresholdChronyOffset].upper_limit,
                    subscription.threshold[Clkmgr_thresholdChronyOffset].lower_limit,
-                   idle_time, timeout);
+                   idle_time, timeout, ptp4lAddr, chronyAddr, domainNumber);
             return EXIT_FAILURE;
         }
     }
@@ -166,16 +194,19 @@ int main(int argc, char *argv[])
         goto do_exit;
     }
 
-    if (!clkmgr_c_add_ptp4l_instance(client_ptr, ptp4lAddr, 0)) {
+    if (!clkmgr_c_add_ptp4l_instance(client_ptr, ptp4lAddr, domainNumber)) {
         printf("[clkmgr] failure in setting ptp4l UDS address !!!\n");
         ret = EXIT_FAILURE;
         goto do_exit;
     }
+    printf("[clkmgr] domain number: %d\n", domainNumber);
+    printf("[clkmgr] ptp4lAddr: %s\n", ptp4lAddr);
     if (!clkmgr_c_add_chrony_instance(client_ptr, chronyAddr)) {
         printf("[clkmgr] failure in setting chrony UDS address !!!\n");
         ret = EXIT_FAILURE;
         goto do_exit;
     }
+    printf("[clkmgr] chronyAddr: %s\n", chronyAddr);
 
     sleep(1);
 

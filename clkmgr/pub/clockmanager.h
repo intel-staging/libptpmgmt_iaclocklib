@@ -74,7 +74,7 @@ class ClockManager
      * @param[in] udsAddr unix domain address to communicate with Chrony
      * @return true on success, false on failure
      */
-    bool clkmgr_add_chrony_instance(const UDSAddress &udsAddr);
+    bool clkmgr_add_chrony_instance(const std::string &udsAddr);
 
     /**
      * Add the ptp4l instance
@@ -82,7 +82,7 @@ class ClockManager
      * @param[in] domainNumber domain number used
      * @return true on success, false on failure
      */
-    bool clkmgr_add_ptp4l_instance(const UDSAddress &udsAddr,
+    bool clkmgr_add_ptp4l_instance(const std::string &udsAddr,
         uint8_t domainNumber);
 
     /**
