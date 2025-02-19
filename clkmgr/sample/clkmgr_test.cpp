@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
                 "     Bit 2: eventASCapable\n"
                 "  -u gm offset upper limit (ns)\n"
                 "     Default: " << std::dec << gmOffsetUpperLimit << " ns\n"
-                "  -l gm offset lower limitt (ns)\n"
+                "  -l gm offset lower limit (ns)\n"
                 "     Default: " << gmOffsetLowerLimit << " ns\n"
                 "  -i idle time (s)\n"
                 "     Default: " << idleTime << " s\n"
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
     printf("| %-25s | %-19X    |\n",
             "chrony clock_reference_id", eventState.chrony_reference_id);
     printf("| %-25s | %-19d us |\n",
-            "chrony polling interval", eventState.polling_interval);
+            "chrony polling_interval", eventState.polling_interval);
     printf("+---------------------------+------------------------+\n\n");
 
     sleep(1);
