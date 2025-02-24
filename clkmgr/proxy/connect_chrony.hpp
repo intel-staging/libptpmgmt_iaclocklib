@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-3-Clause
-   SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. */
+   SPDX-FileCopyrightText: Copyright © 2025 Intel Corporation. */
 
 /** @file
  * @brief Proxy connect chrony message class.
@@ -11,13 +11,14 @@
 
 #include "common/connect_msg.hpp"
 #include "proxy/message.hpp"
+#include "proxy/connect_ptp4l.hpp"
 
 __CLKMGR_NAMESPACE_BEGIN
 
 class ConnectChrony
 {
   public:
-    static void connect_chrony();
+    static void connect_chrony(const std::vector<TimeBaseCfg> &params);
 };
 
 __CLKMGR_NAMESPACE_END
