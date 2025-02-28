@@ -50,7 +50,16 @@ int main(int argc, char *argv[])
         PrintError("Message init failed");
         return EXIT_FAILURE;
     }
-    std::vector<TimeBaseCfg> timeBaseCfgs;
+    std::vector<TimeBaseCfg> timeBaseCfgs = {
+        {
+            "/var/run/chrony/chronyd.sock", "/var/run/master-domain-1",
+            "enp1s0", 1, 1, 2
+        },
+        {
+            "/var/run/chrony/chronyd-server1.sock", "/var/run/master-domain-0",
+            "enp1s0", 2, 1, 0
+        }
+    }; // TO BE REMOVED
     ConnectPtp4l::connect_ptp4l(timeBaseCfgs);
     #ifdef HAVE_LIBCHRONY
     ConnectChrony::connect_chrony(timeBaseCfgs);
