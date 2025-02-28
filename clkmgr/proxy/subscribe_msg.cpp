@@ -74,7 +74,8 @@ PARSE_RXBUFFER_TYPE(ProxySubscribeMessage::parseBuffer)
     ConnectPtp4l::subscribe_ptp4l(timeBaseIndexTest[i], this->getc_sessionId());
     i++; // TO BE REMOVED
     #ifdef HAVE_LIBCHRONY
-    //ConnectChrony::subscribe_chrony(std::move(timeBaseIndexTest[i]));
+    ConnectChrony::subscribe_chrony(std::move(timeBaseIndexTest[i]),
+        this->getc_sessionId());
     #endif
     return true;
 }
