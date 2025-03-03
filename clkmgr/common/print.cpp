@@ -55,14 +55,14 @@ void clkmgr::_PrintError(string msg, uint16_t line,
 void clkmgr::_PrintDebug(string msg, uint16_t line,
     const char *file, const char *func)
 {
-    if(currentLogLevel > DEBUG)
-        return;
     if(useSyslog)
         syslog(LOG_DEBUG, "*** Debug: %s at line %u in %s: %s",
             msg.c_str(), line, file, func);
-    fprintf(stderr, "*** Debug: %s at line %u in %s: %s\n",
-        msg.c_str(), line, file, func);
-    fflush(stderr);
+    if(currentLogLevel <= DEBUG) {
+        fprintf(stderr, "*** Debug: %s at line %u in %s: %s\n",
+            msg.c_str(), line, file, func);
+        fflush(stderr);
+    }
 }
 
 void clkmgr::_PrintInfo(string msg, uint16_t line, const char *file,
@@ -82,7 +82,7 @@ void clkmgr::_PrintInfo(string msg, uint16_t line, const char *file,
 void clkmgr::_DumpOctetArray(string msg, const uint8_t *arr,
     size_t length, uint16_t line, const char *file, const char *func)
 {
-    if(currentLogLevel > DEBUG)
+    if(!useSyslog && currentLogLevel > DEBUG)
         return;
     char buf[2000];
     string str;
@@ -96,6 +96,8 @@ void clkmgr::_DumpOctetArray(string msg, const uint8_t *arr,
     }
     if(useSyslog)
         syslog(LOG_DEBUG, "%s", str.c_str());
-    fprintf(stderr, "%s\n", str.c_str());
-    fflush(stderr);
+    if(currentLogLevel <= DEBUG) {
+        fprintf(stderr, "%s\n", str.c_str());
+        fflush(stderr);
+    }
 }
