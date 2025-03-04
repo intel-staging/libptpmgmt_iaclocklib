@@ -14,6 +14,7 @@
 
 #include "common/print.hpp"
 #include "common/sighandler.hpp"
+#include "proxy/config_parser.hpp"
 #include "proxy/connect_ptp4l.hpp"
 #ifdef HAVE_LIBCHRONY
 #include "proxy/connect_chrony.hpp"
@@ -93,6 +94,16 @@ int main(int argc, char *argv[])
         PrintError("Message init failed");
         return EXIT_FAILURE;
     }
+    timeBaseCfgs = {
+        {
+            1, "with chrony domain 1", "/var/run/chrony/chronyd.sock",
+            "/var/run/master-domain-1", "enp1s0", 1, 2
+        },
+        {
+            2, "with chrony domain 0", "/var/run/chrony/chronyd-server1.sock",
+            "/var/run/master-domain-0", "enp1s0", 1, 0
+        }
+    }; // TO BE REMOVED
     ConnectPtp4l::connect_ptp4l();
     #ifdef HAVE_LIBCHRONY
     ConnectChrony::connect_chrony();
