@@ -12,20 +12,18 @@
 #ifndef PROXY_CONFIG_PARSER_HPP
 #define PROXY_CONFIG_PARSER_HPP
 
+#include "pub/clkmgr/utility.h"
+#include "pub/clkmgr/types.h"
+
 #include <cstdint>
 #include <string>
 #include <vector>
 
-struct TimeBaseCfg {
-    std::string udsAddrChrony;
-    std::string udsAddrPtp4l;
-    std::string interfaceName;
-    int timeBaseIndex;
-    uint8_t transportSpecific;
-    uint8_t domainNumber;
-};
+__CLKMGR_NAMESPACE_BEGIN
 
 /* Global vector to hold all time base configurations */
 extern std::vector<TimeBaseCfg> timeBaseCfgs;
+
+__CLKMGR_NAMESPACE_END
 
 #endif /* PROXY_CONFIG_PARSER_HPP */

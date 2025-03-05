@@ -11,5 +11,9 @@
 
 #include "proxy/config_parser.hpp"
 
+__CLKMGR_NAMESPACE_BEGIN
+
 /* Global vector to hold all time base configurations */
 std::vector<TimeBaseCfg> timeBaseCfgs;
+
+__CLKMGR_NAMESPACE_END

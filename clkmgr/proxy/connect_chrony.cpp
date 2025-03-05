@@ -168,10 +168,10 @@ void ConnectChrony::connect_chrony()
 {
     for(const auto &param : timeBaseCfgs) {
         /* skip if chrony UDS address is empty */
-        if(param.udsAddrChrony.empty())
+        if(param.udsAddrChrony[0] == '\0')
             continue;
         /* connect to chronyd unix socket using udsAddrChrony */
-        int fd = chrony_open_socket(param.udsAddrChrony.c_str());
+        int fd = chrony_open_socket(param.udsAddrChrony);
         chronyIndex.insert(std::pair<int, int>(fd, param.timeBaseIndex));
         chrony_session *s;
         if(chrony_init_session(&s, fd) == CHRONY_OK) {
