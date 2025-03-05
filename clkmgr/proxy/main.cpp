@@ -96,12 +96,12 @@ int main(int argc, char *argv[])
     }
     timeBaseCfgs = {
         {
-            "/var/run/chrony/chronyd.sock", "/var/run/master-domain-1",
-            "enp1s0", 1, 1, 2
+            1, "with chrony domain 1", "/var/run/chrony/chronyd.sock",
+            "/var/run/master-domain-1", "enp1s0", 1, 2
         },
         {
-            "/var/run/chrony/chronyd-server1.sock", "/var/run/master-domain-0",
-            "enp1s0", 2, 1, 0
+            2, "with chrony domain 0", "/var/run/chrony/chronyd-server1.sock",
+            "/var/run/master-domain-0", "enp1s0", 2, 0
         }
     }; // TO BE REMOVED
     ConnectPtp4l::connect_ptp4l();
