@@ -23,9 +23,6 @@ __CLKMGR_NAMESPACE_USE;
 using namespace std;
 
 extern std::map<int, ptp_event> ptp4lEvents;
-int timeBaseIndexTest[2] = {2, 1}; // TO BE REMOVED
-int i = 0; // TO BE REMOVED
-int j = 0; // TO BE REMOVED
 
 /**
  * Create the ProxySubscribeMessage object
@@ -58,8 +55,7 @@ BUILD_TXBUFFER_TYPE(ProxySubscribeMessage::makeBuffer) const
     PrintDebug("[ProxySubscribeMessage]::makeBuffer");
     if(!CommonSubscribeMessage::makeBuffer(TxContext))
         return false;
-    ptp_event event = ptp4lEvents[timeBaseIndexTest[j]];
-    j++; // TO BE REMOVED
+    ptp_event event = ptp4lEvents[timeBaseIndex];
     /* Add ptp data here */
     if(!WRITE_TX(FIELD, event, TxContext))
         return false;
@@ -71,10 +67,11 @@ PARSE_RXBUFFER_TYPE(ProxySubscribeMessage::parseBuffer)
     PrintDebug("[ProxySubscribeMessage]::parseBuffer ");
     if(!CommonSubscribeMessage::parseBuffer(LxContext))
         return false;
-    ConnectPtp4l::subscribe_ptp4l(timeBaseIndexTest[i], this->getc_sessionId());
-    i++; // TO BE REMOVED
+    if(!PARSE_RX(FIELD, timeBaseIndex, LxContext))
+        return false;
+    ConnectPtp4l::subscribe_ptp4l(timeBaseIndex, this->getc_sessionId());
     #ifdef HAVE_LIBCHRONY
-    ConnectChrony::subscribe_chrony(std::move(timeBaseIndexTest[i]),
+    ConnectChrony::subscribe_chrony(std::move(timeBaseIndex),
         this->getc_sessionId());
     #endif
     return true;

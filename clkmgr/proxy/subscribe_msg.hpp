@@ -22,7 +22,7 @@ class ProxySubscribeMessage : virtual public ProxyMessage,
     virtual public CommonSubscribeMessage
 {
   private:
-    //int timeBaseIndex;
+    int timeBaseIndex;
   protected:
     ProxySubscribeMessage() : MESSAGE_SUBSCRIBE() {};
   public:
