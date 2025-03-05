@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
         },
         {
             2, "with chrony domain 0", "/var/run/chrony/chronyd-server1.sock",
-            "/var/run/master-domain-0", "enp1s0", 2, 0
+            "/var/run/master-domain-0", "enp1s0", 1, 0
         }
     }; // TO BE REMOVED
     ConnectPtp4l::connect_ptp4l();
