@@ -39,7 +39,6 @@ std::vector<std::unique_ptr<ptpmgmt::Message>> msgList;
 std::vector<std::unique_ptr<SockUnix>> sockets;
 std::vector<SockBase *> socketList;
 std::vector<ptpmgmt::Message *> msgs;
-std::vector<std::tuple<SockBase *, ptpmgmt::Message *, int>> combinedList;
 std::map<int, ptp_event> ptp4lEvents;
 std::string baseAddr = "/var/run/pmc.";
 std::map<int, std::vector<sessionId_t>> subscribedClients;
@@ -137,51 +136,45 @@ void event_handle(ptpmgmt::Message *msg, int timeBaseIndex)
     notify_client(timeBaseIndex);
 }
 
-static inline bool msg_send(bool local)
+static inline bool msg_send(bool local, ptpmgmt::Message *msg, SockBase *sk)
 {
-    for(const auto &pair : combinedList) {
-        SockBase *sk = std::get<0>(pair);
-        ptpmgmt::Message *msg = std::get<1>(pair);
-        static int seq = 0;
-        ptpmgmt::Message *m;
-        MNG_PARSE_ERROR_e err;
-        if(local) {
-            m = &msgu;
-            err = m->build(buf, bufSize, seq);
-        } else
-            err = msg->build(buf, bufSize, seq);
-        if(err != MNG_PARSE_ERROR_OK) {
-            PrintError(string("build error ") + msg->err2str_c(err));
-            return false;
-        }
-        bool ret;
-        ret = sk->send(buf, msg->getMsgLen());
-        if(!ret) {
-            #if 0
-            PrintError("send failed");
-            #endif
-            return false;
-        }
-        seq++;
+    static int seq = 0;
+    ptpmgmt::Message *m;
+    MNG_PARSE_ERROR_e err;
+    if(local) {
+        m = &msgu;
+        err = m->build(buf, bufSize, seq);
+    } else
+        err = msg->build(buf, bufSize, seq);
+    if(err != MNG_PARSE_ERROR_OK) {
+        PrintError(string("build error ") + msg->err2str_c(err));
+        return false;
     }
+    bool ret;
+    ret = sk->send(buf, msg->getMsgLen());
+    if(!ret) {
+        #if 0
+        PrintError("send failed");
+        #endif
+        return false;
+    }
+    seq++;
     return true;
 }
 
-static inline bool msg_set_action(bool local, mng_vals_e id)
+static inline bool msg_set_action(bool local, mng_vals_e id,
+    ptpmgmt::Message *msg, SockBase *sk)
 {
     bool ret;
-    for(const auto &pair : combinedList) {
-        ptpmgmt::Message *msg = std::get<1>(pair);
-        if(local)
-            ret = msgu.setAction(GET, id);
-        else
-            ret = msg->setAction(GET, id);
-        if(!ret) {
-            PrintError(string("Fail get ") + msg->mng2str_c(id));
-            return false;
-        }
+    if(local)
+        ret = msgu.setAction(GET, id);
+    else
+        ret = msg->setAction(GET, id);
+    if(!ret) {
+        PrintError(string("Fail get ") + msg->mng2str_c(id));
+        return false;
     }
-    return msg_send(local);
+    return msg_send(local, msg, sk);
 }
 
 /**
@@ -206,7 +199,7 @@ static inline bool msg_set_action(bool local, mng_vals_e id)
  *         sent, false otherwise.
  *
  */
-bool event_subscription(ptpmgmt::Message *msg)
+bool event_subscription(ptpmgmt::Message *msg, SockBase *sk)
 {
     bool ret = false;
     memset(eventsTlv.bitmask, 0, sizeof eventsTlv.bitmask);
@@ -219,7 +212,7 @@ bool event_subscription(ptpmgmt::Message *msg)
         PrintError("Fail set SUBSCRIBE_EVENTS_NP");
         return false;
     }
-    ret = msg_send(false);
+    ret = msg_send(false, msg, sk);
     /* Remove referance to local SUBSCRIBE_EVENTS_NP_t */
     msg->clearData();
     return ret;
@@ -249,7 +242,7 @@ void *ptp4l_event_loop(SockBase *sk, ptpmgmt::Message *msg, int timeBaseIndex,
 {
     const uint64_t timeout_ms = 1000;
     bool lost_connection = false;
-    if(!msg_set_action(true, PORT_PROPERTIES_NP))
+    if(!msg_set_action(true, PORT_PROPERTIES_NP, msg, sk))
         PrintDebug("Failed to get port properties\n");
     ssize_t cnt;
     sk->poll(timeout_ms);
@@ -259,8 +252,8 @@ void *ptp4l_event_loop(SockBase *sk, ptpmgmt::Message *msg, int timeBaseIndex,
         if(err == MNG_PARSE_ERROR_OK)
             event_handle(msg, timeBaseIndex);
     }
-    msg_set_action(false, PORT_PROPERTIES_NP);
-    event_subscription(msg);
+    msg_set_action(false, PORT_PROPERTIES_NP, msg, sk);
+    event_subscription(msg, sk);
     for(;;) {
         MsgParams prms;
         prms = msg->getParams();
@@ -273,7 +266,7 @@ void *ptp4l_event_loop(SockBase *sk, ptpmgmt::Message *msg, int timeBaseIndex,
             }
         } else {
             for(;;) {
-                if(event_subscription(msg))
+                if(event_subscription(msg, sk))
                     break;
                 if(!lost_connection) {
                     PrintError("Lost connection to ptp4l at address: " + udsAddr);
@@ -315,7 +308,6 @@ int ConnectPtp4l::subscribe_ptp4l(int timeBaseIndex, sessionId_t sessionId)
 void handle_connect_thread(SockBase *sk, ptpmgmt::Message *msg,
     int timeBaseIndex, std::string udsAddr)
 {
-    combinedList.push_back(std::make_tuple(sk, msg, timeBaseIndex));
     ptp4l_event_loop(sk, msg, timeBaseIndex, udsAddr);
 }
 
