@@ -28,11 +28,22 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+    JsonConfigParser parser;
     int level, verbose, syslog;
     bool startSyslog = true;
+    bool getJsonConfig = false;
     int opt;
-    while((opt = getopt(argc, argv, "l:v:s:h")) != -1) {
+    const char *file = nullptr;
+    while((opt = getopt(argc, argv, "f:l:v:s:h")) != -1) {
         switch(opt) {
+            case 'f':
+                file = optarg;
+                if(file == nullptr || !parser.process_json(file)) {
+                    fprintf(stderr, "Failed to process json file\n");
+                    return EXIT_FAILURE;
+                }
+                getJsonConfig = true; //Recheck isConfigset
+                break;
             case 'l':
                 level = atoi(optarg);
                 if(level < 0 || level > 3) {
@@ -60,6 +71,7 @@ int main(int argc, char *argv[])
             case 'h':
                 printf("Usage of %s:\n"
                     "Options:\n"
+                    " -f [file] Read configuration from 'file'\n"
                     " -l <lvl> Set log level\n"
                     "          0: ERROR, 1: INFO(default), 2: DEBUG, 3: TRACE\n"
                     " -v <0|1> Enable or disable verbose output\n"
@@ -72,6 +84,7 @@ int main(int argc, char *argv[])
             default:
                 fprintf(stderr, "Usage of %s:\n"
                     "Options:\n"
+                    " -f [file] Read configuration from 'file'\n"
                     " -l <lvl> Set log level\n"
                     "          0: ERROR, 1: INFO(default), 2: DEBUG, 3: TRACE\n"
                     " -v <0|1> Enable or disable verbose output\n"
@@ -82,6 +95,10 @@ int main(int argc, char *argv[])
                     argv[0]);
                 return EXIT_FAILURE;
         }
+    }
+    if(!getJsonConfig) {
+        PrintError("No configuration file provided");
+        return EXIT_FAILURE;
     }
     if(startSyslog)
         PrintStartLog(argv[0]);
