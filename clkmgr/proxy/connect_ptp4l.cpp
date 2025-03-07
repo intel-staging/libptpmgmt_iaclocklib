@@ -12,6 +12,7 @@
 #include "common/print.hpp"
 #include "proxy/client.hpp"
 #include "proxy/config_parser.hpp"
+#include "proxy/connect_chrony.hpp"
 #include "proxy/connect_ptp4l.hpp"
 #include "proxy/notification_msg.hpp"
 
@@ -144,6 +145,20 @@ class ptpSet : MessageDispatcher
 static vector<unique_ptr<ptpSet>> ptpSets;
 static map<int, vector<sessionId_t>> subscribedClients;
 
+int ConnectPtp4l::remove_ptp4l_subscriber(int timeBaseIndex,
+    sessionId_t sessionId)
+{
+    auto &clients = subscribedClients[timeBaseIndex];
+    for(auto it = clients.begin(); it != clients.end(); ++it) {
+        if(*it == sessionId) {
+            // sessionId found, remove it
+            clients.erase(it);
+            return 0;
+        }
+    }
+    return 0;
+}
+
 void notify_client(int timeBaseIndex)
 {
     PrintDebug("[clkmgr]::notify_client");
@@ -160,8 +175,13 @@ void notify_client(int timeBaseIndex)
         PrintDebug("Get client session ID: " + to_string(sessionId));
         auto TxContext =
             Client::GetClientSession(sessionId).get()->get_transmitContext();
-        if(!pmsg->transmitMessage(*TxContext))
+        if(!pmsg->transmitMessage(*TxContext)) {
+            ConnectPtp4l::remove_ptp4l_subscriber(timeBaseIndex, sessionId);
+            #ifdef HAVE_LIBCHRONY
+            ConnectChrony::remove_chrony_subscriber(timeBaseIndex, sessionId);
+            #endif
             Client::RemoveClientSession(sessionId);
+        }
     }
 }
 
