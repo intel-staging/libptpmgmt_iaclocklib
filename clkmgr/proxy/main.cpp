@@ -28,7 +28,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    JsonConfigParser parser;
     int level, verbose, syslog;
     bool startSyslog = true;
     bool getJsonConfig = false;
@@ -38,7 +37,8 @@ int main(int argc, char *argv[])
         switch(opt) {
             case 'f':
                 file = optarg;
-                if(file == nullptr || !parser.process_json(file)) {
+                if(file == nullptr ||
+                    !JsonConfigParser::getInstance().process_json(file)) {
                     fprintf(stderr, "Failed to process json file\n");
                     return EXIT_FAILURE;
                 }
