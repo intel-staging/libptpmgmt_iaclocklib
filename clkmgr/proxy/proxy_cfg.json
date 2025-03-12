@@ -9,7 +9,7 @@
  *
  */
 {
-    "timeBase": [
+    "timeBases": [
         {
             "timeBaseName": "Global Clock",
             "ptp4l":
