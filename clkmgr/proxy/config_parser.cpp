@@ -13,14 +13,13 @@
 #include "common/print.hpp"
 #include "proxy/config_parser.hpp"
 
-__CLKMGR_NAMESPACE_BEGIN
-
-/* Global vector to hold all time base configurations */
-std::vector<TimeBaseCfg> timeBaseCfgs;
-
-__CLKMGR_NAMESPACE_END
-
 __CLKMGR_NAMESPACE_USE;
+
+JsonConfigParser &JsonConfigParser::getInstance()
+{
+    static JsonConfigParser instance;
+    return instance;
+}
 
 void JsonConfigParser::print_config()
 {

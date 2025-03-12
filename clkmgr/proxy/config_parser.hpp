@@ -21,17 +21,20 @@
 
 __CLKMGR_NAMESPACE_BEGIN
 
-/* Global vector to hold all time base configurations */
-extern std::vector<TimeBaseCfg> timeBaseCfgs;
-
 class JsonConfigParser
 {
   private:
+    std::vector<TimeBaseCfg> timeBaseCfgs;
+    JsonConfigParser() = default;
   public:
+    static JsonConfigParser &getInstance();
     bool process_json(const char *file);
     bool get_Int_Val(jsonObject *obj, const char *key, uint8_t *res);
     bool get_Str_Val(jsonObject *obj, const char *key, char *res);
     void print_config();
+    const std::vector<TimeBaseCfg> &getTimeBaseCfgs() const {
+        return timeBaseCfgs;
+    }
 };
 
 __CLKMGR_NAMESPACE_END
