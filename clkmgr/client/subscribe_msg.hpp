@@ -27,7 +27,7 @@ class ClientSubscribeMessage : virtual public
 {
   private:
     static ClientState *currentClientState;
-    int timeBaseIndex; /**< Timebase index */
+    int timeBaseIndex = 0; /**< Timebase index */
 
   public:
     ClientSubscribeMessage() : MESSAGE_SUBSCRIBE() {};

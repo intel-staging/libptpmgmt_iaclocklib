@@ -56,7 +56,7 @@ PARSE_RXBUFFER_TYPE(ClientConnectMessage::parseBuffer)
     if(!PARSE_RX(FIELD, mapSize, LxContext))
         return false;
     for(size_t i = 0; i < mapSize; ++i) {
-        TimeBaseCfg newCfg;
+        TimeBaseCfg newCfg = {};
         if(!PARSE_RX(FIELD, newCfg, LxContext))
             return false;
         TimeBaseConfigurations::getInstance().addTimeBaseCfg(newCfg);
