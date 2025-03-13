@@ -14,6 +14,7 @@
  */
 
 #include <getopt.h>
+#include <algorithm>
 #include <iostream>
 #include <signal.h>
 #include <sstream>
@@ -59,7 +60,9 @@ int main(int argc, char *argv[])
     int ret = EXIT_SUCCESS;
     uint32_t idleTime = 1;
     uint32_t timeout = 10;
-    std::vector<int> index;
+    //std::vector<int> index;
+    std::vector<std::string> name;
+    int count = 0;
     std::string input;
     timespec ts;
     int retval;
@@ -216,11 +219,11 @@ int main(int argc, char *argv[])
     }
 
     if (subscribeAll) {
-        for (const auto &cfg : cm.clkmgr_get_timebase_cfgs()) {
+        /*for (const auto &cfg : cm.clkmgr_get_timebase_cfgs()) {
             index.push_back(cfg.timeBaseIndex);
-        }
+        }*/
     } else if (userInput) {
-        std::cout << "Enter the time base indices to subscribe (comma-separated, default is 1): ";
+        /*std::cout << "Enter the time base indices to subscribe (comma-separated, default is 1): ";
         std::getline(std::cin, input);
         if (!input.empty()) {
             try {
@@ -236,14 +239,33 @@ int main(int argc, char *argv[])
         } else {
             std::cerr << "Invalid input. Using default time base index 1.\n";
             index.push_back(1);
+        }*/
+        std::cout << "Enter the time base name to subscribe: ";
+        std::getline(std::cin, input);
+        if (!input.empty()) {
+            try {
+                std::stringstream ss(input);
+                std::string item;
+                while (std::getline(ss, item, ',')) {
+                    // Trim leading and trailing spaces
+                    item.erase(0, item.find_first_not_of(' '));
+                    item.erase(item.find_last_not_of(' ') + 1);
+                    name.push_back(item);
+                    count++;
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "Invalid time base name!\n";
+                return EXIT_FAILURE;
+            }
         }
     } else {
-        index.push_back(1);
+        //index.push_back(1);
     }
 
-    for (const auto &idx : index) {
-        std::cout << "Subscribe to time base index: " << idx << "\n";
-        if (!cm.clkmgr_subscribe(subscription, idx, eventState)) {
+    for (int i = 0; i < count; ++i) {
+        std::cout << "Subscribe to time base name: " << name[i] << "\n";
+        char *timeBaseName = const_cast<char*>(name[i].c_str());
+        if (!cm.clkmgr_subscribe_by_name(subscription, timeBaseName, eventState)) {
             std::cerr << "[clkmgr] Failure in subscribing to clkmgr Proxy !!!\n";
             cm.clkmgr_disconnect();
             return EXIT_FAILURE;
@@ -319,10 +341,11 @@ int main(int argc, char *argv[])
     sleep(1);
 
     while (!signal_flag) {
-        for (const auto &idx : index) {
-            printf("[clkmgr][%.3f] Waiting Notification from time base index %d ...\n",
-                getMonotonicTime(), idx);
-            retval = cm.clkmgr_status_wait(timeout, idx, eventState , eventCount);
+        for (int i = 0; i < count; ++i) {
+            printf("[clkmgr][%.3f] Waiting Notification from time base index %s ...\n",
+                getMonotonicTime(), name[i].c_str());
+            char *timeBaseName = const_cast<char*>(name[i].c_str());
+            retval = cm.clkmgr_status_wait_by_name(timeout, timeBaseName, eventState , eventCount);
             if (!retval) {
                 printf("[clkmgr][%.3f] No event status changes identified in %d seconds.\n\n",
                     getMonotonicTime(), timeout);

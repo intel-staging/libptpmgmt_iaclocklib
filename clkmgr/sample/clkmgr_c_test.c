@@ -22,6 +22,27 @@
 
 #include <clockmanager.h>
 
+
+// Function to trim leading and trailing spaces from a string
+char *trim_spaces(char *str) {
+    char *end;
+
+    // Trim leading spaces
+    while (isspace((unsigned char)*str)) str++;
+
+    // All spaces?
+    if (*str == 0) return str;
+
+    // Trim trailing spaces
+    end = str + strlen(str) - 1;
+    while (end > str && isspace((unsigned char)*end)) end--;
+
+    // Write new null terminator
+    *(end + 1) = 0;
+
+    return str;
+}
+
 double getMonotonicTime() {
     struct timespec time_spec;
 
@@ -47,9 +68,11 @@ int main(int argc, char *argv[])
     int ret = EXIT_SUCCESS;
     uint32_t idle_time = 1;
     uint32_t timeout = 10;
-    char input[8];
-    int index[8];
-    int index_count = 0;
+    char input[64];
+    char name[64][64];
+    int count = 0;
+    //int index[8];
+    //int index_count = 0;
     struct timespec ts;
     int retval;
     int option;
@@ -208,17 +231,33 @@ int main(int argc, char *argv[])
     }
 
     if (subscribeAll) {
-        for (size_t i = 1; i <= index_size; i++) {
+        /*for (size_t i = 1; i <= index_size; i++) {
             struct Clkmgr_TimeBaseCfg cfg;
             if (clkmgr_c_get_timebase_cfgs(client_ptr, i, &cfg)) {
                 index[index_count++] = cfg.timeBaseIndex;
             }
-        }
+        }*/
     } else if (userInput) {
-        printf("Enter the time base indices to subscribe (comma-separated, default is 1): ");
+        printf("Enter the time base name to subscribe: ");
+        fgets(input, sizeof(input), stdin);
+        if (strlen(input) > 1) {
+            char *token = strtok(input, ",");
+            while (token != NULL) {
+                token = trim_spaces(token); // Trim spaces from the token
+                strncpy(name[count], token, sizeof(name[count]) - 1);
+                name[count][sizeof(name[count]) - 1] = '\0';
+                count++;
+                token = strtok(NULL, ",");
+            }
+        } else {
+            printf("Invalid input.\n");
+            //index[index_count++] = 1;
+        }
+        /*printf("Enter the time base indices to subscribe (comma-separated, default is 1): ");
         fgets(input, sizeof(input), stdin);
         if (strlen(input) > 1) {
             char *token = strtok(input, ", ");
+
             while (token != NULL) {
                 if (isdigit(*token)) {
                     index[index_count++] = atoi(token);
@@ -231,15 +270,15 @@ int main(int argc, char *argv[])
         } else {
             printf("Invalid input. Using default time base index 1.\n");
             index[index_count++] = 1;
-        }
+        }*/
     } else {
-        index[index_count++] = 1;
+        //index[index_count++] = 1;
     }
 
-    for (size_t i = 0; i < index_count; i++) {
+    for (int i = 0; i < count; ++i) {
         /* Subscribe to default time base index 1 */
-        printf("[clkmgr] Subscribe to time base index: %d\n", index[i]);
-        if (clkmgr_c_subscribe(client_ptr, subscription, index[i], &event_state) == false) {
+        printf("[clkmgr] Subscribe to time base index: %s\n", name[i]);
+        if (clkmgr_c_subscribe_by_name(client_ptr, subscription, name[i], &event_state) == false) {
             printf("[clkmgr] Failure in subscribing to clkmgr Proxy !!!\n");
             ret = EXIT_FAILURE;
             goto do_exit;
@@ -315,10 +354,10 @@ int main(int argc, char *argv[])
     sleep(1);
 
     while (1) {
-        for (size_t i = 0; i < index_count; i++) {
-            printf("[clkmgr][%.3f] Waiting Notification from time base index %d ...\n",
-                getMonotonicTime(), index[i]);
-            retval = clkmgr_c_status_wait(client_ptr, timeout, index[i], &event_state , &event_count);
+        for (int i = 0; i < count; ++i) {
+            printf("[clkmgr][%.3f] Waiting Notification from time base index %s ...\n",
+                getMonotonicTime(), name[i]);
+            retval = clkmgr_c_status_wait_by_name(client_ptr, timeout, name[i], &event_state , &event_count);
             if (!retval) {
                 printf("[clkmgr][%.3f] No event status changes identified in %d seconds.\n\n",
                     getMonotonicTime(), timeout);
