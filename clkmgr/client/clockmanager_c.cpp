@@ -65,6 +65,27 @@ size_t clkmgr_c_get_timebase_cfgs_size(clkmgr_c_client_ptr client_ptr)
     return cm->clkmgr_get_timebase_cfgs().size();
 }
 
+bool clkmgr_c_subscribe_by_name(clkmgr_c_client_ptr client_ptr,
+    const clkmgr_c_subscription sub, char timeBaseName[CLKMGR_STRING_SIZE_MAX],
+    Clkmgr_Event_state *current_state)
+{
+    if(client_ptr == nullptr || timeBaseName == nullptr ||
+        current_state == nullptr)
+        return false;
+    clkmgr::ClockManager *cm = static_cast<clkmgr::ClockManager *>(client_ptr);
+    int timeBaseIndex = -1;
+    std::vector<clkmgr::TimeBaseCfg> cfgs = cm->clkmgr_get_timebase_cfgs();
+    for(const auto &cfg : cfgs) {
+        if(strncmp(cfg.timeBaseName, timeBaseName, CLKMGR_STRING_SIZE_MAX) == 0) {
+            timeBaseIndex = cfg.timeBaseIndex;
+            break;
+        }
+    }
+    if(timeBaseIndex == -1)
+        return false;
+    return clkmgr_c_subscribe(client_ptr, sub, timeBaseIndex, current_state);
+}
+
 bool clkmgr_c_subscribe(clkmgr_c_client_ptr client_ptr,
     const clkmgr_c_subscription sub, int time_base_index,
     Clkmgr_Event_state *current_state)
@@ -100,6 +121,28 @@ bool clkmgr_c_subscribe(clkmgr_c_client_ptr client_ptr,
         current_state->polling_interval = state.polling_interval;
     }
     return ret;
+}
+
+int clkmgr_c_status_wait_by_name(clkmgr_c_client_ptr client_ptr, int timeout,
+    char timeBaseName[CLKMGR_STRING_SIZE_MAX], Clkmgr_Event_state *current_state,
+    Clkmgr_Event_count *current_count)
+{
+    if(client_ptr == nullptr || timeBaseName == nullptr ||
+        current_state == nullptr)
+        return -1;
+    clkmgr::ClockManager *cm = static_cast<clkmgr::ClockManager *>(client_ptr);
+    int timeBaseIndex = -1;
+    std::vector<clkmgr::TimeBaseCfg> cfgs = cm->clkmgr_get_timebase_cfgs();
+    for(const auto &cfg : cfgs) {
+        if(strncmp(cfg.timeBaseName, timeBaseName, CLKMGR_STRING_SIZE_MAX) == 0) {
+            timeBaseIndex = cfg.timeBaseIndex;
+            break;
+        }
+    }
+    if(timeBaseIndex == -1)
+        return -1;
+    return clkmgr_c_status_wait(client_ptr, timeout, timeBaseIndex, current_state,
+            current_count);
 }
 
 int clkmgr_c_status_wait(clkmgr_c_client_ptr client_ptr, int timeout,
