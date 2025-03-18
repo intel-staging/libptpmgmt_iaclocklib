@@ -242,7 +242,9 @@ int main(int argc, char *argv[])
     }
 
     for (const auto &idx : index) {
-        std::cout << "Subscribe to time base index: " << idx << "\n";
+        /* Clear screen */
+        std::cout << "\033[2J\033[H" << std::flush;
+        std::cout << "\033[47;30m==================Subscribe to time base index: " << idx << "==================\033[0m" << "\n\n";
         if (!cm.clkmgr_subscribe(subscription, idx, eventState)) {
             std::cerr << "[clkmgr] Failure in subscribing to clkmgr Proxy !!!\n";
             cm.clkmgr_disconnect();
@@ -257,35 +259,54 @@ int main(int argc, char *argv[])
             printf("[clkmgr] Current Time of CLOCK_REALTIME: %ld ns\n",
                 (ts.tv_sec * 1000000000) + ts.tv_nsec);
         }
-        printf("+---------------------------+------------------------+\n");
-        printf("| %-25s | %-22s |\n", "Event", "Event Status");
+        printf("+-------------------------------+------------------------+\n");
+        printf("| %-25s |         %-18s |\n", "Event", "Event Status");
         if (event2Sub) {
-            printf("+---------------------------+------------------------+\n");
+            printf("+-------------------------------+------------------------+\n");
         }
         if (event2Sub & eventGMOffset) {
-            printf("| %-25s | %-22d |\n", "offset_in_range",
-                eventState.offset_in_range);
+            if (eventState.offset_in_range) {
+                printf("| %-25s |    \033[32m● In Range          ●\033[0m %-1s |\n", "offset_in_range",
+                    " ");
+            } else {
+                printf("| %-25s |    \033[31;5m● Out of Range      ●\033[0m %-1s |\n", "offset_in_range",
+                    " ");
+            }
         }
         if (event2Sub & eventSyncedToGM) {
-            printf("| %-25s | %-22d |\n", "synced_to_primary_clock", eventState.synced_to_primary_clock);
+            if (eventState.synced_to_primary_clock) {
+                printf("| %-25s |    \033[32m● In Sync           ●\033[0m%-2s |\n", "synced_to_primary_clock", " ");
+            } else {
+                printf("| %-25s |    \033[31;5m● Out of Sync       ●\033[0m%-2s |\n", "synced_to_primary_clock", " ");
+            }
         }
         if (event2Sub & eventASCapable) {
-            printf("| %-25s | %-22d |\n", "as_capable", eventState.as_capable);
+            if (eventState.as_capable) {
+                printf("| %-25s |    \033[32m● Capable          ●\033[0m%-2s |\n", "as_capable", " ");
+            } else {
+                printf("| %-25s |    \033[31;5m● Not Capable       ●\033[0m%-2s |\n", "as_capable", " ");
+            }
+
         }
         if (event2Sub & eventGMChanged) {
-            printf("| %-25s | %-22d |\n", "gm_Changed", eventState.gm_changed);
+            if (eventState.gm_changed) {
+                printf("| %-25s |    \033[31;5m● GM Changed        ●\033[0m%-2s |\n", "gm_Changed", " ");
+            } else {
+                printf("| %-25s |    \033[32m● Same GM           ●\033[0m%-2s |\n", "gm_Changed", " ");
+            }
+
         }
-        printf("+---------------------------+------------------------+\n");
-        printf("| %-25s | %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n", "GM UUID",
+        printf("+---------------------------+----------------------------+\n");
+        printf("| %-25s | %02x%02x%02x.%02x%02x.%02x%02x%06x     |\n", "GM UUID",
             eventState.gm_identity[0], eventState.gm_identity[1],
             eventState.gm_identity[2], eventState.gm_identity[3],
             eventState.gm_identity[4], eventState.gm_identity[5],
             eventState.gm_identity[6], eventState.gm_identity[7]);
-        printf("| %-25s | %-19ld ns |\n",
+        printf("| %-25s | %-23ld ns |\n",
                 "clock_offset", eventState.clock_offset);
-        printf("| %-25s | %-19ld ns |\n",
+        printf("| %-25s | %-23ld ns |\n",
                 "notification_timestamp", eventState.notification_timestamp);
-        printf("+---------------------------+------------------------+\n");
+        printf("+---------------------------+----------------------------+\n");
         if (composite_event) {
             printf("| %-25s | %-22d |\n", "composite_event",
                 eventState.composite_event);
@@ -304,30 +325,35 @@ int main(int argc, char *argv[])
         } else {
             printf("\n");
         }
-        printf("+---------------------------+------------------------+\n");
-        printf("| %-25s | %-22d |\n", "chrony offset_in_range",
-                eventState.chrony_offset_in_range);
-        printf("+---------------------------+------------------------+\n");
-        printf("| %-25s | %-19ld ns |\n",
+        printf("+---------------------------+----------------------------+\n");
+        if (eventState.chrony_offset_in_range) {
+            printf("| %-25s |    \033[32m● In Range         ●\033[0m%-3s |\n", "chrony offset_in_range",
+                " ");
+        } else {
+            printf("| %-25s |    \033[31;5m● Out of Range      ●\033[0m%-2s |\n", "chrony offset_in_range",
+                " ");
+        }
+        printf("+---------------------------+----------------------------+\n");
+        printf("| %-25s | %-23ld ns |\n",
                 "chrony clock_offset", eventState.chrony_clock_offset);
-        printf("| %-25s | %-19X    |\n",
+        printf("| %-25s | %-23X    |\n",
                 "chrony clock_reference_id", eventState.chrony_reference_id);
-        printf("| %-25s | %-19d us |\n",
+        printf("| %-25s | %-23d us |\n",
                 "chrony polling interval", eventState.polling_interval);
-        printf("+---------------------------+------------------------+\n\n");
+        printf("+---------------------------+----------------------------+\n\n");
     }
-    sleep(1);
+    //sleep(1);
 
     while (!signal_flag) {
         for (const auto &idx : index) {
-            printf("[clkmgr][%.3f] Waiting Notification from time base index %d ...\n",
-                getMonotonicTime(), idx);
+            /*printf("[clkmgr][%.3f] Waiting Notification from time base index %d ...\n",
+                getMonotonicTime(), idx);*/
             retval = cm.clkmgr_status_wait(timeout, idx, eventState , eventCount);
             if (!retval) {
-                printf("[clkmgr][%.3f] No event status changes identified in %d seconds.\n\n",
+                /*printf("[clkmgr][%.3f] No event status changes identified in %d seconds.\n\n",
                     getMonotonicTime(), timeout);
                 printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
-                    getMonotonicTime(), idleTime);
+                    getMonotonicTime(), idleTime);*/
                 sleep(idleTime);
                 continue;
             } else if (retval < 0) {
@@ -336,6 +362,9 @@ int main(int argc, char *argv[])
                 return EXIT_SUCCESS;
             }
 
+            /* Clear screen */
+            std::cout << "\033[2J\033[H" << std::flush;
+            std::cout << "\033[47;30m==================Subscribe to time base index: " << idx << "==================\033[0m" << "\n\n";
             printf("[clkmgr][%.3f] Obtained data from Notification Event:\n",
                 getMonotonicTime());
             if (cm.clkmgr_gettime(&ts)) {
@@ -344,40 +373,59 @@ int main(int argc, char *argv[])
                 printf("[clkmgr] Current Time of CLOCK_REALTIME: %ld ns\n",
                     (ts.tv_sec * 1000000000) + ts.tv_nsec);
             }
-            printf("+---------------------------+--------------+-------------+\n");
-            printf("| %-25s | %-12s | %-11s |\n", "Event", "Event Status",
+            printf("+---------------------------+----------------------+-------------+\n");
+            printf("| %-25s |     %-16s | %-11s |\n", "Event", "Event Status",
                 "Event Count");
             if (event2Sub) {
-            printf("+---------------------------+--------------+-------------+\n");
+            printf("+---------------------------+----------------------+-------------+\n");
             }
             if (event2Sub & eventGMOffset) {
-                printf("| %-25s | %-12d | %-11d |\n", "offset_in_range",
-                    eventState.offset_in_range,
-                    eventCount.offset_in_range_event_count);
+                if (eventState.offset_in_range) {
+                    printf("| %-25s |   \033[32m● In Range     ●\033[0m%-2s | %-11d |\n", "offset_in_range",
+                        " ", eventCount.offset_in_range_event_count);
+                } else {
+                    printf("| %-25s |   \033[31;5m● Out of Range ●\033[0m%-2s | %-11d |\n", "offset_in_range",
+                        " ", eventCount.offset_in_range_event_count);
+                }
             }
             if (event2Sub & eventSyncedToGM) {
-                printf("| %-25s | %-12d | %-11d |\n", "synced_to_primary_clock",
-                eventState.synced_to_primary_clock, eventCount.synced_to_gm_event_count);
+                if (eventState.synced_to_primary_clock) {
+                    printf("| %-25s |   \033[32m● In Sync      ●\033[0m%-2s | %-11d |\n", "synced_to_primary_clock",
+                    " ", eventCount.synced_to_gm_event_count);
+                } else {
+                    printf("| %-25s |   \033[31;5m● Out of Sync  ●\033[0m%-2s | %-11d |\n", "synced_to_primary_clock",
+                        " ", eventCount.synced_to_gm_event_count);
+                }
             }
             if (event2Sub & eventASCapable) {
-                printf("| %-25s | %-12d | %-11d |\n", "as_capable",
-                    eventState.as_capable, eventCount.as_capable_event_count);
+                if (eventState.as_capable) {
+                    printf("| %-25s | \033[32m● Capable     ●\033[0m%-2s | %-11d |\n", "as_capable",
+                        " ", eventCount.as_capable_event_count);
+                } else {
+                    printf("| %-25s |   \033[31;5m● Not Capable  ●\033[0m%-2s | %-11d |\n", "as_capable",
+                        " ", eventCount.as_capable_event_count);
+                }
             }
             if (event2Sub & eventGMChanged) {
-                printf("| %-25s | %-12d | %-11d |\n", "gm_Changed",
-                    eventState.gm_changed, eventCount.gm_changed_event_count);
+                if (eventState.gm_changed) {
+                    printf("| %-25s |   \033[31;5m● GM Changed   ●\033[0m%-2s | %-11d |\n", "gm_Changed",
+                        " ", eventCount.gm_changed_event_count);
+                } else {
+                    printf("| %-25s |   \033[32m● Same GM      ●\033[0m%-2s | %-11d |\n", "gm_Changed",
+                        " ", eventCount.gm_changed_event_count);
+                }
             }
-            printf("+---------------------------+--------------+-------------+\n");
-            printf("| %-25s |     %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n",
+            printf("+---------------------------+----------------------+-------------+\n");
+            printf("| %-25s |     %02x%02x%02x.%02x%02x.%02x%02x%010x     |\n",
                 "GM UUID", eventState.gm_identity[0], eventState.gm_identity[1],
                 eventState.gm_identity[2], eventState.gm_identity[3],
                 eventState.gm_identity[4], eventState.gm_identity[5],
                 eventState.gm_identity[6], eventState.gm_identity[7]);
-            printf("| %-25s |     %-19ld ns |\n",
+            printf("| %-25s |     %-27ld ns |\n",
                 "clock_offset", eventState.clock_offset);
-            printf("| %-25s |     %-19ld ns |\n",
+            printf("| %-25s |     %-27ld ns |\n",
                 "notification_timestamp", eventState.notification_timestamp);
-            printf("+---------------------------+--------------+-------------+\n");
+            printf("+---------------------------+----------------------+-------------+\n");
             if (composite_event) {
                 printf("| %-25s | %-12d | %-11d |\n", "composite_event",
                     eventState.composite_event, eventCount.composite_event_count);
@@ -396,20 +444,25 @@ int main(int argc, char *argv[])
             } else {
                 printf("\n");
             }
-            printf("+---------------------------+----------------------------+\n");
-            printf("| %-25s | %-12d | %-11d |\n", "chrony offset_in_range",
-                eventState.chrony_offset_in_range, eventCount.chrony_offset_in_range_event_count);
-            printf("+---------------------------+----------------------------+\n");
-            printf("| %-25s |     %-19ld ns |\n",
+            printf("+---------------------------+------------------------------------+\n");
+            if (eventState.chrony_offset_in_range) {
+                printf("| %-25s |   \033[32m● In Range     ●\033[0m%-2s | %-11d |\n", "chrony offset_in_range",
+                    " ", eventCount.chrony_offset_in_range_event_count);
+            } else {
+                printf("| %-25s |   \033[31;5m● Out of Range ●\033[0m%-2s | %-11d |\n", "chrony offset_in_range",
+                    " ", eventCount.chrony_offset_in_range_event_count);
+            }
+            printf("+---------------------------+------------------------------------+\n");
+            printf("| %-25s |     %-27ld ns |\n",
                 "chrony clock_offset", eventState.chrony_clock_offset);
-            printf("| %-25s |     %-19X    |\n",
+            printf("| %-25s |     %-27X    |\n",
                 "chrony clock_reference_id", eventState.chrony_reference_id);
-            printf("| %-25s |     %-19d us |\n",
+            printf("| %-25s |     %-27d us |\n",
                 "chrony polling_interval", eventState.polling_interval);
-            printf("+---------------------------+----------------------------+\n\n");
+            printf("+---------------------------+------------------------------------+\n\n");
 
-            printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
-                getMonotonicTime(), idleTime);
+            /*printf("[clkmgr][%.3f] sleep for %d seconds...\n\n",
+                getMonotonicTime(), idleTime);*/
             sleep(idleTime);
         }
     }
