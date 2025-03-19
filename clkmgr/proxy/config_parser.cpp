@@ -84,9 +84,9 @@ bool JsonConfigParser::process_json(const char *file)
     timeBaseArray = main.getObj()->getArr("timeBases");
     if(!timeBaseArray)
         return false;
-    for(size_t idx = 0; idx < timeBaseArray->size(); ++idx) {
+    for(auto it = timeBaseArray->begin(); it != timeBaseArray->end(); ++it) {
         TimeBaseCfg config = {};
-        timeBaseObj = timeBaseArray->getObj(idx);
+        timeBaseObj = timeBaseArray->getObj(it);
         if(!timeBaseObj)
             return false;
         ptp4lObj = timeBaseObj->getObj("ptp4l");
