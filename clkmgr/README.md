@@ -104,7 +104,7 @@ using the Clock Manager.
 
 # Future Directions
 
-## Support for Multiple Clock Domains 
+## Support for Multiple Clock Domains (This needed to move to top and update?)
 
 The IEC/IEEE 60802 standard specifies a profile of TSN for Industrial
 Automation. IEC/IEEE 60802 applications require support for multiple time bases
@@ -113,3 +113,7 @@ may also be underpinned by multiple redundant time sources using 802.1ASdm. The
 Clock Manager framework will provide the capabilities to map application clocks
 to Linux POSIX clocks, switch between redundant time sources, and provide
 application notifications.
+
+## Support for Multiple PTP4L GM and Chrony (Redundancy)
+
+Blablabla.....
