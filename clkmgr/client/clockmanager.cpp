@@ -194,6 +194,7 @@ int64_t timespec_delta(const timespec &last_notification_time,
 bool check_proxy_liveness(ClientState &implClientState, int timeBaseIndex)
 {
     auto &states = TimeBaseStates::getInstance();
+    static timespec lastConnectTime = {0};
     timespec lastNotificationTime;
     timespec currentTime;
     int64_t timeout = 0;
@@ -206,6 +207,9 @@ bool check_proxy_liveness(ClientState &implClientState, int timeBaseIndex)
         goto send_connect;
     }
     timeout = timespec_delta(lastNotificationTime, currentTime);
+    if(timeout < DEFAULT_LIVENESS_TIMEOUT_IN_MS)
+        return true;
+    timeout = timespec_delta(lastConnectTime, currentTime);
     if(timeout < DEFAULT_LIVENESS_TIMEOUT_IN_MS)
         return true;
 send_connect:
@@ -231,8 +235,12 @@ send_connect:
                 PrintDebug("[CONNECT] Timeout waiting reply from Proxy.");
                 return false;
             }
-        } else
+        } else {
+            // Store the last connect time
+            if(clock_gettime(CLOCK_REALTIME, &lastConnectTime) == -1)
+                PrintDebug("[CONNECT] Failed to get lastConnectTime.");
             PrintDebug("[CONNECT] Received reply from Proxy.");
+        }
     }
     return true;
 }
