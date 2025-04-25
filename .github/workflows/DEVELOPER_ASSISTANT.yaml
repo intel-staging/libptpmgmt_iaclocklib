@@ -63,6 +63,7 @@ jobs:
             -e API_BASE="${API_BASE}" \
             -e STABLE_API_VERSION="${STABLE_API_VERSION}" \
             -e PREVIEW_API_VERSION="${PREVIEW_API_VERSION}" \
+            -e GITHUB_ACTION.IGNORE_ISSUE_TAGS="${GITHUB_ACTION.IGNORE_ISSUE_TAGS}" \
             -e DEPLOY_NAME="${DEPLOY_NAME}" \
             -e PUSH_TOKEN="${PUSH_TOKEN}" \
             -e CLIENT_ID="${CLIENT_ID}" \
