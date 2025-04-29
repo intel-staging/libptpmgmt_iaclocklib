@@ -1,13 +1,3 @@
-# SPDX-License-Identifier: LGPL-3.0-or-later
-# SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. All rights reserved.
-#
-# @author Song Yoong Siang <yoong.siang.song@intel.com>
-# @copyright © 2024 Intel Corporation. All rights reserved.
-# @license LGPL-3.0-or-later
-#
-# developer assistant
-###############################################################################
-
 name: DEVELOPER ASSISTANT
 on:
   pull_request:
@@ -58,12 +48,12 @@ jobs:
             -e GITHUB_ACTION_AUTO_REVIEW="${GITHUB_ACTION_AUTO_REVIEW}" \
             -e GITHUB_ACTION_AUTO_DESCRIBE="${GITHUB_ACTION_AUTO_DESCRIBE}" \
             -e GITHUB_ACTION_UPDATE_TITLE="${GITHUB_ACTION_UPDATE_TITLE}" \
+            -e GITHUB_ACTION_IGNORE_ISSUE_TAGS="${GITHUB_ACTION_IGNORE_ISSUE_TAGS}" \
             -e PR_NUMBER="${PR_NUMBER}" \
             -e API_KEY="${API_KEY}" \
             -e API_BASE="${API_BASE}" \
             -e STABLE_API_VERSION="${STABLE_API_VERSION}" \
             -e PREVIEW_API_VERSION="${PREVIEW_API_VERSION}" \
-            -e GITHUB_ACTION.IGNORE_ISSUE_TAGS="${GITHUB_ACTION.IGNORE_ISSUE_TAGS}" \
             -e DEPLOY_NAME="${DEPLOY_NAME}" \
             -e PUSH_TOKEN="${PUSH_TOKEN}" \
             -e CLIENT_ID="${CLIENT_ID}" \
@@ -80,9 +70,9 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
-          GITHUB_ACTION.AUTO_REVIEW: true
-          GITHUB_ACTION.AUTO_DESCRIBE: true
-          GITHUB_ACTION.UPDATE_TITLE: false
+          GITHUB_ACTION_AUTO_REVIEW: true
+          GITHUB_ACTION_AUTO_DESCRIBE: true
+          GITHUB_ACTION_UPDATE_TITLE: false
           PR_NUMBER: ${{ github.event.number }}
           API_KEY: ${{ secrets.API_KEY }}
           API_BASE: ${{ secrets.API_BASE }}
@@ -92,41 +82,46 @@ jobs:
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+
+          ## Uncomment the line below to further customize code review output
+          ## Once uncommented below, please add the parameter to the Run PR Agent Script steps above
+          ## Example: -e GITHUB_ACTION_IGNORE_ISSUE_TAGS="${GITHUB_ACTION_IGNORE_ISSUE_TAGS}" \
+
           # Uncomment the line below to enable the pre-merge checks (Ensure to provide the keywords to Code Review Dev Team to include in pre-merge checks)
-          # GITHUB_ACTION.ENABLE_PRE_MERGE_CHECKS: true
+          # GITHUB_ACTION_ENABLE_PRE_MERGE_CHECKS: true
           
           # Uncomment the line below to add any extra instructions you wish to give to the LLM
-          # GITHUB_ACTION.EXTRA_INSTRUCTIONS: 'Please give clear review for the user'
+          # GITHUB_ACTION_EXTRA_INSTRUCTIONS: 'Please give clear review for the user'
 
           # Uncomment the line below to push all the suggestions for all the files as a batch instead of pushing it per file in the PR
-          # GITHUB_ACTION.BATCH_SUGGESTION_PUSH: true
+          # GITHUB_ACTION_BATCH_SUGGESTION_PUSH: true
 
           # To enable dependent context from external repo/internal repo, uncomment the line below and add details in .github/dependent_files.json.
           # Please refer to the wiki for the sample json file.
-          # GITHUB_ACTION.ENABLE_DEPENDENT_CONTEXT: true
+          # GITHUB_ACTION_ENABLE_DEPENDENT_CONTEXT: true
 
           # Uncomment the comma separated string below and modify it accordingly to skip specific aspects during review. Refer to the wiki for supported tags
-          GITHUB_ACTION.IGNORE_ISSUE_TAGS: improvements, coding style, miscellaneous
+          GITHUB_ACTION_IGNORE_ISSUE_TAGS: improvements, coding style, miscellaneous
 
           # Uncomment the line below to publish the review as a single comment instead of being published as separate comments for every suggestion
-          # GITHUB_ACTION.SINGLE_REVIEW_COMMENT: true
+          # GITHUB_ACTION_SINGLE_REVIEW_COMMENT: true
 
           # Uncomment any of the required language macro from below and mention the version of the language being used in the project to get tailored suggestions as per mentioned version
-          # LANG_VERSION.PYTHON: "NA"
-          # LANG_VERSION.JAVASCRIPT: "NA"
-          # LANG_VERSION.TYPESCRIPT: "NA"
-          # LANG_VERSION.GO: "NA"
-          # LANG_VERSION.CPP: "NA"
-          # LANG_VERSION.C: "NA"
-          # LANG_VERSION.SWIFT: "NA"
-          # LANG_VERSION.PHP: "NA"
-          # LANG_VERSION.RUBY: "NA"
-          # LANG_VERSION.RUST: "NA"
-          # LANG_VERSION.SCALA: "NA"
-          # LANG_VERSION.KOTLIN: "NA"
-          # LANG_VERSION.PERL: "NA"
-          # LANG_VERSION.MARKDOWN: "NA"
+          # LANG_VERSION_PYTHON: "NA"
+          # LANG_VERSION_JAVASCRIPT: "NA"
+          # LANG_VERSION_TYPESCRIPT: "NA"
+          # LANG_VERSION_GO: "NA"
+          # LANG_VERSION_CPP: "NA"
+          # LANG_VERSION_C: "NA"
+          # LANG_VERSION_SWIFT: "NA"
+          # LANG_VERSION_PHP: "NA"
+          # LANG_VERSION_RUBY: "NA"
+          # LANG_VERSION_RUST: "NA"
+          # LANG_VERSION_SCALA: "NA"
+          # LANG_VERSION_KOTLIN: "NA"
+          # LANG_VERSION_PERL: "NA"
+          # LANG_VERSION_MARKDOWN: "NA"
 
           # Uncomment the line below to consider the ICP and Kernel Coding Guidelines for C Language Code
-          # CODING_GUIDELINES.C_ICP_GUIDELINES: true
-          # CODING_GUIDELINES.C_KERNEL_GUIDELINES: true
+          # CODING_GUIDELINES_C_ICP_GUIDELINES: true
+          # CODING_GUIDELINES_C_KERNEL_GUIDELINES: true
