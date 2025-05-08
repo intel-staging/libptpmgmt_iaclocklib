@@ -96,17 +96,18 @@ const TimeBaseConfigurations &ClockManager::get_timebase_cfgs()
 }
 
 bool ClockManager::subscribe_by_name(const ClkMgrSubscription &newSub,
-    const string &timeBaseName, Event_state &currentState)
+    const string &timeBaseName, ClockSyncBases &clockSyncBases)
 {
     size_t timeBaseIndex = 0;
     if(!TimeBaseConfigurations::BaseNameToBaseIndex(timeBaseName, timeBaseIndex)) {
         PrintDebug("[SUBSCRIBE] Invalid timeBaseName.");
         return false;
     }
-    return subscribe(newSub, timeBaseIndex, currentState);
+    return subscribe(newSub, timeBaseIndex, clockSyncBases);
 }
 bool ClockManager::subscribe(const ClkMgrSubscription &newSub,
-    size_t timeBaseIndex, Event_state &currentState)
+    size_t timeBaseIndex,
+    ClockSyncBases &clockSyncBases)
 {
     // Check whether connection between Proxy and Client is established or not
     if(!implClientState.get_connected()) {
@@ -155,7 +156,16 @@ bool ClockManager::subscribe(const ClkMgrSubscription &newSub,
         PrintDebug("[SUBSCRIBE] Failed to get specific timebase state.");
         return false;
     }
-    currentState = state.get_eventState();
+    /* Copy data from ptpData to the map */
+    if(clockSyncBases.havePTP()) {
+        PTPClockEvent &ptpData = state.get_ptp4lEventState();
+        clockSyncBases.updatePTPClock(ptpData);
+    }
+    /* Copy data from chronyData to the map */
+    if(clockSyncBases.haveSys()) {
+        SysClockEvent &chronydata = state.get_chronyEventState();
+        clockSyncBases.updateSysClock(chronydata);
+    }
     return true;
 }
 
@@ -234,18 +244,18 @@ send_connect:
 }
 
 int ClockManager::status_wait_by_name(int timeout, const string &timeBaseName,
-    Event_state &currentState, Event_count &currentCount)
+    ClockSyncBases &clockSyncBases)
 {
     size_t timeBaseIndex = 0;
     if(!TimeBaseConfigurations::BaseNameToBaseIndex(timeBaseName, timeBaseIndex)) {
         PrintDebug("[SUBSCRIBE] Invalid timeBaseName.");
         return -1;
     }
-    return status_wait(timeout, timeBaseIndex, currentState, currentCount);
+    return status_wait(timeout, timeBaseIndex, clockSyncBases);
 }
 
 int ClockManager::status_wait(int timeout, size_t timeBaseIndex,
-    Event_state &currentState, Event_count &currentCount)
+    ClockSyncBases &clockSyncBases)
 {
     // Check whether connection between Proxy and Client is established or not
     if(!implClientState.get_connected()) {
@@ -282,9 +292,14 @@ int ClockManager::status_wait(int timeout, size_t timeBaseIndex,
         // Sleep for a short duration before the next iteration
         this_thread::sleep_for(milliseconds(10));
     } while(high_resolution_clock::now() < end);
-    /* Copy out the current state */
-    currentCount = state.get_eventStateCount();
-    currentState = state.get_eventState();
+    if(clockSyncBases.havePTP()) {
+        PTPClockEvent &ptpData = state.get_ptp4lEventState();
+        clockSyncBases.updatePTPClock(ptpData);
+    }
+    if(clockSyncBases.haveSys()) {
+        SysClockEvent &chronydata = state.get_chronyEventState();
+        clockSyncBases.updateSysClock(chronydata);
+    }
     if(!event_changes_detected)
         return 0;
     return 1;

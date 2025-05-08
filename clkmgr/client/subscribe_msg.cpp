@@ -67,15 +67,21 @@ BUILD_TXBUFFER_TYPE(ClientSubscribeMessage::makeBuffer) const
 
 PARSE_RXBUFFER_TYPE(ClientSubscribeMessage::parseBuffer)
 {
-    ptp_event data = {};
     PrintDebug("[ClientSubscribeMessage]::parseBuffer ");
     if(!CommonSubscribeMessage::parseBuffer(LxContext))
         return false;
     if(!PARSE_RX(FIELD, timeBaseIndex, LxContext))
         return false;
-    if(!PARSE_RX(FIELD, data, LxContext))
+    PTPClockEvent ptpData;
+    if(!PARSE_RX(FIELD, ptpData, LxContext))
         return false;
-    TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex, data);
+    TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex,
+        PTP_CLOCK, ptpData);
+    SysClockEvent chronyData;
+    if(!PARSE_RX(FIELD, chronyData, LxContext))
+        return false;
+    TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex,
+        SYSTEM_CLOCK, chronyData);
     return true;
 }
 

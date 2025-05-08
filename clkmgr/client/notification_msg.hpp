@@ -14,7 +14,6 @@
 #define CLIENT_NOTIFICATION_MSG_HPP
 
 #include "client/message.hpp"
-#include "common/ptp_event.hpp"
 #include "common/notification_msg.hpp"
 
 #include <cstdint>

@@ -10,13 +10,15 @@
  */
 
 #include "common/print.hpp"
+#include "common/clock_event_handler.hpp"
 #include "proxy/client.hpp"
 #include "proxy/config_parser.hpp"
 #include "proxy/connect_chrony.hpp"
 #include "proxy/connect_ptp4l.hpp"
 #include "proxy/notification_msg.hpp"
-#include <chrony.h>
+#include "pub/clockmanager.h"
 
+#include <chrony.h>
 #include <poll.h>
 #include <stdio.h>
 #include <string>
@@ -28,8 +30,9 @@ __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-extern std::map<int, ptp_event> ptp4lEvents;
+std::map<int, SysClockEvent> chronyEvents;
 std::map<int, std::vector<sessionId_t>> subscribedClientsChrony;
+ClockEventHandler sysClockEventHandler(ClockEventHandler::SysClock);
 
 struct ThreadArgs {
     int timeBaseIndex;
@@ -66,6 +69,8 @@ void chrony_notify_client(int timeBaseIndex)
         PrintDebug("[clkmgr::notify_client] notifyMsg creation is OK !!");
         // Send data for multiple sessions
         pmsg->setTimeBaseIndex(timeBaseIndex);
+        // Set the Chrony clock as clock name
+        pmsg->setClockType(SYSTEM_CLOCK);
         PrintDebug("Get client session ID: " + to_string(sessionId));
         auto TxContext = Client::GetClientSession(
                 sessionId).get()->get_transmitContext();
@@ -108,20 +113,21 @@ static int subscribe_to_chronyd(chrony_session *s, int timeBaseIndex)
     if(r != CHRONY_OK)
         return r;
     field_index = chrony_get_field_index(s, "reference ID");
-    ptp4lEvents[timeBaseIndex].chrony_reference_id =
-        chrony_get_field_uinteger(s, field_index);
+    SysClockEvent &event = chronyEvents[timeBaseIndex];
+    sysClockEventHandler.setGmIdentity(event, chrony_get_field_uinteger(s,
+            field_index));
     field_index = chrony_get_field_index(s, "poll");
     int32_t interval = static_cast<int32_t>
         (static_cast<int16_t>(chrony_get_field_integer(s, field_index)));
-    ptp4lEvents[timeBaseIndex].polling_interval =
-        pow(2.0, interval) * 1000000;
+    sysClockEventHandler.setSyncInterval(event,
+        pow(2.0, interval) * 1000000);
     PrintDebug("CHRONY polling_interval = " +
-        to_string(ptp4lEvents[timeBaseIndex].polling_interval) + " us");
+        to_string(chronyEvents[timeBaseIndex].getSyncInterval()) + " us");
     field_index = chrony_get_field_index(s, "original last sample offset");
     float second = (chrony_get_field_float(s, field_index) * 1e9);
-    ptp4lEvents[timeBaseIndex].chrony_offset = (int)second;
+    sysClockEventHandler.setClockOffset(event, (int)second);
     PrintDebug("CHRONY master_offset = " +
-        to_string(ptp4lEvents[timeBaseIndex].chrony_offset));
+        to_string(chronyEvents[timeBaseIndex].getClockOffset()));
     chrony_notify_client(timeBaseIndex);
     return CHRONY_OK;
 }
@@ -131,6 +137,7 @@ void *monitor_chronyd(void *arg)
     ThreadArgs *args = (ThreadArgs *)arg;
     chrony_session *s;
     int timeBaseIndex = args->timeBaseIndex;
+    SysClockEvent &event = chronyEvents[timeBaseIndex];
     std::string udsAddrChrony = args->udsAddrChrony;
     // connect to chronyd unix socket using udsAddrChrony
     int fd = chrony_open_socket(udsAddrChrony.c_str());
@@ -139,9 +146,9 @@ void *monitor_chronyd(void *arg)
     for(;;) {
         if(subscribe_to_chronyd(s, timeBaseIndex) != CHRONY_OK) {
             chrony_deinit_session(s);
-            ptp4lEvents[timeBaseIndex].chrony_reference_id = 0;
-            ptp4lEvents[timeBaseIndex].polling_interval = 0;
-            ptp4lEvents[timeBaseIndex].chrony_offset = 0;
+            sysClockEventHandler.setGmIdentity(event, 0);
+            sysClockEventHandler.setSyncInterval(event, 0);
+            sysClockEventHandler.setClockOffset(event, 0);
             chrony_notify_client(timeBaseIndex);
             PrintError("Failed to connect to Chrony at " + udsAddrChrony);
             // Reconnection loop
@@ -160,7 +167,7 @@ void *monitor_chronyd(void *arg)
             }
         }
         // Sleep duration is based on chronyd polling interval
-        usleep(ptp4lEvents[timeBaseIndex].polling_interval);
+        usleep(chronyEvents[timeBaseIndex].getSyncInterval());
     }
 }
 
@@ -176,8 +183,8 @@ void start_monitor_thread(int timeBaseIndex, const std::string &udsAddrChrony)
 
 int ConnectChrony::subscribe_chrony(int timeBaseIndex, sessionId_t sessionId)
 {
-    auto it = ptp4lEvents.find(timeBaseIndex);
-    if(it != ptp4lEvents.end()) {
+    auto it = chronyEvents.find(timeBaseIndex);
+    if(it != chronyEvents.end()) {
         // timeBaseIndex exists in the map
         subscribedClientsChrony[timeBaseIndex].push_back(sessionId);
     } else {

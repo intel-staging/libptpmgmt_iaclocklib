@@ -17,12 +17,16 @@
 #include "proxy/connect_chrony.hpp"
 #include "proxy/connect_ptp4l.hpp"
 #include "proxy/subscribe_msg.hpp"
+#include "pub/clockmanager.h"
 
 __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-extern std::map<int, ptp_event> ptp4lEvents;
+extern std::map<int, PTPClockEvent> ptp4lEvents;
+#ifdef HAVE_LIBCHRONY
+extern std::map<int, SysClockEvent> chronyEvents;
+#endif
 
 /**
  * Create the ProxySubscribeMessage object
@@ -55,13 +59,18 @@ BUILD_TXBUFFER_TYPE(ProxySubscribeMessage::makeBuffer) const
     PrintDebug("[ProxySubscribeMessage]::makeBuffer");
     if(!CommonSubscribeMessage::makeBuffer(TxContext))
         return false;
-    ptp_event event = ptp4lEvents[timeBaseIndex];
     // Add timeBaseIndex into the message
     if(!WRITE_TX(FIELD, timeBaseIndex, TxContext))
         return false;
     // Add event data into the message
-    if(!WRITE_TX(FIELD, event, TxContext))
+    PTPClockEvent ptpEvent = ptp4lEvents[timeBaseIndex];
+    if(!WRITE_TX(FIELD, ptpEvent, TxContext))
         return false;
+    #ifdef HAVE_LIBCHRONY
+    SysClockEvent chronyEvent = chronyEvents[timeBaseIndex];
+    if(!WRITE_TX(FIELD, chronyEvent, TxContext))
+        return false;
+    #endif
     return true;
 }
 

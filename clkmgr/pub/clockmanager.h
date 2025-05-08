@@ -14,6 +14,7 @@
 
 #ifdef __cplusplus
 
+#include "pub/clkmgr/event.h"
 #include "pub/clkmgr/subscription.h"
 #include "pub/clkmgr/timebase_configs.h"
 #include <memory>
@@ -62,57 +63,72 @@ class ClockManager
     static const TimeBaseConfigurations &get_timebase_cfgs();
 
     /**
-     * Subscribe to events by name of the time base
-     * @param[in] newSub Reference to the new subscription
-     * @param[in] timeBaseName Name of the time base to be subscribed
-     * @param[out] currentState Reference to the current state
-     * @return true on success, false on failure
+     * This function allows a new subscription to be added for monitoring
+     * clock synchronization events associated with a specific time base,
+     * identified by its name. It updates the current state based on the
+     * subscription details.
+     *
+     * @param[in] newSub Reference to the new subscription details.
+     * @param[in] timeBaseName Name of the time base to be subscribed.
+     * @param[out] clockSyncBases Reference to the map containing clock
+     * synchronization states and count.
+     * @return True on successful subscription, false on failure.
      */
     static bool subscribe_by_name(const ClkMgrSubscription &newSub,
-        const std::string &timeBaseName, Event_state &currentState);
+        const std::string &timeBaseName,
+        ClockSyncBases &clockSyncBases);
 
     /**
-     * Subscribe to events
-     * @param[in] newSub Reference to the new subscription
-     * @param[in] timeBaseIndex Index of the time base to be subscribed
-     * @param[out] currentState Reference to the current state
-     * @return true on success, false on failure
+     * This function allows a new subscription to be added for monitoring
+     * clock synchronization events associated with a specific time base.
+     * It updates the current state based on the subscription details.
+     *
+     * @param[in] newSub Reference to the new subscription details.
+     * @param[in] timeBaseIndex Index of the time base to be subscribed.
+     * @param[out] clockSyncBases Reference to the object containing clock
+     * synchronization states and count.
+     * @return True on successful subscription, false on failure.
      */
     static bool subscribe(const ClkMgrSubscription &newSub, size_t timeBaseIndex,
-        Event_state &currentState);
+        ClockSyncBases &clockSyncBases);
 
     /**
-     * Waits for a specified timeout period for any event changes by
-     * name of the time base.
-     * @param[in] timeout in seconds
-     * @li Use 0 to check without waiting
-     * @li Use -1 to wait until there is event changes occurs.
-     * @param[in] timeBaseName Name of the time base to be monitored
-     * @param[out] currentState Reference to the current event state
-     * @param[out] currentCount Reference to the current event count
-     * @return result
-     * @li 1 when an event changes within the timeout period
-     * @li 0 No event changes
-     * @li -1 lost connection to the Clock manager Proxy
+     * This function monitors the specified time base, identified by its name,
+     * for event changes within a given timeout period. It updates the current
+     * event state and count based on the observed changes.
+     *
+     * @param[in] timeout Timeout period in seconds.
+     * @li Use 0 to check without waiting.
+     * @li Use -1 to wait indefinitely until an event change occurs.
+     * @param[in] timeBaseName Name of the time base to be monitored.
+     * @param[out] clockSyncBases Reference to the map containing clock
+     * synchronization states and count.
+     * @return Result indicating the status of event changes.
+     * @li 1 if an event change occurs within the timeout period.
+     * @li 0 if no event changes occur.
+     * @li -1 if the connection to the Clock Manager Proxy is lost.
      */
     static int status_wait_by_name(int timeout, const std::string &timeBaseName,
-        Event_state &currentState, Event_count &currentCount);
+        ClockSyncBases &clockSyncBases);
 
     /**
-     * Waits for a specified timeout period for any event changes.
-     * @param[in] timeout in seconds
-     * @li Use 0 to check without waiting
-     * @li Use -1 to wait until there is event changes occurs.
-     * @param[in] timeBaseIndex Index of the time base to be monitored
-     * @param[out] currentState Reference to the current event state
-     * @param[out] currentCount Reference to the current event count
-     * @return result
-     * @li 1 when an event changes within the timeout period
-     * @li 0 No event changes
-     * @li -1 lost connection to the Clock manager Proxy
+     * This function monitors the specified time base for event changes
+     * within a given timeout period. It updates the current event state
+     * and count based on the observed changes.
+     *
+     * @param[in] timeout Timeout period in seconds.
+     * @li Use 0 to check without waiting.
+     * @li Use -1 to wait indefinitely until an event change occurs.
+     * @param[in] timeBaseIndex Index of the time base to be monitored.
+     * @param[out] clockSyncBases Reference to the map containing clock
+     * synchronization states and count
+     * @return Result indicating the status of event changes.
+     * @li 1 if an event change occurs within the timeout period.
+     * @li 0 if no event changes occur.
+     * @li -1 if the connection to the Clock Manager Proxy is lost.
      */
     static int status_wait(int timeout, size_t timeBaseIndex,
-        Event_state &currentState, Event_count &currentCount);
+        ClockSyncBases &clockSyncBases);
 
     /**
      * Retrieve the time of the CLOCK_REALTIME

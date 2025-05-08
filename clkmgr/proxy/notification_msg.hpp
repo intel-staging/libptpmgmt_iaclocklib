@@ -13,7 +13,7 @@
 #ifndef PROXY_NOTIFICATION_MSG_HPP
 #define PROXY_NOTIFICATION_MSG_HPP
 
-#include "common/ptp_event.hpp"
+//#include "common/ptp_event.hpp"
 #include "common/notification_msg.hpp"
 #include "proxy/message.hpp"
 
@@ -26,6 +26,7 @@ class ProxyNotificationMessage : virtual public ProxyMessage,
 {
   private:
     int timeBaseIndex = 0;
+    int clockType = 0;
   public:
     ProxyNotificationMessage() : MESSAGE_NOTIFY() {}
     virtual PROCESS_MESSAGE_TYPE(processMessage);
@@ -47,6 +48,12 @@ class ProxyNotificationMessage : virtual public ProxyMessage,
     void setTimeBaseIndex(int newTimeBaseIndex) {
         timeBaseIndex = newTimeBaseIndex;
     }
+#define PTP_CLOCK 0
+#define SYSTEM_CLOCK 1
+    void setClockType(int newClockType) {
+        clockType = newClockType;
+    }
+    int getClockType() const { return clockType; }
 };
 
 __CLKMGR_NAMESPACE_END
