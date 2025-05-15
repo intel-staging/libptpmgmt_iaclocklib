@@ -359,7 +359,7 @@ ifeq ($(findstring -O,$(CXXFLAGS)),)
 # Add debug optimization, unless we already have an optimization :-)
 override CXXFLAGS+=-Og
 endif # find '-O'
-override CXXFLAGS+=-Wdate-time -Wall -std=c++11 -g -I$(SRC) -I$(PUB)
+override CXXFLAGS+=-Wdate-time -Wall -std=c++17 -g -I$(SRC) -I$(PUB)
 # Add warnings from -Wextra
 override CXXFLAGS+=-Wtype-limits -Wdeprecated-copy -Wundef
 # Ignore deprecated functions in pub/opt.h and pub/init.h pub/json.h pub/c/json.h
