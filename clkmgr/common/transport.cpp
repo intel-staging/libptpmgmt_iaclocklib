@@ -32,6 +32,7 @@ class TransportWorkerState
 {
   private:
     promise<bool> m_promise;
+    std::future<bool> m_future; // Store future here
     TransportWorkFunction m_func; // Callback
     unique_ptr<TransportListenerContext> m_arg;
     unique_ptr<atomic_bool> m_exitVal;
@@ -39,7 +40,8 @@ class TransportWorkerState
   public:
     TransportWorkerState(TransportWorkFunction func,
         TransportListenerContext *context) : m_func(std::move(func)),
-        m_arg(context), m_exitVal(new atomic_bool(false)) {}
+        m_arg(context), m_exitVal(new atomic_bool(false)),
+        m_future(m_promise.get_future()) {}
     bool init();
     void dispatchLoop();
     bool finalize();
@@ -56,9 +58,8 @@ static vector<TransportWorkerState> workerList;
 
 bool TransportWorkerState::isFutureSet()
 {
-    return m_promise.get_future().valid() &&
-        m_promise.get_future().wait_for(chrono::milliseconds(0)) ==
-        future_status::ready;
+    return m_future.valid() &&
+        m_future.wait_for(chrono::milliseconds(0)) == future_status::ready;
 }
 
 void TransportWorkerState::dispatchLoop()
@@ -98,7 +99,7 @@ bool TransportWorkerState::init()
 
 bool TransportWorkerState::finalize()
 {
-    if(m_promise.get_future().wait_for(chrono::milliseconds(EXIT_TIMEOUT)) !=
+    if(m_future.wait_for(chrono::milliseconds(EXIT_TIMEOUT)) !=
         future_status::ready) {
         PrintError("Thread Join Timeout");
         return false;
