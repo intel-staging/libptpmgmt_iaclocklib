@@ -39,9 +39,11 @@ class TransportWorkerState
     thread m_thread;
   public:
     TransportWorkerState(TransportWorkFunction func,
-        TransportListenerContext *context) : m_func(std::move(func)),
-        m_arg(context), m_exitVal(new atomic_bool(false)),
-        m_future(m_promise.get_future()) {}
+        std::unique_ptr<TransportListenerContext> context)
+        : m_future(m_promise.get_future()),
+          m_func(std::move(func)),
+          m_arg(std::move(context)),
+          m_exitVal(new atomic_bool(false)) {}
     bool init();
     void dispatchLoop();
     bool finalize();
@@ -111,10 +113,11 @@ bool TransportWorkerState::finalize()
 TransportWorkDesc Transport::registerWork(TransportWorkFunction func,
     TransportListenerContext *context)
 {
-    TransportWorkerState row(std::move(func), context);
-    if(!row.init())
-        return InvalidTransportWorkDesc;
-    workerList.push_back(std::move(row));
+    // Take ownership of context
+    std::unique_ptr<TransportListenerContext> uptr(context);
+    workerList.emplace_back(std::move(func), std::move(uptr));
+    if(!workerList.back().init())
+        return InvalidTransportWorkDesc;;
     // We add at the end, so the index is the last element
     return workerList.size() - 1;
 }
