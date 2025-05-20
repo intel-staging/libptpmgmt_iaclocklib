@@ -114,16 +114,15 @@ void ChronyThreadSet::notify_client()
         PrintDebug("Get client session ID: " + to_string(sessionId));
         auto TxContext = Client::GetClientSession(
                 sessionId).get()->get_transmitContext();
-        if(!pmsg->transmitMessage(*TxContext)) {
-            it = subscribedClients.erase(it);
+        if(!pmsg->transmitMessage(*TxContext))
             /* Add sessionId into the list to remove */
             sessionIdToRemove.push_back(sessionId);
-        } else
-            ++it;
+        ++it;
     }
     local.unlock(); // Explicitly unlock the mutex
     for(const sessionId_t sessionId : sessionIdToRemove) {
         ConnectPtp4l::remove_ptp4l_subscriber(sessionId);
+        ConnectChrony::remove_chrony_subscriber(sessionId);
         Client::RemoveClientSession(sessionId);
     }
 }
