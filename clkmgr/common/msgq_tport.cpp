@@ -179,6 +179,7 @@ bool Listener::MqListenerWork()
     DumpOctetArray("Received Message", get_buffer().data(),
         get_buffer().max_size());
     Message *msg;
+    this->resetOffset();
     if(!Message::buildMessage(msg, *this))
         return false;
     PrintDebug("Received message " + msg->toString());
