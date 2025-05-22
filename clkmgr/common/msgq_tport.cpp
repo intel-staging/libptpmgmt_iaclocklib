@@ -176,9 +176,9 @@ bool Listener::MqListenerWork()
     }
     PrintDebug("Receive complete");
     DumpOctetArray("Received Message", data(), max_size());
-    Message *msg;
     this->resetOffset();
-    if(!Message::buildMessage(msg, *this))
+    Message *msg = Message::buildMessage(*this);
+    if(msg == nullptr)
         return false;
     PrintDebug("Received message " + msg->toString());
     Transmitter *txcontext;
