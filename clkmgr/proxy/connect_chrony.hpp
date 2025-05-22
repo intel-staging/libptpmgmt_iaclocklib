@@ -17,6 +17,7 @@ class ConnectChrony
 {
   public:
     static void connect_chrony();
+    static void disconnect_chrony();
     static int subscribe_chrony(int timeBaseIndex, sessionId_t sessionId);
     static int remove_chrony_subscriber(sessionId_t sessionId);
 };

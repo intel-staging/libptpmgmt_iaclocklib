@@ -116,6 +116,9 @@ int main(int argc, char *argv[])
     WaitForStopSignal();
     PrintDebug("Got stop signal");
     ConnectPtp4l::disconnect_ptp4l();
+    #ifdef HAVE_LIBCHRONY
+    ConnectChrony::disconnect_chrony();
+    #endif
     if(!ProxyTransport::stop() || !ProxyMessageQueue::stop()) {
         PrintError("stop failed");
         return EXIT_FAILURE;

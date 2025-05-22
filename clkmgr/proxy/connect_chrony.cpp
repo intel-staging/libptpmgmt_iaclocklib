@@ -34,6 +34,7 @@ extern map<int, ptp_event> ptp4lEvents;
 class ChronyThreadSet
 {
   private:
+    int fd = -1;
     int timeBaseIndex;
     string udsAddrChrony;
     thread self;
@@ -48,6 +49,9 @@ class ChronyThreadSet
 
   public:
     ChronyThreadSet(int timeBaseIndex, const string &udsAddrChrony);
+    atomic<bool> stopThread{false};
+    void wait() { self.join(); }
+    void close() { chrony_close_socket(fd); fd = -1; }
     void monitor_chronyd(); // The actual thread
     // notification subscribe
     bool subscribe(sessionId_t sessionId);
@@ -175,10 +179,12 @@ chrony_err ChronyThreadSet::subscribe_to_chronyd()
 void ChronyThreadSet::monitor_chronyd()
 {
     // connect to chronyd unix socket using udsAddrChrony
-    int fd = chrony_open_socket(udsAddrChrony.c_str());
+    fd = chrony_open_socket(udsAddrChrony.c_str());
     if(chrony_init_session(&m_s, fd) == CHRONY_OK && fd > 0)
         PrintInfo("Connected to Chrony at " + udsAddrChrony);
     for(;;) {
+        if(stopThread.load())
+            return;
         if(subscribe_to_chronyd() != CHRONY_OK) {
             chrony_deinit_session(m_s);
             ptp4lEvent.chrony_reference_id = 0;
@@ -188,6 +194,8 @@ void ChronyThreadSet::monitor_chronyd()
             PrintError("Failed to connect to Chrony at " + udsAddrChrony);
             // Reconnection loop
             for(;;) {
+                if(stopThread.load())
+                    return;
                 PrintInfo("Attempting to reconnect to Chrony at " +
                     udsAddrChrony);
                 fd = chrony_open_socket(udsAddrChrony.c_str());
@@ -256,4 +264,16 @@ void ConnectChrony::connect_chrony()
     }
     // Ensure threads start after finish initializing
     all_init.store(true);
+}
+
+void ConnectChrony::disconnect_chrony()
+{
+    for(const auto &it : chronyThreadList) {
+        it.second->stopThread.store(true);
+        // Buffer for threads to end
+        sleep(1);
+        it.second->wait();
+        // Close the socket
+        it.second->close();
+    }
 }
