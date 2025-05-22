@@ -9,13 +9,18 @@
 ###############################################################################
 
 name: deploy doxygen documents
-permissions: read-all
 
 # Deploy after release a new version, or manually
 on:
   workflow_dispatch:
   release:
     types: published
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 # Allow only one concurrent deployment
 concurrency:
