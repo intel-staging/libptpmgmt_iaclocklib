@@ -60,7 +60,6 @@ bool ClockManager::connect()
         PrintDebug("[CONNECT] Failed to initialize Client queue.");
         return false;
     }
-    ClientQueue::writeClientId(cmsg);
     ClientQueue::sendMessage(cmsg);
     // Wait DEFAULT_CONNECT_TIME_OUT seconds for response from Proxy Daemon
     unsigned int timeout_sec = (unsigned int)DEFAULT_CONNECT_TIME_OUT;
@@ -129,7 +128,6 @@ bool ClockManager::subscribe(const ClkMgrSubscription &newSub,
     strcpy((char *)cmsg->getClientId().data(),
         (char *)implClientState.get_clientID().data());
     cmsg->set_sessionId(implClientState.get_sessionId());
-    ClientQueue::writeClientId(cmsg);
     ClientQueue::sendMessage(cmsg);
     // Wait DEFAULT_SUBSCRIBE_TIME_OUT seconds for response from Proxy Daemon
     unsigned int timeout_sec = (unsigned int) DEFAULT_SUBSCRIBE_TIME_OUT;
@@ -213,7 +211,6 @@ send_connect:
     implClientState.set_connected(false);
     cmsg->setClientState(implClientState);
     cmsg->set_sessionId(implClientState.get_sessionId());
-    ClientQueue::writeClientId(cmsg);
     ClientQueue::sendMessage(cmsg);
     /* Wait for connection result */
     auto endTime = system_clock::now() +
