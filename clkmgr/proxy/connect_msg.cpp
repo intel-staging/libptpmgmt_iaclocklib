@@ -56,6 +56,7 @@ bool ProxyConnectMessage::processMessage(Listener &rxContext,
     }
     PrintDebug("Created new client session ID: " + to_string(newSessionId));
     set_sessionId(newSessionId);
+    txContext = Client::getTxContext(newSessionId);
     set_msgAck(ACK_SUCCESS);
     return true;
 }
