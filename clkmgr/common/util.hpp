@@ -19,11 +19,10 @@
 
 __CLKMGR_NAMESPACE_BEGIN
 
-/** Maximum number of character for transport client ID */
-const int TRANSPORT_CLIENTID_LENGTH = 512;
+const int CLIENTID_LENGTH = 512;
 
-/** Array to store transport client ID. */
-typedef std::array<uint8_t, TRANSPORT_CLIENTID_LENGTH> TransportClientId;
+/** client ID type. */
+typedef std::array<uint8_t, CLIENTID_LENGTH> ClientId;
 
 /** Type definition for session ID. */
 typedef uint16_t sessionId_t;

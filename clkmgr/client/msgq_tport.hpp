@@ -2,7 +2,7 @@
    SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. */
 
 /** @file
- * @brief Client POSIX message queue transport class.
+ * @brief Client queue class.
  *
  * @author Christopher Hall <christopher.s.hall@@intel.com>
  * @copyright © 2024 Intel Corporation.
@@ -12,44 +12,20 @@
 #ifndef CLIENT_MSGQ_TPORT_HPP
 #define CLIENT_MSGQ_TPORT_HPP
 
-#include "client/transport.hpp"
 #include "common/msgq_tport.hpp"
 
 #include <string>
 
 __CLKMGR_NAMESPACE_BEGIN
 
-class ClientMessageQueueListenerContext :
-    public MessageQueueListenerContext
-{
-    friend class ClientMessageQueue;
-  protected:
-    virtual bool processMessage(Message *bmsg,
-        TransportTransmitterContext *&txcontext);
-    ClientMessageQueueListenerContext(const PosixMessageQueue &mqListenerDesc) :
-        MessageQueueListenerContext(mqListenerDesc) {}
-};
+class Message;
 
-class ClientMessageQueueTransmitterContext  :
-    public MessageQueueTransmitterContext
+class ClientQueue
 {
-    friend class ClientMessageQueue;
-  protected:
-    ClientMessageQueueTransmitterContext(const PosixMessageQueue &mqTransmitterDesc)
-        : MessageQueueTransmitterContext(mqTransmitterDesc) {}
-};
-
-class ClientMessageQueue : public MessageQueue,
-    public ClientTransport
-{
-  private:
-    static std::string mqListenerName;
-    static std::unique_ptr<MessageQueueTransmitterContext> txContext;
   public:
-    static bool initTransport();
-    static bool stopTransport();
-    static bool finalizeTransport();
-    static bool writeTransportClientId(Message *msg);
+    static bool init();
+    static bool stop();
+    static bool finalize();
     static bool sendMessage(Message *msg);
 };
 

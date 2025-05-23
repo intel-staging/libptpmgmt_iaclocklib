@@ -20,17 +20,7 @@
 
 __CLKMGR_NAMESPACE_BEGIN
 
-class ClientMessage;
-typedef std::shared_ptr<ClientMessage> MessageX;
-typedef std::unique_ptr<ClientMessage> Message0;
-
-class ClientMessage : virtual public Message
-{
-  protected:
-    ClientMessage() : Message(NULL_MSG) {}
-  public:
-    static bool init();
-};
+bool clientMessageRegister();
 
 __CLKMGR_NAMESPACE_END
 

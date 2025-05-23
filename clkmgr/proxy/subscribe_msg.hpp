@@ -18,32 +18,16 @@
 
 __CLKMGR_NAMESPACE_BEGIN
 
-class ProxySubscribeMessage : virtual public ProxyMessage,
-    virtual public CommonSubscribeMessage
+class ProxySubscribeMessage : public SubscribeMessage
 {
   private:
     int timeBaseIndex = 0;
-  protected:
-    ProxySubscribeMessage() : Message(SUBSCRIBE_MSG) {};
+
   public:
-    virtual bool processMessage(TransportListenerContext &LxContext,
-        TransportTransmitterContext *&TxContext);
-    virtual bool makeBuffer(TransportTransmitterContext &TxContext) const;
-    virtual bool parseBuffer(TransportListenerContext &LxContext);
+    bool processMessage(Listener &rxContext, Transmitter *&txContext) override;
+    bool makeBuffer(Transmitter &txContext) const override;
+    bool parseBuffer(Listener &rxContext) override;
 
-    /**
-     * Create the ProxyConnectMessage object
-     * @param msg msg structure to be fill up
-     * @param LxContext proxy transport listener context
-     * @return true
-     */
-    static bool buildMessage(Message *&msg, TransportListenerContext &LxContext);
-
-    /**
-     * Add proxy's CONNECT_MSG type and its builder to transport layer.
-     * @return true
-     */
-    static bool initMessage();
     void setTimeBaseIndex(int newTimeBaseIndex) {
         timeBaseIndex = newTimeBaseIndex;
     }

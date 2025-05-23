@@ -15,7 +15,6 @@
 #include "client/msgq_tport.hpp"
 #include "client/subscribe_msg.hpp"
 #include "client/timebase_state.hpp"
-#include "client/transport.hpp"
 #include "common/clock_event_handler.hpp"
 #include "common/print.hpp"
 
@@ -48,19 +47,20 @@ ClockManager &ClockManager::fetchSingleInstance()
 bool ClockManager::connect()
 {
     // Send a connect message to Proxy Daemon
-    Message0 connectMsg(new ClientConnectMessage());
-    ClientConnectMessage *cmsg = dynamic_cast<decltype(cmsg)>(connectMsg.get());
+    ClientConnectMessage *cmsg = new ClientConnectMessage();
+    if(cmsg == nullptr)
+        return false;
+    unique_ptr<Message> connectMsg(cmsg);
     cmsg->setClientState(implClientState);
-    if(!ClientMessage::init()) {
+    if(!clientMessageRegister()) {
         PrintDebug("[CONNECT] Failed to initialize Client message.");
         return false;
     }
-    if(!ClientTransport::init()) {
-        PrintDebug("[CONNECT] Failed to initialize Client transportation.");
+    if(!ClientQueue::init()) {
+        PrintDebug("[CONNECT] Failed to initialize Client queue.");
         return false;
     }
-    ClientMessageQueue::writeTransportClientId(connectMsg.get());
-    ClientMessageQueue::sendMessage(connectMsg.get());
+    ClientQueue::sendMessage(cmsg);
     // Wait DEFAULT_CONNECT_TIME_OUT seconds for response from Proxy Daemon
     unsigned int timeout_sec = (unsigned int)DEFAULT_CONNECT_TIME_OUT;
     auto endTime = system_clock::now() + seconds(timeout_sec);
@@ -77,7 +77,7 @@ bool ClockManager::connect()
     }
     // Store Client ID in Client State
     if((cmsg != nullptr) && !(cmsg->getClientId().empty())) {
-        TransportClientId newClientID;
+        ClientId newClientID;
         strcpy((char *)newClientID.data(), (char *)cmsg->getClientId().data());
         implClientState.set_clientID(newClientID);
     }
@@ -117,19 +117,18 @@ bool ClockManager::subscribe(const ClkMgrSubscription &newSub,
     auto &states = TimeBaseStates::getInstance();
     states.setEventSubscription(timeBaseIndex, newSub);
     // Send a subscribe message to Proxy Daemon
-    MessageX subscribeMsg(new ClientSubscribeMessage());
-    ClientSubscribeMessage *cmsg = dynamic_cast<decltype(cmsg)>(subscribeMsg.get());
+    ClientSubscribeMessage *cmsg = new ClientSubscribeMessage();
     if(cmsg == nullptr) {
         PrintDebug("[SUBSCRIBE] Failed to create subscribe message.");
         return false;
     }
+    unique_ptr<Message> subscribeMsg(cmsg);
     cmsg->setClientState(implClientState);
     cmsg->set_timeBaseIndex(timeBaseIndex);
     strcpy((char *)cmsg->getClientId().data(),
         (char *)implClientState.get_clientID().data());
     cmsg->set_sessionId(implClientState.get_sessionId());
-    ClientMessageQueue::writeTransportClientId(subscribeMsg.get());
-    ClientMessageQueue::sendMessage(subscribeMsg.get());
+    ClientQueue::sendMessage(cmsg);
     // Wait DEFAULT_SUBSCRIBE_TIME_OUT seconds for response from Proxy Daemon
     unsigned int timeout_sec = (unsigned int) DEFAULT_SUBSCRIBE_TIME_OUT;
     auto endTime = system_clock::now() + seconds(timeout_sec);
@@ -164,11 +163,11 @@ bool ClockManager::subscribe(const ClkMgrSubscription &newSub,
 bool ClockManager::disconnect()
 {
     // Send a disconnect message
-    if(!ClientTransport::stop()) {
+    if(!ClientQueue::stop()) {
         PrintDebug("Client Stop Failed");
         return false;
     }
-    if(!ClientTransport::finalize()) {
+    if(!ClientQueue::finalize()) {
         PrintDebug("Client Finalize Failed");
         return false;
     }
@@ -203,17 +202,16 @@ static inline bool check_proxy_liveness(size_t timeBaseIndex)
     if(timeout < DEFAULT_LIVENESS_TIMEOUT_IN_MS)
         return true;
 send_connect:
-    Message0 connectMsg(new ClientConnectMessage());
-    ClientConnectMessage *cmsg = dynamic_cast<decltype(cmsg)>(connectMsg.get());
+    ClientConnectMessage *cmsg = new ClientConnectMessage();
     if(cmsg == nullptr) {
         PrintDebug("[WAIT] Failed to cast to ClientConnectMessage");
         return false;
     }
+    unique_ptr<Message> connectMsg(cmsg);
     implClientState.set_connected(false);
     cmsg->setClientState(implClientState);
     cmsg->set_sessionId(implClientState.get_sessionId());
-    ClientMessageQueue::writeTransportClientId(connectMsg.get());
-    ClientMessageQueue::sendMessage(connectMsg.get());
+    ClientQueue::sendMessage(cmsg);
     /* Wait for connection result */
     auto endTime = system_clock::now() +
         milliseconds(DEFAULT_LIVENESS_TIMEOUT_IN_MS);

@@ -18,27 +18,24 @@
 
 __CLKMGR_NAMESPACE_BEGIN
 
-class CommonSubscribeMessage : virtual public Message
+class SubscribeMessage : public Message
 {
   private:
     ClkMgrSubscription subscription;
-    TransportClientId clientId;
+    ClientId clientId;
+  protected:
+    SubscribeMessage() = default;
 
   public:
-    static msgId_t getMsgId() { return SUBSCRIBE_MSG; }
-    //static bool buildMessage(Message *&msg, TransportListenerContext &LxContext);
-    virtual bool parseBuffer(TransportListenerContext &LxContext);
-    virtual bool transmitMessage(TransportTransmitterContext &TxContext);
-    virtual bool makeBuffer(TransportTransmitterContext &TxContext) const;
-    ClkMgrSubscription &getSubscription()
-    { return subscription; }
-    TransportClientId &getClientId()
-    { return clientId; }
+    msgId_t get_msgId() const override final { return SUBSCRIBE_MSG; }
+    bool parseBuffer(Listener &rxContext) override;
+    bool transmitMessage(Transmitter &txContext) override;
+    bool makeBuffer(Transmitter &txContext) const override;
+    ClkMgrSubscription &getSubscription() { return subscription; }
+    ClientId &getClientId() { return clientId; }
     void setSubscription(ClkMgrSubscription &newsub);
 
-    virtual std::string toString();
-  protected:
-    CommonSubscribeMessage() : Message(SUBSCRIBE_MSG) {}
+    std::string toString() override;
 };
 
 __CLKMGR_NAMESPACE_END

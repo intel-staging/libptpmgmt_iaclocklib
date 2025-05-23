@@ -18,45 +18,44 @@ __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-string CommonConnectMessage::toString()
+string ConnectMessage::toString()
 {
-    string name = ExtractClassName(string(__PRETTY_FUNCTION__),
-            string(__FUNCTION__));
+    string name = MSG_EXTRACT_CLASS_NAME;
     name += "\n";
     name += Message::toString();
     name += "Client ID: " + string((char *)clientId.data()) + "\n";
     return name;
 }
 
-bool CommonConnectMessage::parseBuffer(TransportListenerContext &LxContext)
+bool ConnectMessage::parseBuffer(Listener &rxContext)
 {
-    if(!Message::parseBuffer(LxContext))
+    if(!Message::parseBuffer(rxContext))
         return false;
-    if(!PARSE_RX(FIELD, get_sessionId(), LxContext))
+    sessionId_t sessionId;
+    if(!PARSE_RX(FIELD, sessionId, rxContext))
         return false;
-    if(!PARSE_RX(ARRAY, clientId, LxContext))
+    set_sessionId(sessionId);
+    if(!PARSE_RX(ARRAY, clientId, rxContext))
         return false;
     return true;
 }
 
-bool CommonConnectMessage::makeBuffer(TransportTransmitterContext &TxContext)
-const
+bool ConnectMessage::makeBuffer(Transmitter &txContext) const
 {
-    auto ret = Message::makeBuffer(TxContext);
+    auto ret = makeBufferBase(txContext);
     if(!ret)
         return ret;
-    if(!WRITE_TX(FIELD, c_get_val_sessionId(), TxContext))
+    if(!WRITE_TX(FIELD, get_sessionId(), txContext))
         return false;
-    if(!WRITE_TX(ARRAY, clientId, TxContext))
+    if(!WRITE_TX(ARRAY, clientId, txContext))
         return false;
     return true;
 }
 
-bool CommonConnectMessage::transmitMessage(TransportTransmitterContext
-    &TxContext)
+bool ConnectMessage::transmitMessage(Transmitter &txContext)
 {
-    PrintDebug("[CommonConnectMessage]::transmitMessage ");
-    if(!presendMessage(&TxContext))
+    PrintDebug("[ConnectMessage]::transmitMessage ");
+    if(!presendMessage(txContext))
         return false;
-    return TxContext.sendBuffer();
+    return txContext.sendBuffer();
 }

@@ -14,20 +14,19 @@
 #define COMMON_NOTIFICATION_MSG_HPP
 
 #include "common/message.hpp"
-#include "common/transport.hpp"
 
 __CLKMGR_NAMESPACE_BEGIN
 
-class NotificationMessage : virtual public Message
+class NotificationMessage : public Message
 {
-  public:
-    virtual bool transmitMessage(TransportTransmitterContext &TxContext);
-    static msgId_t getMsgId() { return SUBSCRIBE_MSG; }
-    bool isEnable() { return waitEnable == 0x1; }
-  protected:
-    NotificationMessage() : Message(NOTIFY_MESSAGE), waitEnable(0) {}
   private:
-    uint32_t   waitEnable : 1;
+    uint32_t waitEnable : 1;
+  protected:
+    NotificationMessage() : waitEnable(0) {}
+  public:
+    msgId_t get_msgId() const override final { return NOTIFY_MESSAGE; }
+    bool transmitMessage(Transmitter &txContext) override;
+    bool isEnable() { return waitEnable == 0x1; }
 };
 
 __CLKMGR_NAMESPACE_END

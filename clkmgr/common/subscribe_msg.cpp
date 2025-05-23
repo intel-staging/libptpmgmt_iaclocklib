@@ -18,56 +18,55 @@ __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-string CommonSubscribeMessage::toString()
+string SubscribeMessage::toString()
 {
-    string name = ExtractClassName(string(__PRETTY_FUNCTION__),
-            string(__FUNCTION__));
+    string name = MSG_EXTRACT_CLASS_NAME;
     name += "\n";
     name += Message::toString();
     //name += "Client ID: " + string((char *)clientId.data()) + "\n";
     return name;
 }
 
-bool CommonSubscribeMessage::parseBuffer(TransportListenerContext &LxContext)
+bool SubscribeMessage::parseBuffer(Listener &rxContext)
 {
-    PrintDebug("[CommonSubscribeMessage]::parseBuffer ");
-    if(!Message::parseBuffer(LxContext))
+    PrintDebug("[SubscribeMessage]::parseBuffer ");
+    if(!Message::parseBuffer(rxContext))
         return false;
-    if(!PARSE_RX(FIELD, get_sessionId(), LxContext))
+    sessionId_t sessionId;
+    if(!PARSE_RX(FIELD, sessionId, rxContext))
         return false;
-    if(!PARSE_RX(FIELD, subscription, LxContext))
+    set_sessionId(sessionId);
+    if(!PARSE_RX(FIELD, subscription, rxContext))
         return false;
     return true;
 }
 
-bool CommonSubscribeMessage::makeBuffer(TransportTransmitterContext &TxContext)
-const
+bool SubscribeMessage::makeBuffer(Transmitter &txContext) const
 {
-    auto ret = Message::makeBuffer(TxContext);
+    auto ret = makeBufferBase(txContext);
     if(!ret)
         return ret;
-    PrintDebug("[CommonSubscribeMessage]::makeBuffer - sessionId : " +
-        to_string(c_get_val_sessionId()));
-    if(!WRITE_TX(FIELD, c_get_val_sessionId(), TxContext))
+    PrintDebug("[SubscribeMessage]::makeBuffer - sessionId : " +
+        to_string(get_sessionId()));
+    if(!WRITE_TX(FIELD, get_sessionId(), txContext))
         return false;
-    PrintDebug("[CommonSubscribeMessage]::makeBuffer - subscription event : " +
+    PrintDebug("[SubscribeMessage]::makeBuffer - subscription event : " +
         to_string(subscription.get_event_mask()) + ", composite event : " +
         to_string(subscription.get_composite_event_mask()));
-    if(!WRITE_TX(FIELD, subscription, TxContext))
+    if(!WRITE_TX(FIELD, subscription, txContext))
         return false;
     return true;
 }
 
-bool CommonSubscribeMessage::transmitMessage(TransportTransmitterContext
-    &TxContext)
+bool SubscribeMessage::transmitMessage(Transmitter &txContext)
 {
-    PrintDebug("[CommonSubscribeMessage]::transmitMessage ");
-    if(!presendMessage(&TxContext))
+    PrintDebug("[SubscribeMessage]::transmitMessage ");
+    if(!presendMessage(txContext))
         return false;
-    return TxContext.sendBuffer();
+    return txContext.sendBuffer();
 }
 
 void setSubscription(ClkMgrSubscription &newsub)
 {
-    PrintDebug("[CommonSubscribeMessage]::setSubscription ");
+    PrintDebug("[SubscribeMessage]::setSubscription ");
 }

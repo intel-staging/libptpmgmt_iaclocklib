@@ -34,6 +34,7 @@ extern map<int, ptp_event> ptp4lEvents;
 class ChronyThreadSet
 {
   private:
+    int fd = -1;
     int timeBaseIndex;
     string udsAddrChrony;
     thread self;
@@ -48,6 +49,9 @@ class ChronyThreadSet
 
   public:
     ChronyThreadSet(int timeBaseIndex, const string &udsAddrChrony);
+    atomic<bool> stopThread{false};
+    void wait() { self.join(); }
+    void close() { chrony_close_socket(fd); fd = -1; }
     void monitor_chronyd(); // The actual thread
     // notification subscribe
     bool subscribe(sessionId_t sessionId);
@@ -101,29 +105,27 @@ void ChronyThreadSet::notify_client()
     unique_lock<rtpi::mutex> local(subscribedLock[timeBaseIndex]);
     for(auto it = subscribedClients.begin(); it != subscribedClients.end();) {
         sessionId_t sessionId = *it;
-        unique_ptr<ProxyMessage> notifyMsg(new ProxyNotificationMessage());
-        ProxyNotificationMessage *pmsg =
-            dynamic_cast<decltype(pmsg)>(notifyMsg.get());
+        ProxyNotificationMessage *pmsg = new ProxyNotificationMessage();
         if(pmsg == nullptr) {
             PrintErrorCode("[clkmgr::notify_client] notifyMsg is nullptr !!");
             return;
         }
+        // Release message on function ends
+        unique_ptr<Message> notifyMsg(pmsg);
         PrintDebug("[clkmgr::notify_client] notifyMsg creation is OK !!");
         // Send data for multiple sessions
         pmsg->setTimeBaseIndex(timeBaseIndex);
         PrintDebug("Get client session ID: " + to_string(sessionId));
-        auto TxContext = Client::GetClientSession(
-                sessionId).get()->get_transmitContext();
-        if(!pmsg->transmitMessage(*TxContext)) {
-            it = subscribedClients.erase(it);
+        Transmitter *txContext = Client::getTxContext(sessionId);
+        if(txContext != nullptr && !pmsg->transmitMessage(*txContext))
             /* Add sessionId into the list to remove */
             sessionIdToRemove.push_back(sessionId);
-        } else
-            ++it;
+        ++it;
     }
     local.unlock(); // Explicitly unlock the mutex
     for(const sessionId_t sessionId : sessionIdToRemove) {
         ConnectPtp4l::remove_ptp4l_subscriber(sessionId);
+        ConnectChrony::remove_chrony_subscriber(sessionId);
         Client::RemoveClientSession(sessionId);
     }
 }
@@ -176,10 +178,12 @@ chrony_err ChronyThreadSet::subscribe_to_chronyd()
 void ChronyThreadSet::monitor_chronyd()
 {
     // connect to chronyd unix socket using udsAddrChrony
-    int fd = chrony_open_socket(udsAddrChrony.c_str());
+    fd = chrony_open_socket(udsAddrChrony.c_str());
     if(chrony_init_session(&m_s, fd) == CHRONY_OK && fd > 0)
         PrintInfo("Connected to Chrony at " + udsAddrChrony);
     for(;;) {
+        if(stopThread.load())
+            return;
         if(subscribe_to_chronyd() != CHRONY_OK) {
             chrony_deinit_session(m_s);
             ptp4lEvent.chrony_reference_id = 0;
@@ -189,6 +193,8 @@ void ChronyThreadSet::monitor_chronyd()
             PrintError("Failed to connect to Chrony at " + udsAddrChrony);
             // Reconnection loop
             for(;;) {
+                if(stopThread.load())
+                    return;
                 PrintInfo("Attempting to reconnect to Chrony at " +
                     udsAddrChrony);
                 fd = chrony_open_socket(udsAddrChrony.c_str());
@@ -257,4 +263,16 @@ void ConnectChrony::connect_chrony()
     }
     // Ensure threads start after finish initializing
     all_init.store(true);
+}
+
+void ConnectChrony::disconnect_chrony()
+{
+    for(const auto &it : chronyThreadList) {
+        it.second->stopThread.store(true);
+        // Buffer for threads to end
+        sleep(1);
+        it.second->wait();
+        // Close the socket
+        it.second->close();
+    }
 }

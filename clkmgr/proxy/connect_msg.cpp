@@ -21,33 +21,6 @@ __CLKMGR_NAMESPACE_USE;
 using namespace std;
 
 /**
- * Create the ProxyConnectMessage object
- * @param msg msg structure to be fill up
- * @param LxContext proxy transport listener context
- * @return true
- */
-bool ProxyConnectMessage::buildMessage(Message *&msg,
-    TransportListenerContext &LxContext)
-{
-    msg = new ProxyConnectMessage();
-    return true;
-}
-
-/**
- * @brief Add proxy's CONNECT_MSG type and its builder to transport layer.
- *
- * This function will be called during init to add a map of CONNECT_MSG
- * type and its corresponding buildMessage function.
- *
- * @return true
- */
-bool ProxyConnectMessage::initMessage()
-{
-    addMessageType(parseMsgMapElement_t(CONNECT_MSG, buildMessage));
-    return true;
-}
-
-/**
  * @brief process the connect msg from client-runtime
  *
  * This function will be called when the transport layer
@@ -55,23 +28,20 @@ bool ProxyConnectMessage::initMessage()
  * In this case, proxy transport layer will rx a buffer in the
  * message queue and call this function when
  * the enum ID corresponding to the CONNECT_MSG is received.
- * A new ClientSession object and a corresponding TxContext
+ * A new ClientSession object and a corresponding txContext
  * (with the transmit msq) is created in the proxy.
  *
- * @param LxContext proxy transport listener context
- * @param TxContext proxy transport transmitter context
+ * @param rxContext proxy listener
+ * @param txContext proxy transmitter
  * @return true
  */
-bool ProxyConnectMessage::processMessage(TransportListenerContext &LxContext,
-    TransportTransmitterContext *&TxContext)
+bool ProxyConnectMessage::processMessage(Listener &rxContext,
+    Transmitter *&txContext)
 {
-    sessionId_t newSessionId = this->getc_sessionId();
+    sessionId_t newSessionId = get_sessionId();
     PrintDebug("Processing proxy connect message");
     if(newSessionId != InvalidSessionId) {
-        auto clientSession = Client::GetClientSession(newSessionId);
-        if(clientSession)
-            TxContext = clientSession.get()->get_transmitContext();
-        if(TxContext) {
+        if(Client::existClient(newSessionId)) {
             PrintDebug("Receive Connect msg as liveness check.");
             set_msgAck(ACK_SUCCESS);
             return true;
@@ -79,28 +49,30 @@ bool ProxyConnectMessage::processMessage(TransportListenerContext &LxContext,
         PrintError("Session ID not exists: " + to_string(newSessionId));
         return false;
     }
-    newSessionId = Client::CreateClientSession();
+    newSessionId = Client::CreateClientSession(getClientId());
+    if(newSessionId == InvalidSessionId) {
+        PrintError("Fail to allocate new session");
+        return false;
+    }
     PrintDebug("Created new client session ID: " + to_string(newSessionId));
-    this->set_sessionId(newSessionId);
-    TxContext = LxContext.CreateTransmitterContext(getClientId());
-    Client::GetClientSession(newSessionId).get()->set_transmitContext(TxContext);
+    set_sessionId(newSessionId);
+    txContext = Client::getTxContext(newSessionId);
     set_msgAck(ACK_SUCCESS);
     return true;
 }
 
-bool ProxyConnectMessage::makeBuffer(TransportTransmitterContext &TxContext)
-const
+bool ProxyConnectMessage::makeBuffer(Transmitter &txContext) const
 {
     PrintDebug("[ProxyConnectMessage]::makeBuffer");
-    if(!CommonConnectMessage::makeBuffer(TxContext))
+    if(!ConnectMessage::makeBuffer(txContext))
         return false;
     JsonConfigParser parser = JsonConfigParser::getInstance();
     size_t mapSize = parser.size();
-    if(!WRITE_TX(FIELD, mapSize, TxContext))
+    if(!WRITE_TX(FIELD, mapSize, txContext))
         return false;;
     for(const auto &row : parser) {
         TimeBaseCfg cfg = row.base;
-        if(!WRITE_TX(FIELD, cfg, TxContext))
+        if(!WRITE_TX(FIELD, cfg, txContext))
             return false;
     }
     return true;

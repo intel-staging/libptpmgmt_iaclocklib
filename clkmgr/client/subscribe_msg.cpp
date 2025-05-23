@@ -21,62 +21,39 @@ using namespace std;
 
 ClientState *ClientSubscribeMessage::currentClientState = nullptr;
 
-/**
- * Create the ClientSubscribeMessage object
- * @param msg msg structure to be fill up
- * @param LxContext client run-time transport listener context
- * @return true
- */
-bool ClientSubscribeMessage::buildMessage(Message *&msg,
-    TransportListenerContext &LxContext)
-{
-    PrintDebug("[ClientSubscribeMessage]::buildMessage()");
-    msg = new ClientSubscribeMessage();
-    return true;
-}
-
-/**
- * @brief Add client's SUBSCRIBE_MSG type and its builder to transport layer.
- *
- * This function will be called during init to add a map of SUBSCRIBE_MSG
- * type and its corresponding buildMessage function.
- *
- * @return true
- */
-bool ClientSubscribeMessage::initMessage()
-{
-    PrintDebug("[ClientSubscribeMessage]::initMessage()");
-    addMessageType(parseMsgMapElement_t(SUBSCRIBE_MSG, buildMessage));
-    return true;
-}
-
 void ClientSubscribeMessage::setClientState(ClientState &newClientState)
 {
     currentClientState = &newClientState;
 }
 
-bool ClientSubscribeMessage::makeBuffer(TransportTransmitterContext &TxContext)
-const
+bool ClientSubscribeMessage::makeBuffer(Transmitter &txContext) const
 {
     PrintDebug("[ProxySubscribeMessage]::makeBuffer");
-    if(!CommonSubscribeMessage::makeBuffer(TxContext))
+    if(!SubscribeMessage::makeBuffer(txContext))
         return false;
-    if(!WRITE_TX(FIELD, timeBaseIndex, TxContext))
+    if(!WRITE_TX(FIELD, timeBaseIndex, txContext))
         return false;
     return true;
 }
 
-bool ClientSubscribeMessage::parseBuffer(TransportListenerContext &LxContext)
+bool ClientSubscribeMessage::parseBuffer(Listener &rxContext)
 {
     ptp_event data = {};
     PrintDebug("[ClientSubscribeMessage]::parseBuffer ");
-    if(!CommonSubscribeMessage::parseBuffer(LxContext))
+    if(!SubscribeMessage::parseBuffer(rxContext))
         return false;
-    if(!PARSE_RX(FIELD, timeBaseIndex, LxContext))
+    if(!PARSE_RX(FIELD, timeBaseIndex, rxContext))
         return false;
-    if(!PARSE_RX(FIELD, data, LxContext))
+    if(!PARSE_RX(FIELD, data, rxContext))
         return false;
     TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex, data);
+    return true;
+}
+
+bool ClientSubscribeMessage::writeClientId(Listener &)
+{
+    PrintDebug("[ClientQueue] [SUBSCRIBE] : subscription->event Mask : " +
+        to_string(getSubscription().get_event_mask()));
     return true;
 }
 
@@ -90,17 +67,17 @@ bool ClientSubscribeMessage::parseBuffer(TransportListenerContext &LxContext)
  * listening message queue (listening to proxy) and call this function when
  * the enum ID corresponding to the SUBSCRIBE_MSG is received.
  *
- * @param LxContext client run-time transport listener context
- * @param TxContext client run-time transport transmitter context
+ * @param rxContext client run-time listener
+ * @param txContext client run-time transmitter
  * @return true
  */
-bool ClientSubscribeMessage::processMessage(TransportListenerContext &LxContext,
-    TransportTransmitterContext *&TxContext)
+bool ClientSubscribeMessage::processMessage(Listener &rxContext,
+    Transmitter *&txContext)
 {
     PrintDebug("[ClientSubscribeMessage]::processMessage (reply)");
     unique_lock<rtpi::mutex> lock(cv_mtx);
     TimeBaseStates::getInstance().setSubscribed(timeBaseIndex, true);
-    this->set_msgAck(ACK_NONE);
+    set_msgAck(ACK_NONE);
     cv.notify_one(lock);
     return true;
 }

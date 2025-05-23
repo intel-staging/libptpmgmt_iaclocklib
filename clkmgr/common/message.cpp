@@ -18,16 +18,10 @@ __CLKMGR_NAMESPACE_USE;
 
 using namespace std;
 
-DECLARE_STATIC(Message::parseMsgMap);
+DECLARE_STATIC(Message::allocMessageMap);
 
-Message::Message(msgId_t msgId)
-{
-    this->msgId = msgId;
-    this->msgAck = ACK_NONE;
-    this->sessionId = InvalidSessionId;
-}
-
-string Message::ExtractClassName(string prettyFunction, string function)
+string Message::ExtractClassName(const string &prettyFunction,
+    const char *function)
 {
     const auto &fpos = prettyFunction.find(function);
     if(fpos == string::npos)
@@ -46,71 +40,68 @@ string Message::ExtractClassName(string prettyFunction, string function)
 string Message::toString()
 {
     string ret;
-    ret += PRIMITIVE_TOSTRING(msgId);
-    ret += PRIMITIVE_TOSTRING(msgAck);
+    ret += PRIMITIVE_TOSTRING(get_msgId());
+    ret += PRIMITIVE_TOSTRING(m_msgAck);
     return ret;
 }
 
-bool Message::makeBuffer(TransportTransmitterContext &TxContext) const
+bool Message::makeBufferBase(Transmitter &txContext) const
 {
-    PrintDebug("[Message]::makeBuffer");
-    if(!WRITE_TX(FIELD, msgId, TxContext))
+    PrintDebug("[Message]::makeBufferBase");
+    if(!WRITE_TX(FIELD, get_msgId(), txContext))
         return false;
-    if(!WRITE_TX(FIELD, msgAck, TxContext))
+    if(!WRITE_TX(FIELD, m_msgAck, txContext))
         return false;
     return true;
 }
 
-bool Message::presendMessage(TransportTransmitterContext *ctx)
+bool Message::presendMessage(Transmitter &ctx)
 {
     PrintDebug("[Message]::presendMessage starts");
-    ctx->resetOffset();
-    if(!makeBuffer(*ctx)) {
+    ctx.resetOffset();
+    if(!makeBuffer(ctx)) {
         PrintError("Failed to make buffer from message object");
         return false;
     }
-    DumpOctetArray("Sending message (length = " + to_string(ctx->getc_offset()) +
-        "): ", ctx->getc_buffer().data(), ctx->getc_offset());
+    DumpOctetArray("Sending message (length = " + to_string(ctx.get_offset()) +
+        "): ", ctx.data(), ctx.get_offset());
     PrintDebug("[Message]::presendMessage successful");
     return true;
 }
 
-bool Message::addMessageType(parseMsgMapElement_t mapping)
-{
-    auto size = parseMsgMap.size();
-    parseMsgMap.insert(mapping);
-    if(parseMsgMap.size() == size)
-        return false;
-    PrintDebug("Added message type: " + to_string(mapping.first));
-    return true;
-}
-
-bool Message::parseBuffer(TransportListenerContext &LxContext)
+bool Message::parseBuffer(Listener &rxContext)
 {
     PrintDebug("[Message]::parseBuffer ");
-    if(!PARSE_RX(FIELD, msgId, LxContext))
+    msgId_t msgId;
+    if(!PARSE_RX(FIELD, msgId, rxContext))
         return false;
-    if(!PARSE_RX(FIELD, msgAck, LxContext))
+    if(msgId != get_msgId()) {
+        PrintError("Wrong message type " + to_string(msgId));
+        return false;
+    }
+    if(!PARSE_RX(FIELD, m_msgAck, rxContext))
         return false;
     return true;
 }
 
-bool Message::buildMessage(Message *&msg, TransportListenerContext &LxContext)
+Message *Message::buildMessage(Listener &rxContext)
 {
     msgId_t msgId;
-    if(!PARSE_RX(FIELD, msgId, LxContext))
-        return false;
-    const auto &it = parseMsgMap.find(msgId);
-    if(it == parseMsgMap.cend()) {
+    if(!PARSE_RX(FIELD, msgId, rxContext))
+        return nullptr;
+    if(allocMessageMap.count(msgId) == 0) {
         PrintError("Unknown message type " + to_string(msgId));
-        return false;
+        return nullptr;
     }
-    if(!it->second(msg, LxContext)) {
+    Message *msg = allocMessageMap[msgId]();
+    if(msg == nullptr) {
         PrintError("Error parsing message");
-        return false;
+        return nullptr;
     }
-    LxContext.resetOffset();
-    if(!msg->parseBuffer(LxContext))
-        return false;
-    return true;
+    rxContext.resetOffset();
+    if(!msg->parseBuffer(rxContext)) {
+        delete msg;
+        return nullptr;
+    }
+    return msg;
 }

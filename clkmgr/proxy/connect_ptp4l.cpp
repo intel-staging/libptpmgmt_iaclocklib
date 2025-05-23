@@ -185,17 +185,15 @@ void ptpSet::notify_client()
         // Send data for multiple sessions
         pmsg->setTimeBaseIndex(timeBaseIndex);
         PrintDebug("Get client session ID: " + to_string(sessionId));
-        auto TxContext =
-            Client::GetClientSession(sessionId).get()->get_transmitContext();
-        if(!pmsg->transmitMessage(*TxContext)) {
-            it = subscribedClients.erase(it);
+        Transmitter *txContext = Client::getTxContext(sessionId);
+        if(txContext != nullptr && !pmsg->transmitMessage(*txContext))
             /* Add sessionId into the list to remove */
             sessionIdToRemove.push_back(sessionId);
-        } else
-            ++it;
+        ++it;
     }
     local.unlock(); // Explicitly unlock the mutex
     for(const sessionId_t sessionId : sessionIdToRemove) {
+        ConnectPtp4l::remove_ptp4l_subscriber(sessionId);
         #ifdef HAVE_LIBCHRONY
         ConnectChrony::remove_chrony_subscriber(sessionId);
         #endif

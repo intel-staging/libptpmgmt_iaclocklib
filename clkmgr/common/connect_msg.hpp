@@ -14,23 +14,22 @@
 #define COMMON_CONNECT_MSG_HPP
 
 #include "common/message.hpp"
-#include "common/transport.hpp"
 
 __CLKMGR_NAMESPACE_BEGIN
 
-class CommonConnectMessage : virtual public Message
+class ConnectMessage : public Message
 {
   private:
-    TransportClientId clientId;
+    ClientId clientId;
   protected:
-    CommonConnectMessage() : Message(CONNECT_MSG) {}
+    ConnectMessage() = default;
   public:
-    TransportClientId &getClientId() { return clientId; }
-    virtual bool parseBuffer(TransportListenerContext &LxContext);
-    static bool registerBuild();
-    virtual bool transmitMessage(TransportTransmitterContext &TxContext);
-    virtual bool makeBuffer(TransportTransmitterContext &TxContext) const;
-    virtual std::string toString();
+    msgId_t get_msgId() const override final { return CONNECT_MSG; }
+    ClientId &getClientId() { return clientId; }
+    bool parseBuffer(Listener &rxContext) override;
+    bool transmitMessage(Transmitter &txContext) override;
+    bool makeBuffer(Transmitter &txContext) const override;
+    std::string toString() override;
 };
 
 __CLKMGR_NAMESPACE_END

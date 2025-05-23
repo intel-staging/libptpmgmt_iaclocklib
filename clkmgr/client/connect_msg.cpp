@@ -21,47 +21,26 @@ using namespace std;
 
 ClientState *ClientConnectMessage::currentClientState = nullptr;
 
-/**
- * Create the ClientConnectMessage object
- * @param msg structure to be fill up
- * @param LxContext client run-time transport listener context
- * @return true
- */
-bool ClientConnectMessage::buildMessage(Message *&msg,
-    TransportListenerContext &LxContext)
-{
-    msg = new ClientConnectMessage();
-    return true;
-}
-
-/**
- * @brief Add client's CONNECT_MSG type and its builder to transport layer.
- *
- * This function will be called during init to add a map of CONNECT_MSG
- * type and its corresponding buildMessage function.
- *
- * @return true
- */
-bool ClientConnectMessage::initMessage()
-{
-    addMessageType(parseMsgMapElement_t(CONNECT_MSG, buildMessage));
-    return true;
-}
-
-bool ClientConnectMessage::parseBuffer(TransportListenerContext &LxContext)
+bool ClientConnectMessage::parseBuffer(Listener &rxContext)
 {
     PrintDebug("[ClientConnectMessage]::parseBuffer ");
-    if(!CommonConnectMessage::parseBuffer(LxContext))
+    if(!ConnectMessage::parseBuffer(rxContext))
         return false;
     size_t mapSize = 0;
-    if(!PARSE_RX(FIELD, mapSize, LxContext))
+    if(!PARSE_RX(FIELD, mapSize, rxContext))
         return false;
     for(size_t i = 0; i < mapSize; ++i) {
         TimeBaseCfg newCfg = {};
-        if(!PARSE_RX(FIELD, newCfg, LxContext))
+        if(!PARSE_RX(FIELD, newCfg, rxContext))
             return false;
         TimeBaseConfigurations::addTimeBaseCfg(newCfg);
     }
+    return true;
+}
+
+bool ClientConnectMessage::writeClientId(Listener &rxContext)
+{
+    rxContext.getQueueName().copy((char *)getClientId().data(), CLIENTID_LENGTH);
     return true;
 }
 
@@ -83,22 +62,21 @@ void ClientConnectMessage::setClientState(ClientState &newClientState)
  * is always send first from the client runtime first. The proxy will
  * echo-reply with a different ACK msg.
  *
- * @param LxContext client run-time transport listener context
- * @param TxContext client run-time transport transmitter context
+ * @param rxContext client run-time listener
+ * @param txContext client run-time transmitter
  * @return true
  */
-bool ClientConnectMessage::processMessage(TransportListenerContext &LxContext,
-    TransportTransmitterContext *&TxContext)
+bool ClientConnectMessage::processMessage(Listener &rxContext,
+    Transmitter *&txContext)
 {
     unique_lock<rtpi::mutex> lock(cv_mtx);
     PrintDebug("Processing client connect message (reply)");
     currentClientState->set_connected(true);
-    currentClientState->set_sessionId(this->get_sessionId());
-    PrintDebug("Connected with session ID: " +
-        to_string(this->get_sessionId()));
+    currentClientState->set_sessionId(get_sessionId());
+    PrintDebug("Connected with session ID: " + to_string(get_sessionId()));
     PrintDebug("Current state.sessionId: " +
         to_string(currentClientState->get_sessionId()));
-    this->set_msgAck(ACK_NONE);
+    set_msgAck(ACK_NONE);
     cv.notify_one(lock);
     return true;
 }
