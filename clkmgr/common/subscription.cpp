@@ -13,59 +13,95 @@
 
 __CLKMGR_NAMESPACE_USE;
 
-ClkMgrSubscription::ClkMgrSubscription() noexcept : m_event_mask(0),
-    m_composite_event_mask(0) {}
+ClockSubscriptionBase::ClockSubscriptionBase() noexcept : eventMask(0) {}
 
-void ClkMgrSubscription::set_ClkMgrSubscription(const ClkMgrSubscription &n)
+void ClockSubscriptionBase::defineClockOffsetThreshold(int32_t threshold)
 {
-    m_event_mask = n.m_event_mask;
-    m_composite_event_mask = n.m_composite_event_mask;
-    m_threshold = n.m_threshold;
+    clockOffsetThreshold = threshold;
 }
 
-void ClkMgrSubscription::set_event_mask(uint32_t event_mask)
+int32_t ClockSubscriptionBase::getClockOffsetThreshold() const
 {
-    m_event_mask = event_mask;
+    return clockOffsetThreshold;
 }
 
-uint32_t ClkMgrSubscription::get_event_mask() const
+void ClockSubscriptionBase::setEventMask(uint32_t newEventMask)
 {
-    return m_event_mask;
+    eventMask = newEventMask;
 }
 
-void ClkMgrSubscription::set_composite_event_mask(uint32_t composite_event_mask)
+uint32_t ClockSubscriptionBase::getEventMask() const
+{
+    return eventMask;
+}
+
+void PTPClockSubscription::set_composite_event_mask(uint32_t
+    composite_event_mask)
 {
     m_composite_event_mask = composite_event_mask;
 }
 
-uint32_t ClkMgrSubscription::get_composite_event_mask() const
+uint32_t PTPClockSubscription::get_composite_event_mask() const
 {
     return m_composite_event_mask;
 }
 
-bool ClkMgrSubscription::define_threshold(ThresholdIndex index, int32_t upper,
-    int32_t lower)
+bool ClockSubscriptionBase::clockOffsetInRange(int32_t value) const
 {
-    if(index >= thresholdLast || upper <= lower)
-        return false;
-    m_threshold[index].upper_limit = upper;
-    m_threshold[index].lower_limit = lower;
-    return true;
+    return value >= -static_cast<int32_t>(clockOffsetThreshold) &&
+        value <= static_cast<int32_t>(clockOffsetThreshold);
 }
 
-bool ClkMgrSubscription::get_threshold(ThresholdIndex index, int32_t &upper,
-    int32_t &lower)
+PTPClockSubscription::PTPClockSubscription() noexcept
+    : m_composite_event_mask(0) {}
+
+SysClockSubscription::SysClockSubscription() noexcept
+    : ClockSubscriptionBase() {}
+
+ClockSyncSubscription::ClockSyncSubscription()
 {
-    if(index >= thresholdLast)
-        return false;
-    upper = m_threshold[index].upper_limit;
-    lower = m_threshold[index].lower_limit;
-    return true;
+    ptpSubscribed = false;
+    sysSubscribed = false;
 }
 
-bool ClkMgrSubscription::in_range(ThresholdIndex index, int32_t value) const
+bool ClockSyncSubscription::subscribedPTP() const
 {
-    return index < thresholdLast &&
-        value >= m_threshold[index].lower_limit &&
-        value <= m_threshold[index].upper_limit;
+    return ptpSubscribed;
+}
+
+void ClockSyncSubscription::setPTPSubscription(bool subscribed)
+{
+    ptpSubscribed = subscribed;
+}
+
+const PTPClockSubscription &ClockSyncSubscription::getPtpSubscription() const
+{
+    return ptpSubscription;
+}
+
+void ClockSyncSubscription::updatePtpSubscription(
+    const PTPClockSubscription &newPtpSub)
+{
+    ptpSubscription = newPtpSub;
+}
+
+bool ClockSyncSubscription::subscribedSys() const
+{
+    return sysSubscribed;
+}
+
+void ClockSyncSubscription::setSysSubscription(bool subscribed)
+{
+    sysSubscribed = subscribed;
+}
+
+const SysClockSubscription &ClockSyncSubscription::getSysSubscription() const
+{
+    return sysSubscription;
+}
+
+void ClockSyncSubscription::updateSysSubscription(
+    const SysClockSubscription &newSysSub)
+{
+    sysSubscription = newSysSub;
 }

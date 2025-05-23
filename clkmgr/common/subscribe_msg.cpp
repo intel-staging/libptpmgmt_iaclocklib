@@ -50,9 +50,6 @@ const
         to_string(c_get_val_sessionId()));
     if(!WRITE_TX(FIELD, c_get_val_sessionId(), TxContext))
         return false;
-    PrintDebug("[CommonSubscribeMessage]::makeBuffer - subscription event : " +
-        to_string(subscription.get_event_mask()) + ", composite event : " +
-        to_string(subscription.get_composite_event_mask()));
     if(!WRITE_TX(FIELD, subscription, TxContext))
         return false;
     return true;
@@ -67,7 +64,7 @@ bool CommonSubscribeMessage::transmitMessage(TransportTransmitterContext
     return TxContext.sendBuffer();
 }
 
-void setSubscription(ClkMgrSubscription &newsub)
+void setSubscription(ClockSubscriptionBase &newsub)
 {
     PrintDebug("[CommonSubscribeMessage]::setSubscription ");
 }

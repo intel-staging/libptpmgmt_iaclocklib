@@ -21,7 +21,7 @@ __CLKMGR_NAMESPACE_BEGIN
 class CommonSubscribeMessage : virtual public Message
 {
   private:
-    ClkMgrSubscription subscription;
+    ClockSubscriptionBase subscription;
     TransportClientId clientId;
 
   public:
@@ -30,11 +30,11 @@ class CommonSubscribeMessage : virtual public Message
     virtual bool parseBuffer(TransportListenerContext &LxContext);
     virtual bool transmitMessage(TransportTransmitterContext &TxContext);
     virtual bool makeBuffer(TransportTransmitterContext &TxContext) const;
-    ClkMgrSubscription &getSubscription()
+    ClockSubscriptionBase &getSubscription()
     { return subscription; }
     TransportClientId &getClientId()
     { return clientId; }
-    void setSubscription(ClkMgrSubscription &newsub);
+    void setSubscription(ClockSubscriptionBase &newsub);
 
     virtual std::string toString();
   protected:

@@ -109,7 +109,7 @@ bool ClientMessageQueue::writeTransportClientId(Message *msg)
             }
             PrintDebug("[ClientMessageQueue] [SUBSCRIBE] : "
                 "subscription->event Mask : " +
-                to_string(cmsg->getSubscription().get_event_mask()));
+                to_string(cmsg->getSubscription().getEventMask()));
             break;
         }
         default: {

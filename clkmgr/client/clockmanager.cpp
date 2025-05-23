@@ -89,7 +89,7 @@ const TimeBaseConfigurations &ClockManager::getTimebaseCfgs()
     return TimeBaseConfigurations::getInstance();
 }
 
-bool ClockManager::subscribeByName(const ClkMgrSubscription &newSub,
+bool ClockManager::subscribeByName(const ClockSyncSubscription &newSub,
     const string &timeBaseName, ClockSyncData &clockSyncData)
 {
     size_t timeBaseIndex = 0;
@@ -99,7 +99,8 @@ bool ClockManager::subscribeByName(const ClkMgrSubscription &newSub,
     }
     return subscribe(newSub, timeBaseIndex, clockSyncData);
 }
-bool ClockManager::subscribe(const ClkMgrSubscription &newSub,
+
+bool ClockManager::subscribe(const ClockSyncSubscription &newSub,
     size_t timeBaseIndex,
     ClockSyncData &clockSyncData)
 {
@@ -115,7 +116,15 @@ bool ClockManager::subscribe(const ClkMgrSubscription &newSub,
     }
     // Store the event subscription in TimeBaseStates
     auto &states = TimeBaseStates::getInstance();
-    states.setEventSubscription(timeBaseIndex, newSub);
+    if(newSub.subscribedPTP()) {
+        const PTPClockSubscription &newPtpSub = newSub.getPtpSubscription();
+        states.setPtpEventSubscription(timeBaseIndex, newPtpSub);
+    }
+    // ToDo: Check whether system clock is available for subscription
+    if(newSub.subscribedSys()) {
+        const SysClockSubscription &newSysSub = newSub.getSysSubscription();
+        states.setSysEventSubscription(timeBaseIndex, newSysSub);
+    }
     // Send a subscribe message to Proxy Daemon
     MessageX subscribeMsg(new ClientSubscribeMessage());
     ClientSubscribeMessage *cmsg = dynamic_cast<decltype(cmsg)>(subscribeMsg.get());

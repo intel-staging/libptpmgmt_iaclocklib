@@ -19,37 +19,69 @@
 __CLKMGR_NAMESPACE_BEGIN
 
 /**
- * Class to hold the event subscription masks, composite event mask, and
- * thresholds for events that require user-defined threshold (upper and lower
- * limits).
+ * Provides functionality to manage event masks and clock offset thresholds
+ * for clock synchronization subscriptions.
+ * It includes methods to set and retrieve these values, as well as to check
+ * if a given clock offset is within the defined threshold.
  */
-class ClkMgrSubscription
+class ClockSubscriptionBase
 {
   private:
-    uint32_t m_event_mask; /**< Event subscription mask */
-    uint32_t m_composite_event_mask; /**< Composite event mask */
-    std::array<Threshold, THRESHOLD_MAX> m_threshold; /**< Upper & lower limits */
+    int32_t clockOffsetThreshold; /**< Clock offset threshold */
+    uint32_t eventMask; /**< Event subscription mask */
 
   public:
-    ClkMgrSubscription() noexcept;
+    ClockSubscriptionBase() noexcept;
 
     /**
-     * Set the Subscription masks.
-     * @param[in] newSubscription The new event mask to set.
+     * Set the event mask
+     * @param[in] newEventMask The new event mask to set
      */
-    void set_ClkMgrSubscription(const ClkMgrSubscription &newSubscription);
+    void setEventMask(uint32_t newEventMask);
 
     /**
-     * Set the event mask.
-     * @param[in] event_mask The new event mask to set.
+     * Get the value of the event mask
+     * @return The value of the event mask
      */
-    void set_event_mask(uint32_t event_mask);
+    uint32_t getEventMask() const;
 
     /**
-     * Get the value of the event mask.
-     * @return The value of the event mask.
+     * Define the threshold of clock offset
+     * @param[in] threshold Threshold of clock offset
+     * @note The threshold defines a symmetric range of clock offset
      */
-    uint32_t get_event_mask() const;
+    void defineClockOffsetThreshold(int32_t threshold);
+
+    /**
+     * Get the threshold of clock offset
+     * @return Threshold of clock offset
+     */
+    int32_t getClockOffsetThreshold() const;
+
+    /**
+     * Check whether a given value is within predefined threshold
+     * @param[in] value current clock offset value
+     * @return True if the value is within the threshold range centered around
+     * zero, and false otherwise
+     */
+    bool clockOffsetInRange(int32_t value) const;
+};
+
+/**
+ * Derived from ClockSubscriptionBase and is used to manage
+ * subscriptions related to PTP clock synchronization.
+ */
+class PTPClockSubscription : public ClockSubscriptionBase
+{
+  private:
+    uint32_t m_composite_event_mask; /**< Composite event mask */
+
+  public:
+    /**
+     * Initialize a PTPClockSubscription object with default settings.
+     * It is marked noexcept to indicate that it does not throw exceptions.
+     */
+    PTPClockSubscription() noexcept;
 
     /**
      * Set the composite event mask.
@@ -62,32 +94,86 @@ class ClkMgrSubscription
      * @return the composite event mask.
      */
     uint32_t get_composite_event_mask() const;
+};
+
+/**
+ * Derived from ClockSubscriptionBase and is used to manage
+ * subscriptions related to system clock synchronization.
+ */
+class SysClockSubscription : public ClockSubscriptionBase
+{
+  public:
+    /**
+     * Initialize a SysClockSubscription object with default settings.
+     * It is marked noexcept to indicate that it does not throw exceptions.
+     */
+    SysClockSubscription() noexcept;
+};
+
+/**
+ * Provide accessors to retrieve these subscriptions which encapsulates both
+ * PTPClockSubscription and SysClockSubscription objects.
+ */
+class ClockSyncSubscription
+{
+  public:
+    ClockSyncSubscription();
 
     /**
-     * Define the upper and lower limits of a specific event
-     * @param[in] index Index of the event according to ThresholdIndex enum
-     * @param[in] upper Upper limit
-     * @param[in] lower Lower limit
-     * @return true on success, false on failure
+     * Check if the PTP clock is subscribed
+     * @return True if the PTP clock is subscribed, false otherwise
      */
-    bool define_threshold(ThresholdIndex index, int32_t upper, int32_t lower);
+    bool subscribedPTP() const;
 
     /**
-     * get the upper and lower limits of a specific event
-     * @param[in] index Index of the event according to ThresholdIndex enum
-     * @param[out] upper Upper limit
-     * @param[out] lower Lower limit
-     * @return true on success, false on failure
+     * Set the subscription of the system clock.
+     * @param[in] subscribed True if the system clock is subscribed,
+     * false otherwise.
      */
-    bool get_threshold(ThresholdIndex index, int32_t &upper, int32_t &lower);
+    void setPTPSubscription(bool subscribed);
 
     /**
-     * Check whether a given value is within predefined threshold
-     * @param[in] index Index of the event according to ThresholdIndex enum
-     * @param[in] value Current value
-     * @return Return true if value is within the threshold, and false otherwise
+     * Retrieve the PTP clock manager subscription.
+     * @return A constant reference to the PTP clock manager subscription.
      */
-    bool in_range(ThresholdIndex index, int32_t value) const;
+    const PTPClockSubscription &getPtpSubscription() const;
+
+    /**
+     * Update the PTP clock subscription with a new PTPClockSubscription object
+     * @param[in] newPtpSub The new PTPClockSubscription object to update
+     */
+    void updatePtpSubscription(const PTPClockSubscription &newPtpSub);
+
+    /**
+     * Check if the system clock is subscribed
+     * @return True if the system clock is subscribed, false otherwise
+     */
+    bool subscribedSys() const;
+
+    /**
+     * Set the subscription of the system clock.
+     * @param[in] subscribed True if the system clock is subscribed,
+     * false otherwise.
+     */
+    void setSysSubscription(bool subscribed);
+
+    /**
+     * Retrieve the system clock manager subscription.
+     * @return A constant reference to the system clock manager subscription.
+     */
+    const SysClockSubscription &getSysSubscription() const;
+
+    /**
+     * Update the PTP clock subscription with a new SysClockSubscription object
+     * @param[in] newSysSub The new SysClockSubscription object to update
+     */
+    void updateSysSubscription(const SysClockSubscription &newSysSub);
+
+  private:
+    PTPClockSubscription ptpSubscription; /**< PTP clock subscription */
+    SysClockSubscription sysSubscription; /**< System clock subscription */
+    bool ptpSubscribed;
+    bool sysSubscribed;
 };
 
 __CLKMGR_NAMESPACE_END
