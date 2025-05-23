@@ -117,7 +117,7 @@ void ChronyThreadSet::notify_client()
         pmsg->setTimeBaseIndex(timeBaseIndex);
         PrintDebug("Get client session ID: " + to_string(sessionId));
         Transmitter *txContext = Client::getTxContext(sessionId);
-        if(txContext != nullptr || !pmsg->transmitMessage(*txContext))
+        if(txContext != nullptr && !pmsg->transmitMessage(*txContext))
             /* Add sessionId into the list to remove */
             sessionIdToRemove.push_back(sessionId);
         ++it;
