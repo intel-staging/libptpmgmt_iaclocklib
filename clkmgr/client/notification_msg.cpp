@@ -40,3 +40,9 @@ bool ClientNotificationMessage::parseBuffer(Listener &rxContext)
     TimeBaseStates::getInstance().setTimeBaseState(timeBaseIndex, data);
     return true;
 }
+
+bool ClientNotificationMessage::makeBuffer(Transmitter &TxContext) const
+{
+    PrintDebug("[ClientNotificationMessage]::makeBuffer");
+    return true;
+}
