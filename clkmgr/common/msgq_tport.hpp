@@ -78,6 +78,9 @@ class Queue
     operator std::string() const { return std::to_string(mq); }
     // Get string
     std::string str() const { return std::to_string(mq); }
+    // Get queue name
+    std::string getName() const { return name; }
+
 };
 
 class Listener : public Buffer
@@ -101,7 +104,7 @@ class Listener : public Buffer
     bool stop();
     void stopSignal() { m_exitVal.store(true); }
     std::thread &getThread() { return m_thread; }
-    std::string getQueueName() const { return m_listenerQueue.str(); }
+    std::string getQueueName() const { return m_listenerQueue.getName(); }
 };
 
 class Transmitter : public Buffer
