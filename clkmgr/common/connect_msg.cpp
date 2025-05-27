@@ -29,7 +29,7 @@ string ConnectMessage::toString() const
 
 bool ConnectMessage::parseBufferComm()
 {
-    sessionId_t sessionId;
+    sessionId_t sessionId = 0;
     if(!PARSE_RX(FIELD, sessionId, rxContext) ||
         !PARSE_RX(ARRAY, clientId, rxContext))
         return false;
