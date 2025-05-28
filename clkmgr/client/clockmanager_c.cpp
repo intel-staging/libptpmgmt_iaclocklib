@@ -2,7 +2,7 @@
    SPDX-FileCopyrightText: Copyright © 2024 Intel Corporation. */
 
 /** @file
- * @brief Client utilities to setup and cleanup the library.
+ * @brief C wrapper for the Clock Manager APIs to set up client-runtime.
  *
  * @author Song Yoong Siang <yoong.siang.song@@intel.com>
  * @copyright © 2024 Intel Corporation.
@@ -10,17 +10,52 @@
  */
 
 #include "pub/clkmgr/clockmanager_c.h"
-#include "pub/clkmgr/timebase_configs.h"
 #include "pub/clockmanager.h"
 
 #include <cstring>
 
 __CLKMGR_NAMESPACE_USE;
 
+static void clkmgr_fill_event_state(ClockSyncData &data,
+    Clkmgr_Event_state *state)
+{
+    PTPClockEvent &ptp = data.getPtp();
+    SysClockEvent &sys = data.getSysClock();
+    state->as_capable = ptp.isAsCapable();
+    state->offset_in_range = ptp.isOffsetInRange();
+    state->synced_to_primary_clock = ptp.isSyncedWithGm();
+    state->gm_changed = ptp.isGmChanged();
+    state->composite_event = ptp.isCompositeEventMet();
+    state->clock_offset = ptp.getClockOffset();
+    state->notification_timestamp = ptp.getNotificationTimestamp();
+    uint64_t gm_id = ptp.getGmIdentity();
+    for(int i = 0; i < 8; ++i)
+        state->gm_identity[i] = (uint8_t)(gm_id >> (8 * (7 - i)));
+    state->ptp4l_sync_interval = ptp.getSyncInterval();
+    state->chrony_clock_offset = sys.getClockOffset();
+    state->chrony_reference_id = sys.getGmIdentity();
+    state->chrony_offset_in_range = sys.isOffsetInRange();
+    state->polling_interval = sys.getSyncInterval();
+}
+
+static void clkmgr_fill_event_count(ClockSyncData &data,
+    Clkmgr_Event_count *count)
+{
+    PTPClockEvent &ptp = data.getPtp();
+    SysClockEvent &sys = data.getSysClock();
+    count->as_capable_event_count = ptp.getAsCapableEventCount();
+    count->composite_event_count = ptp.getCompositeEventCount();
+    count->gm_changed_event_count = ptp.getGmChangedEventCount();
+    count->offset_in_range_event_count = ptp.getOffsetInRangeEventCount();
+    count->synced_to_gm_event_count = ptp.getSyncedWithGmEventCount();
+    count->chrony_offset_in_range_event_count = sys.getOffsetInRangeEventCount();
+}
+
 bool clkmgr_connect()
 {
     return ClockManager::connect();
 }
+
 bool clkmgr_disconnect()
 {
     return ClockManager::disconnect();
@@ -28,107 +63,72 @@ bool clkmgr_disconnect()
 
 size_t clkmgr_get_timebase_cfgs_size()
 {
-    return TimeBaseConfigurations::size();
+    return ClockManager::getTimebaseCfgs().size();
 }
 
-bool clkmgr_subscribe_by_name(const clkmgr_c_subscription sub,
-    const char *timeBaseName, Clkmgr_Event_state *cur_stat)
+bool clkmgr_subscribe_by_name(const struct clkmgr_c_subscription sub,
+    const char *timeBaseName, struct Clkmgr_Event_state *cur_state)
 {
-    if(cur_stat == nullptr)
+    if(!timeBaseName || !cur_state)
         return false;
     size_t timeBaseIndex = 0;
     if(TimeBaseConfigurations::BaseNameToBaseIndex(timeBaseName, timeBaseIndex))
-        return clkmgr_subscribe(sub, timeBaseIndex, cur_stat);
+        return clkmgr_subscribe(sub, timeBaseIndex, cur_state);
     return false;
 }
 
-bool clkmgr_subscribe(const clkmgr_c_subscription sub, size_t time_base_index,
-    Clkmgr_Event_state *cur_stat)
+bool clkmgr_subscribe(const struct clkmgr_c_subscription sub,
+    size_t timeBaseIndex,
+    struct Clkmgr_Event_state *cur_state)
 {
-    if(cur_stat == nullptr || time_base_index == 0)
+    if(!cur_state || timeBaseIndex == 0)
         return false;
-    ClkMgrSubscription newsub = {};
-    Event_state state = {};
+    ClkMgrSubscription newSub = {};
+    ClockSyncData data;
     bool ret;
-    newsub.set_event_mask(sub.event_mask);
-    newsub.define_threshold(thresholdGMOffset,
+    newSub.set_event_mask(sub.event_mask);
+    newSub.set_composite_event_mask(sub.composite_event_mask);
+    newSub.define_threshold(thresholdGMOffset,
         sub.threshold[Clkmgr_thresholdGMOffset].upper_limit,
         sub.threshold[Clkmgr_thresholdGMOffset].lower_limit);
-    newsub.define_threshold(thresholdChronyOffset,
+    newSub.define_threshold(thresholdChronyOffset,
         sub.threshold[Clkmgr_thresholdChronyOffset].upper_limit,
         sub.threshold[Clkmgr_thresholdChronyOffset].lower_limit);
-    newsub.set_composite_event_mask(sub.composite_event_mask);
-    ret = 0;//ClockManager::subscribe(newsub, time_base_index, state);
-    if(ret) {
-        cur_stat->as_capable = state.as_capable;
-        cur_stat->offset_in_range = state.offset_in_range;
-        cur_stat->synced_to_primary_clock = state.synced_to_primary_clock;
-        cur_stat->gm_changed = state.gm_changed;
-        cur_stat->composite_event = state.composite_event;
-        cur_stat->clock_offset = state.clock_offset;
-        cur_stat->notification_timestamp = state.notification_timestamp;
-        std::copy(std::begin(state.gm_identity), std::end(state.gm_identity),
-            std::begin(cur_stat->gm_identity));
-        cur_stat->ptp4l_sync_interval = state.ptp4l_sync_interval;
-        cur_stat->chrony_clock_offset = state.chrony_clock_offset;
-        cur_stat->chrony_reference_id = state.chrony_reference_id;
-        cur_stat->chrony_offset_in_range = state.chrony_offset_in_range;
-        cur_stat->polling_interval = state.polling_interval;
-    }
+    ret = ClockManager::subscribe(newSub, timeBaseIndex, data);
+    if(ret)
+        clkmgr_fill_event_state(data, cur_state);
     return ret;
 }
 
 int clkmgr_status_wait_by_name(int timeout, const char *timeBaseName,
-    Clkmgr_Event_state *cur_stat, Clkmgr_Event_count *cur_cnt)
+    struct Clkmgr_Event_state *cur_state, struct Clkmgr_Event_count *cur_count)
 {
-    if(cur_stat == nullptr)
+    if(!timeBaseName || !cur_state || !cur_count)
         return -1;
+    ClockSyncData data;
     size_t timeBaseIndex = 0;
-    if(TimeBaseConfigurations::BaseNameToBaseIndex(timeBaseName, timeBaseIndex))
-        return clkmgr_status_wait(timeout, timeBaseIndex, cur_stat, cur_cnt);
+    if(TimeBaseConfigurations::BaseNameToBaseIndex(std::string(timeBaseName),
+            timeBaseIndex))
+        return clkmgr_status_wait(timeout, timeBaseIndex, cur_state, cur_count);
     return -1;
 }
 
-int clkmgr_status_wait(int timeout, size_t time_base_index,
-    Clkmgr_Event_state *cur_stat, Clkmgr_Event_count *cur_cnt)
+int clkmgr_status_wait(int timeout, size_t timeBaseIndex,
+    struct Clkmgr_Event_state *cur_state, struct Clkmgr_Event_count *cur_count)
 {
-    if(cur_stat == nullptr || cur_cnt == nullptr || time_base_index == 0)
+    if(!cur_state || !cur_count || timeBaseIndex == 0)
         return -1;
-    Event_count eventCount = {};
-    Event_state state = {};
-    int ret = 0;
-    //int ret = ClockManager::status_wait(timeout, time_base_index, state,
-    //        eventCount);
-    //if(ret < 0)
-    //    return ret;
-    cur_stat->as_capable = state.as_capable;
-    cur_stat->offset_in_range = state.offset_in_range;
-    cur_stat->synced_to_primary_clock = state.synced_to_primary_clock;
-    cur_stat->gm_changed = state.gm_changed;
-    cur_stat->composite_event = state.composite_event;
-    cur_stat->clock_offset = state.clock_offset;
-    cur_stat->notification_timestamp = state.notification_timestamp;
-    std::copy(std::begin(state.gm_identity), std::end(state.gm_identity),
-        std::begin(cur_stat->gm_identity));
-    cur_stat->ptp4l_sync_interval = state.ptp4l_sync_interval;
-    cur_stat->chrony_clock_offset = state.chrony_clock_offset;
-    cur_stat->chrony_reference_id = state.chrony_reference_id;
-    cur_stat->chrony_offset_in_range = state.chrony_offset_in_range;
-    cur_stat->polling_interval = state.polling_interval;
-    if(ret > 0) {
-        cur_cnt->as_capable_event_count = eventCount.as_capable_event_count;
-        cur_cnt->composite_event_count = eventCount.composite_event_count;
-        cur_cnt->gm_changed_event_count = eventCount.gm_changed_event_count;
-        cur_cnt->offset_in_range_event_count =
-            eventCount.offset_in_range_event_count;
-        cur_cnt->synced_to_gm_event_count = eventCount.synced_to_gm_event_count;
-        cur_cnt->chrony_offset_in_range_event_count =
-            eventCount.chrony_offset_in_range_event_count;
-    }
+    ClockSyncData data;
+    int ret = ClockManager::statusWait(timeout, timeBaseIndex, data);
+    if(ret < 0)
+        return ret;
+    clkmgr_fill_event_state(data, cur_state);
+    if(ret > 0)
+        clkmgr_fill_event_count(data, cur_count);
     return ret;
 }
 
-bool clkmgr_gettime(timespec *ts)
+bool clkmgr_gettime(struct timespec *ts)
 {
-    return ts != nullptr && clock_gettime(CLOCK_REALTIME, ts) == 0;
+    return ClockManager::getTime(*ts);
 }
