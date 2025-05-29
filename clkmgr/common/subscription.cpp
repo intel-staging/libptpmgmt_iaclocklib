@@ -13,7 +13,8 @@
 
 __CLKMGR_NAMESPACE_USE;
 
-ClockSubscriptionBase::ClockSubscriptionBase() noexcept : eventMask(0) {}
+ClockSubscriptionBase::ClockSubscriptionBase() noexcept
+    : clockOffsetThreshold(0), eventMask(0) {}
 
 void ClockSubscriptionBase::setClockOffsetThreshold(uint32_t threshold)
 {
