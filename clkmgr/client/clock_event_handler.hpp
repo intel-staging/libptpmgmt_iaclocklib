@@ -199,4 +199,12 @@ class ClockSyncBaseHandler
 
 __CLKMGR_NAMESPACE_END
 
+/**
+ * Provice C++ opaque handler for C API
+ */
+struct ClockEventBase_C { clkmgr::ClockEventBase *obj; };
+struct PTPClockEvent_C { clkmgr::PTPClockEvent *obj; };
+struct SysClockEvent_C { clkmgr::SysClockEvent *obj; };
+struct ClockSyncData_C { clkmgr::ClockSyncData *obj; };
+
 #endif /* CLOCK_EVENT_HANDLER_HPP */

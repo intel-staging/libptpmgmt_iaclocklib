@@ -114,3 +114,99 @@ bool ClockSyncBaseHandler::updateAll(const TimeBaseState &state)
     clockSyncData.sysAvailable = true;
     return true;
 }
+
+extern "C" {
+
+    // ClockEventBase
+    int64_t clkmgr_get_clock_offset(const ClockEventBase_C *evt)
+    {
+        return evt->obj->getClockOffset();
+    }
+    bool clkmgr_is_offset_in_range(const ClockEventBase_C *evt)
+    {
+        return evt->obj->isOffsetInRange();
+    }
+    uint32_t clkmgr_get_offset_in_range_event_count(const ClockEventBase_C *evt)
+    {
+        return evt->obj->getOffsetInRangeEventCount();
+    }
+    int64_t clkmgr_get_sync_interval(const ClockEventBase_C *evt)
+    {
+        return evt->obj->getSyncInterval();
+    }
+    uint64_t clkmgr_get_gm_identity(const ClockEventBase_C *evt)
+    {
+        return evt->obj->getGmIdentity();
+    }
+    bool clkmgr_is_gm_changed(const ClockEventBase_C *evt)
+    {
+        return evt->obj->isGmChanged();
+    }
+    uint32_t clkmgr_get_gm_changed_event_count(const ClockEventBase_C *evt)
+    {
+        return evt->obj->getGmChangedEventCount();
+    }
+    uint64_t clkmgr_get_notification_timestamp(const ClockEventBase_C *evt)
+    {
+        return evt->obj->getNotificationTimestamp();
+    }
+
+    // PTPClockEvent
+    bool clkmgr_is_synced_with_gm(const PTPClockEvent_C *evt)
+    {
+        return evt->obj->isSyncedWithGm();
+    }
+    uint32_t clkmgr_get_synced_with_gm_event_count(const PTPClockEvent_C *evt)
+    {
+        return evt->obj->getSyncedWithGmEventCount();
+    }
+    bool clkmgr_is_as_capable(const PTPClockEvent_C *evt)
+    {
+        return evt->obj->isAsCapable();
+    }
+    uint32_t clkmgr_get_as_capable_event_count(const PTPClockEvent_C *evt)
+    {
+        return evt->obj->getAsCapableEventCount();
+    }
+    bool clkmgr_is_composite_event_met(const PTPClockEvent_C *evt)
+    {
+        return evt->obj->isCompositeEventMet();
+    }
+    uint32_t clkmgr_get_composite_event_count(const PTPClockEvent_C *evt)
+    {
+        return evt->obj->getCompositeEventCount();
+    }
+
+    // ClockSyncData
+    ClockSyncData_C *clkmgr_clock_sync_data_create()
+    {
+        auto *c = new ClockSyncData_C;
+        c->obj = new ClockSyncData();
+        return c;
+    }
+    void clkmgr_clock_sync_data_destroy(ClockSyncData_C *data)
+    {
+        delete data->obj;
+        delete data;
+    }
+    bool clkmgr_have_ptp(const ClockSyncData_C *data)
+    {
+        return data->obj->havePTP();
+    }
+    PTPClockEvent_C *clkmgr_get_ptp(ClockSyncData_C *data)
+    {
+        auto *c = new PTPClockEvent_C;
+        c->obj = &data->obj->getPtp();
+        return c;
+    }
+    bool clkmgr_have_sys(const ClockSyncData_C *data)
+    {
+        return data->obj->haveSys();
+    }
+    SysClockEvent_C *clkmgr_get_sys(ClockSyncData_C *data)
+    {
+        auto *c = new SysClockEvent_C;
+        c->obj = &data->obj->getSysClock();
+        return c;
+    }
+} // extern "C"
