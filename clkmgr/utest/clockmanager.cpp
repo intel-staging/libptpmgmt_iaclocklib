@@ -15,13 +15,6 @@
 
 using namespace clkmgr;
 
-// static ClockManager &fetchSingleInstance()
-TEST(ClockManagerTest, singleInstance) {
-    ClockManager &cm1 = ClockManager::fetchSingleInstance();
-    ClockManager &cm2 = ClockManager::fetchSingleInstance();
-    EXPECT_EQ(&cm1, &cm2);
-}
-
 bool ClientState::init()
 {
     printf("SiangDebug: init\n");
@@ -33,6 +26,18 @@ bool ClientState::connect(uint32_t timeOut, timespec *lastConnectTime)
     printf("SiangDebug: connect\n");
     return true;
 }
+
+DECLARE_STATIC(ClientState::m_clientID);
+DECLARE_STATIC(ClientState::m_sessionId, InvalidSessionId);
+DECLARE_STATIC(ClientState::m_connected, false);
+
+// static ClockManager &fetchSingleInstance()
+TEST(ClockManagerTest, singleInstance) {
+    ClockManager &cm1 = ClockManager::fetchSingleInstance();
+    ClockManager &cm2 = ClockManager::fetchSingleInstance();
+    EXPECT_EQ(&cm1, &cm2);
+}
+
 
 // 2. Connection Management
 TEST(ClockManagerTest, ConnectAndDisconnectIdempotency) {
