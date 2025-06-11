@@ -14,29 +14,15 @@
 
 using namespace clkmgr;
 
-
-// Mock/fake implementations or test hooks may be needed for some dependencies.
-
-class ClockManagerTest : public ::testing::Test {
-protected:
-    void SetUp() override {
-        // Ensure clean state before each test
-        ClockManager::disconnect();
-    }
-    void TearDown() override {
-        ClockManager::disconnect();
-    }
-};
-
-// 1. Singleton Instance
-TEST_F(ClockManagerTest, FetchSingleInstanceReturnsSameObject) {
+// static ClockManager &fetchSingleInstance()
+TEST(ClockManagerTest, singleInstance) {
     ClockManager &cm1 = ClockManager::fetchSingleInstance();
     ClockManager &cm2 = ClockManager::fetchSingleInstance();
     EXPECT_EQ(&cm1, &cm2);
 }
 
 // 2. Connection Management
-TEST_F(ClockManagerTest, ConnectAndDisconnectIdempotency) {
+TEST(ClockManagerTest, ConnectAndDisconnectIdempotency) {
     EXPECT_TRUE(ClockManager::connect());
     EXPECT_TRUE(ClockManager::connect()); // Should be idempotent
     EXPECT_TRUE(ClockManager::disconnect());
@@ -44,7 +30,7 @@ TEST_F(ClockManagerTest, ConnectAndDisconnectIdempotency) {
 }
 
 // 3. Timebase Configurations
-TEST_F(ClockManagerTest, GetTimebaseCfgsTriggersConnectIfNeeded) {
+TEST(ClockManagerTest, GetTimebaseCfgsTriggersConnectIfNeeded) {
     // Should connect if not already connected
     EXPECT_NO_THROW({
         const auto &cfgs = ClockManager::getTimebaseCfgs();
@@ -53,7 +39,7 @@ TEST_F(ClockManagerTest, GetTimebaseCfgsTriggersConnectIfNeeded) {
 }
 
 // 4. Subscription by Index
-TEST_F(ClockManagerTest, SubscribeValidAndInvalidIndex) {
+TEST(ClockManagerTest, SubscribeValidAndInvalidIndex) {
     ClockSyncSubscription sub;
     ClockSyncData data;
     // Assuming 1 is a valid index in test environment
@@ -63,7 +49,7 @@ TEST_F(ClockManagerTest, SubscribeValidAndInvalidIndex) {
 }
 
 // 5. Subscription by Name
-TEST_F(ClockManagerTest, SubscribeByNameValidAndInvalid) {
+TEST(ClockManagerTest, SubscribeByNameValidAndInvalid) {
     ClockSyncSubscription sub;
     ClockSyncData data;
     // Assuming "me" is a valid name in test environment
@@ -73,7 +59,7 @@ TEST_F(ClockManagerTest, SubscribeByNameValidAndInvalid) {
 }
 
 // 6. Status Wait by Index
-TEST_F(ClockManagerTest, StatusWaitReturnsExpectedValues) {
+TEST(ClockManagerTest, StatusWaitReturnsExpectedValues) {
     ClockSyncData data;
     // Valid index, no event change expected (simulate with 0 timeout)
     int ret = ClockManager::statusWait(0, 1, data);
@@ -83,7 +69,7 @@ TEST_F(ClockManagerTest, StatusWaitReturnsExpectedValues) {
 }
 
 // 7. Status Wait by Name
-TEST_F(ClockManagerTest, StatusWaitByNameReturnsExpectedValues) {
+TEST(ClockManagerTest, StatusWaitByNameReturnsExpectedValues) {
     ClockSyncData data;
     // Valid name, no event change expected (simulate with 0 timeout)
     int ret = ClockManager::statusWaitByName(0, "me", data);
@@ -93,19 +79,19 @@ TEST_F(ClockManagerTest, StatusWaitByNameReturnsExpectedValues) {
 }
 
 // 8. GetTime Success and Failure
-TEST_F(ClockManagerTest, GetTimeReturnsTrueOnSuccess) {
+TEST(ClockManagerTest, GetTimeReturnsTrueOnSuccess) {
     timespec ts;
     EXPECT_TRUE(ClockManager::getTime(ts));
     // Simulate failure: not possible with standard clock_gettime, but could be tested with a mock.
 }
 
 // 9. Edge: Disconnect Without Connect
-TEST_F(ClockManagerTest, DisconnectWithoutConnectIsSafe) {
+TEST(ClockManagerTest, DisconnectWithoutConnectIsSafe) {
     EXPECT_TRUE(ClockManager::disconnect());
 }
 
 // 10. Edge: Multiple Subscriptions
-TEST_F(ClockManagerTest, MultipleSubscriptions) {
+TEST(ClockManagerTest, MultipleSubscriptions) {
     ClockSyncSubscription sub;
     ClockSyncData data;
     EXPECT_TRUE(ClockManager::subscribe(sub, 1, data));
@@ -114,7 +100,7 @@ TEST_F(ClockManagerTest, MultipleSubscriptions) {
 }
 
 // 11. Edge: Subscribe After Disconnect
-TEST_F(ClockManagerTest, SubscribeAfterDisconnectReconnects) {
+TEST(ClockManagerTest, SubscribeAfterDisconnectReconnects) {
     ClockManager::disconnect();
     ClockSyncSubscription sub;
     ClockSyncData data;
@@ -122,7 +108,7 @@ TEST_F(ClockManagerTest, SubscribeAfterDisconnectReconnects) {
 }
 
 // 12. Edge: StatusWaitAfterDisconnect
-TEST_F(ClockManagerTest, StatusWaitAfterDisconnectFails) {
+TEST(ClockManagerTest, StatusWaitAfterDisconnectFails) {
     ClockManager::disconnect();
     ClockSyncData data;
     EXPECT_EQ(ClockManager::statusWait(0, 1, data), -1);
