@@ -37,7 +37,6 @@ bool ClientState::connect(uint32_t timeOut, timespec *lastConnectTime)
         m_connected = false;
         return false; // Simulate failure for testing
     }
-
     // Simulate a successful connection
     m_connected = true;
     if(lastConnectTime != nullptr)
@@ -45,27 +44,58 @@ bool ClientState::connect(uint32_t timeOut, timespec *lastConnectTime)
     return true;
 }
 
-// Used in _subscribe()
+// Used to define functions in TimeBaseState class
+void TimeBaseState::set_subscribed(bool subscriptionState)
+{
+    subscribed = subscriptionState;
+}
+const timespec &TimeBaseState::get_last_notification_time() const
+{
+    return last_notification_time;
+}
+bool TimeBaseState::get_subscribed() const
+{
+    return subscribed;
+}
+bool TimeBaseState::is_event_changed() const
+{
+    return event_changed;
+}
+const PTPClockEvent &TimeBaseState::get_ptp4lEventState() const
+{
+    return ptp4lEventState;
+}
+const SysClockEvent &TimeBaseState::get_chronyEventState() const
+{
+    return chronyEventState;
+}
+
+// Used in _subscribe() to send a subscribe message to the proxy and wait for
+// a confirmation reply
+bool utest_subscribed_with_proxy = true;
 bool TimeBaseStates::subscribe(size_t timeBaseIndex,
     const ClockSyncSubscription &newSub)
 {
-//    if(newSub.isPTPSubscriptionEnable()) {
-//        const PTPClockSubscription &newPtpSub = newSub.getPtpSubscription();
-//        if(!setPtpEventSubscription(timeBaseIndex, newPtpSub))
- //           return false;
-  //  }
-    // ToDo: Check whether system clock is available for subscription
-//    if(newSub.isSysSubscriptionEnable()) {
- //       const SysClockSubscription &newSysSub = newSub.getSysSubscription();
-//        if(!setSysEventSubscription(timeBaseIndex, newSysSub))
-//            return false;
- //   }
- //   setSubscribed(timeBaseIndex, true);
+    // Check whether connection between Proxy and Client is established or not
+    if(!ClientState::get_connected()) {
+        return false;
+    }
+    // Check whether requested timeBaseIndex is valid or not
+    if(!TimeBaseConfigurations::isTimeBaseIndexPresent(timeBaseIndex)) {
+        return false;
+    }
+    // Simulate failure for testing
+    if(!utest_subscribed_with_proxy){
+        setSubscribed(timeBaseIndex, false);
+        return false;
+    }
+    // Simulate a successful subscription
+    setSubscribed(timeBaseIndex, true);
     return true;
 }
 
-static ClockEventHandler ptpClockEventHandler(ClockEventHandler::PTPClock);
-static ClockEventHandler sysClockEventHandler(ClockEventHandler::SysClock);
+//static ClockEventHandler ptpClockEventHandler(ClockEventHandler::PTPClock);
+//static ClockEventHandler sysClockEventHandler(ClockEventHandler::SysClock);
 
 bool TimeBaseStates::getTimeBaseState(size_t timeBaseIndex,
     TimeBaseState &state)
@@ -94,31 +124,7 @@ bool TimeBaseStates::getTimeBaseState(size_t timeBaseIndex,
     return true;
 }
 
-const timespec &TimeBaseState::get_last_notification_time() const
-{
-    return last_notification_time;
-}
 
-
-bool TimeBaseState::get_subscribed() const
-{
-    return subscribed;
-}
-
-bool TimeBaseState::is_event_changed() const
-{
-    return event_changed;
-}
-
-const PTPClockEvent &TimeBaseState::get_ptp4lEventState() const
-{
-    return ptp4lEventState;
-}
-
-const SysClockEvent &TimeBaseState::get_chronyEventState() const
-{
-    return chronyEventState;
-}
 
 // static ClockManager &fetchSingleInstance()
 TEST(ClockManagerTest, singleInstance) {
