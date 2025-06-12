@@ -142,38 +142,24 @@ class clkmgr::ClientConnectMessage
   public:
     static void set() {
         const TimeBaseConfigurations &cfg = TimeBaseConfigurations::getInstance();
-    clkmgr::TimeBaseCfg cfg1;
-    cfg1.timeBaseIndex = 1;
-    cfg1.timeBaseName[0] = 'm';
-    cfg1.timeBaseName[1] = 'e';
-    cfg1.timeBaseName[2] = 0;
-    cfg1.interfaceName[0] = 'e';
-    cfg1.interfaceName[1] = 't';
-    cfg1.interfaceName[2] = 'h';
-    cfg1.interfaceName[3] = '0';
-    cfg1.interfaceName[4] = 0;
-    cfg1.transportSpecific = 4;
-    cfg1.domainNumber = 1;
-    cfg1.haveSys = true;
-    cfg1.havePtp = true;
-    cfg.addTimeBaseCfg(cfg1);
-
-    clkmgr::TimeBaseCfg cfg2;
-    cfg2.timeBaseIndex = 2;
-    cfg2.timeBaseName[0] = 't';
-    cfg2.timeBaseName[1] = 'o';
-    cfg2.timeBaseName[2] = 'o';
-    cfg2.timeBaseName[3] = 0;
-    cfg2.interfaceName[0] = 'e';
-    cfg2.interfaceName[1] = 't';
-    cfg2.interfaceName[2] = 'h';
-    cfg2.interfaceName[3] = '1';
-    cfg2.interfaceName[4] = 0;
-    cfg2.transportSpecific = 5;
-    cfg2.domainNumber = 5;
-    cfg2.haveSys = true;
-    cfg2.havePtp = false;
-    cfg.addTimeBaseCfg(cfg2);
+        cfg.addTimeBaseCfg({
+            .timeBaseIndex = 1,
+            .timeBaseName = { 'm', 'e', 0 },
+            .interfaceName = { 'e', 't', 'h', '0', 0 },
+            .transportSpecific = 4,
+            .domainNumber = 1,
+            .haveSys = true,
+            .havePtp = true
+        });
+        cfg.addTimeBaseCfg({
+            .timeBaseIndex = 2,
+            .timeBaseName = { 't', 'o', 'o', 0 },
+            .interfaceName = { 'e', 't', 'h', '1', 0 },
+            .transportSpecific = 5,
+            .domainNumber = 5,
+            .haveSys = true,
+            .havePtp = false
+        });
     }
 };
 
