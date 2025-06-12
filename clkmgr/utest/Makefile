@@ -32,7 +32,8 @@ CLKMGR_API_UTEST_OBJS:=$(foreach n,$(CLKMGR_API_SRC),$(CLKMGR_UTEST_DIR)/$n.o)
 CLKMGR_API_SRCS:=$(CLKMGR_CLIENT_DIR)/clockmanager.cpp
 CLKMGR_API_OBJS:=$(CLKMGR_API_SRCS:.cpp=.o)
 CLKMGR_API_OBJS+=$(foreach n,print termin,$(CLKMGR_COMMON_DIR)/$n.o)
-CLKMGR_API_OBJS+=$(foreach n,timebase_configs subscription clock_event,$(CLKMGR_CLIENT_DIR)/$n.o)
+CLKMGR_API_OBJS+=$(foreach n,timebase_configs subscription clock_event,\
+  $(CLKMGR_CLIENT_DIR)/$n.o)
 
 $(CLKMGR_UTEST_DIR)/%.o: $(CLKMGR_UTEST_DIR)/%.cpp | $(COMP_DEPS)
 	$(Q_CC)$(CXX) $(CXXFLAGS_UTEST) $(CLKMGR_CXXFLAGS) $(GTEST_INC_FLAGS)\

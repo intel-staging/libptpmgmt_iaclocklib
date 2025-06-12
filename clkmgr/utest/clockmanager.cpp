@@ -11,16 +11,7 @@
 
 #include "pub/clockmanager.h"
 #include "client/client_state.hpp"
-#include "common/util.hpp"
-#include "common/termin.hpp"
 #include "client/timebase_state.hpp"
-//#include <rtpi/condition_variable.hpp>
-//#include <mutex>
-
-//#include "client/clock_event_handler.hpp"
-//#include "client/client_state.hpp"
-//#include "common/subscribe_msg.hpp"
-//#include "client/subscribe_msg.hpp"
 
 using namespace clkmgr;
 
