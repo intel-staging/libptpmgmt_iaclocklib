@@ -12,6 +12,7 @@
 #include "pub/clockmanager.h"
 #include "client/client_state.hpp"
 #include "client/timebase_state.hpp"
+#include "common/timebase.hpp"
 
 using namespace clkmgr;
 
@@ -135,6 +136,54 @@ bool TimeBaseStates::getTimeBaseState(size_t timeBaseIndex,
     // If timeBaseIndex is not found, return false
     return false;
 }
+
+class clkmgr::ClientConnectMessage
+{
+  public:
+    static void set() {
+        const TimeBaseConfigurations &cfg = TimeBaseConfigurations::getInstance();
+    clkmgr::TimeBaseCfg cfg1;
+    cfg1.timeBaseIndex = 1;
+    cfg1.timeBaseName[0] = 'm';
+    cfg1.timeBaseName[1] = 'e';
+    cfg1.timeBaseName[2] = 0;
+    cfg1.interfaceName[0] = 'e';
+    cfg1.interfaceName[1] = 't';
+    cfg1.interfaceName[2] = 'h';
+    cfg1.interfaceName[3] = '0';
+    cfg1.interfaceName[4] = 0;
+    cfg1.transportSpecific = 4;
+    cfg1.domainNumber = 1;
+    cfg1.haveSys = true;
+    cfg1.havePtp = true;
+    cfg.addTimeBaseCfg(cfg1);
+
+    clkmgr::TimeBaseCfg cfg2;
+    cfg2.timeBaseIndex = 2;
+    cfg2.timeBaseName[0] = 't';
+    cfg2.timeBaseName[1] = 'o';
+    cfg2.timeBaseName[2] = 'o';
+    cfg2.timeBaseName[3] = 0;
+    cfg2.interfaceName[0] = 'e';
+    cfg2.interfaceName[1] = 't';
+    cfg2.interfaceName[2] = 'h';
+    cfg2.interfaceName[3] = '1';
+    cfg2.interfaceName[4] = 0;
+    cfg2.transportSpecific = 5;
+    cfg2.domainNumber = 5;
+    cfg2.haveSys = true;
+    cfg2.havePtp = false;
+    cfg.addTimeBaseCfg(cfg2);
+    }
+};
+
+class ClockManagerTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {
+        ClientConnectMessage::set();
+    }
+};
 
 // static ClockManager &fetchSingleInstance()
 TEST(ClockManagerTest, singleInstance) {
