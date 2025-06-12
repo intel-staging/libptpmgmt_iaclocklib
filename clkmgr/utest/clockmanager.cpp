@@ -82,6 +82,10 @@ void TimeBaseState::set_chronyEventState(const SysClockEvent &chronyState)
 {
     chronyEventState = chronyState;
 }
+void TimeBaseState::set_last_notification_time(const timespec &newTime)
+{
+    last_notification_time = newTime;
+}
 
 // Used in _subscribe() to send a subscribe message to the proxy and wait for
 // a confirmation reply
@@ -137,6 +141,55 @@ bool TimeBaseStates::getTimeBaseState(size_t timeBaseIndex,
     return false;
 }
 
+// Create dummy timebase state for testing
+void TimeBaseStates::setTimeBaseState(size_t timeBaseIndex,
+    const ptp_event &newEvent)
+{
+    auto &state = timeBaseStateMap[1];
+    // Update the notification timestamp
+    timespec last_notification_time = {};
+    clock_gettime(CLOCK_REALTIME, &last_notification_time);
+    state.set_last_notification_time(last_notification_time);
+    state.set_event_changed(true);
+    // Get the current state of the timebase
+    PTPClockEvent ptp4lEventState = state.get_ptp4lEventState();
+    SysClockEvent chronyEventState = state.get_chronyEventState();
+    // Update eventGMOffset
+    ptpClockEventHandler.setClockOffset(ptp4lEventState, 23);
+    ptpClockEventHandler.setOffsetInRange(ptp4lEventState, true);
+    ptpClockEventHandler.setOffsetInRangeEventCount(ptp4lEventState, 8);
+    // Update eventSyncedToGM
+    ptpClockEventHandler.setSyncedWithGm(ptp4lEventState, true);
+    ptpClockEventHandler.setSyncedWithGmEventCount(ptp4lEventState, 9);
+    // Update eventGMChanged
+    ptpClockEventHandler.setGmIdentity(ptp4lEventState, 0x1234ABCD);
+    ptpClockEventHandler.setGmChanged(ptp4lEventState, true);
+    ptpClockEventHandler.setGmChangedEventCount(ptp4lEventState, 10);
+    // Update eventASCapable
+    ptpClockEventHandler.setAsCapable(ptp4lEventState, true);
+    ptpClockEventHandler.setAsCapableEventCount(ptp4lEventState, 11);
+    // Update composite event
+    ptpClockEventHandler.setCompositeEvent(ptp4lEventState, true);
+    ptpClockEventHandler.setCompositeEventCount(ptp4lEventState, 12);
+    // Update notification timestamp
+    uint64_t notification_timestamp = last_notification_time.tv_sec;
+    notification_timestamp *= NSEC_PER_SEC;
+    notification_timestamp += last_notification_time.tv_nsec;
+    ptpClockEventHandler.setNotificationTimestamp(ptp4lEventState,
+        notification_timestamp);
+    // Update GM logSyncInterval
+    ptpClockEventHandler.setSyncInterval(ptp4lEventState, 125000);
+    // Update Chrony clock offset
+    sysClockEventHandler.setClockOffset(chronyEventState, 50000);
+    sysClockEventHandler.setOffsetInRange(chronyEventState, true);
+    sysClockEventHandler.setOffsetInRangeEventCount(chronyEventState, 13);
+    sysClockEventHandler.setGmIdentity(chronyEventState, 0x5678EF01);
+    sysClockEventHandler.setSyncInterval(chronyEventState, 10000);
+    state.set_chronyEventState(chronyEventState);
+    state.set_ptpEventState(ptp4lEventState);
+}
+
+// Create dummy TimeBaseConfigurations for testing
 class clkmgr::ClientConnectMessage
 {
   public:
@@ -168,18 +221,20 @@ class ClockManagerTest : public ::testing::Test
   protected:
     void SetUp() override {
         ClientConnectMessage::set();
+        ptp_event data = {};
+        TimeBaseStates::getInstance().setTimeBaseState(1, data);
     }
 };
 
 // static ClockManager &fetchSingleInstance()
-TEST(ClockManagerTest, singleInstance) {
+TEST_F(ClockManagerTest, singleInstance) {
     ClockManager &cm1 = ClockManager::fetchSingleInstance();
     ClockManager &cm2 = ClockManager::fetchSingleInstance();
     EXPECT_EQ(&cm1, &cm2);
 }
 
 // 2. Connection Management
-TEST(ClockManagerTest, ConnectAndDisconnectIdempotency) {
+TEST_F(ClockManagerTest, ConnectAndDisconnectIdempotency) {
     printf("SiangDebug: start\n");
     EXPECT_TRUE(ClockManager::connect());
     printf("SiangDebug: start2\n");
