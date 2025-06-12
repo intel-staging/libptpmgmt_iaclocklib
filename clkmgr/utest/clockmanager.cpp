@@ -94,15 +94,13 @@ bool TimeBaseStates::subscribe(size_t timeBaseIndex,
     const ClockSyncSubscription &newSub)
 {
     // Check whether connection between Proxy and Client is established or not
-    if(!ClientState::get_connected()) {
+    if(!ClientState::get_connected())
         return false;
-    }
     // Check whether requested timeBaseIndex is valid or not
-    if(!TimeBaseConfigurations::isTimeBaseIndexPresent(timeBaseIndex)) {
+    if(!TimeBaseConfigurations::isTimeBaseIndexPresent(timeBaseIndex))
         return false;
-    }
     // Simulate failure for testing
-    if(!utest_subscribed_with_proxy){
+    if(!utest_subscribed_with_proxy) {
         setSubscribed(timeBaseIndex, false);
         return false;
     }
@@ -227,7 +225,8 @@ class ClockManagerTest : public ::testing::Test
 };
 
 // static ClockManager &fetchSingleInstance()
-TEST_F(ClockManagerTest, singleInstance) {
+TEST_F(ClockManagerTest, singleInstance)
+{
     ClockManager &cm1 = ClockManager::fetchSingleInstance();
     ClockManager &cm2 = ClockManager::fetchSingleInstance();
     EXPECT_EQ(&cm1, &cm2);
@@ -235,7 +234,8 @@ TEST_F(ClockManagerTest, singleInstance) {
 
 // static bool connect()
 // static bool disconnect()
-TEST_F(ClockManagerTest, connectAndDisconnect) {
+TEST_F(ClockManagerTest, connectAndDisconnect)
+{
     EXPECT_FALSE(ClockManager::connect());
     utest_connected_with_proxy = true;
     EXPECT_TRUE(ClockManager::connect());
@@ -245,7 +245,8 @@ TEST_F(ClockManagerTest, connectAndDisconnect) {
 }
 
 // static const TimeBaseConfigurations &getTimebaseCfgs()
-TEST_F(ClockManagerTest, getTimeBaseCfgs) {
+TEST_F(ClockManagerTest, getTimeBaseCfgs)
+{
     TimeBaseConfigurations cfgs = ClockManager::getTimebaseCfgs();
     const auto record1 = cfgs.getRecord(1);
     EXPECT_EQ(record1.index(), 1);
@@ -281,7 +282,8 @@ TEST_F(ClockManagerTest, getTimeBaseCfgs) {
 //     const std::string &timeBaseName, ClockSyncData &clockSyncData)
 // static bool subscribe(const ClockSyncSubscription &newSub,
 //    size_t timeBaseIndex, ClockSyncData &clockSyncData)
-TEST_F(ClockManagerTest, subscribe) {
+TEST_F(ClockManagerTest, subscribe)
+{
     ClockSyncSubscription sub;
     ClockSyncData data;
     EXPECT_FALSE(ClockManager::subscribeByName(sub, "xyz", data));
@@ -317,7 +319,8 @@ TEST_F(ClockManagerTest, subscribe) {
 //     ClockSyncData &clockSyncData)
 // static int statusWait(int timeout, size_t timeBaseIndex,
 //     ClockSyncData &clockSyncData)
-TEST_F(ClockManagerTest, statusWait) {
+TEST_F(ClockManagerTest, statusWait)
+{
     ClockSyncData data;
     EXPECT_EQ(ClockManager::statusWaitByName(0, "xyz", data), -1);
     EXPECT_EQ(ClockManager::statusWait(0, 1, data), 1);
