@@ -20,15 +20,25 @@ DECLARE_STATIC(ClientState::m_clientID);
 DECLARE_STATIC(ClientState::m_sessionId, InvalidSessionId);
 DECLARE_STATIC(ClientState::m_connected, false);
 
-// Used in ClockManager::connect()
+// Used in ClockManager::connect() to setup listener and transmitter queues
 bool ClientState::init()
 {
+    m_clientID = "/clkmgr.112233";
     return true;
 }
 
-// Used in ClockManager::connect() and check_proxy_liveness()
+// Used in ClockManager::connect() and check_proxy_liveness() to send a connect
+// message to the proxy and wait for a reply
+bool utest_connected_with_proxy = true;
 bool ClientState::connect(uint32_t timeOut, timespec *lastConnectTime)
 {
+    // Simulate failure for testing
+    if(!utest_connected_with_proxy) {
+        m_connected = false;
+        return false; // Simulate failure for testing
+    }
+
+    // Simulate a successful connection
     m_connected = true;
     if(lastConnectTime != nullptr)
         clock_gettime(CLOCK_REALTIME, lastConnectTime);
