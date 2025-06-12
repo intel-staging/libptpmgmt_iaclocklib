@@ -276,3 +276,68 @@ TEST_F(ClockManagerTest, getTimeBaseCfgs) {
     EXPECT_EQ(cfgs.getRecord(3).index(), 0);
     EXPECT_STREQ(cfgs.getRecord(3).name_c(), "");
 }
+
+// static bool subscribeByName(const ClockSyncSubscription &newSub,
+//     const std::string &timeBaseName, ClockSyncData &clockSyncData)
+// static bool subscribe(const ClockSyncSubscription &newSub,
+//    size_t timeBaseIndex, ClockSyncData &clockSyncData)
+TEST_F(ClockManagerTest, subscribe) {
+    ClockSyncSubscription sub;
+    ClockSyncData data;
+    EXPECT_FALSE(ClockManager::subscribeByName(sub, "xyz", data));
+    EXPECT_FALSE(ClockManager::subscribe(sub, 0, data));
+    utest_subscribed_with_proxy = false;
+    EXPECT_FALSE(ClockManager::subscribe(sub, 1, data));
+    utest_subscribed_with_proxy = true;
+    EXPECT_TRUE(ClockManager::subscribe(sub, 1, data));
+    // check data
+    EXPECT_TRUE(data.havePTP());
+    EXPECT_EQ(data.getPtp().getClockOffset(), 23);
+    EXPECT_TRUE(data.getPtp().isOffsetInRange());
+    EXPECT_EQ(data.getPtp().getOffsetInRangeEventCount(), 8);
+    EXPECT_TRUE(data.getPtp().isSyncedWithGm());
+    EXPECT_EQ(data.getPtp().getSyncedWithGmEventCount(), 9);
+    EXPECT_EQ(data.getPtp().getGmIdentity(), 0x1234ABCD);
+    EXPECT_TRUE(data.getPtp().isGmChanged());
+    EXPECT_EQ(data.getPtp().getGmChangedEventCount(), 10);
+    EXPECT_TRUE(data.getPtp().isAsCapable());
+    EXPECT_EQ(data.getPtp().getAsCapableEventCount(), 11);
+    EXPECT_TRUE(data.getPtp().isCompositeEventMet());
+    EXPECT_EQ(data.getPtp().getCompositeEventCount(), 12);
+    EXPECT_EQ(data.getPtp().getSyncInterval(), 125000);
+    EXPECT_TRUE(data.haveSys());
+    EXPECT_EQ(data.getSysClock().getClockOffset(), 50000);
+    EXPECT_TRUE(data.getSysClock().isOffsetInRange());
+    EXPECT_EQ(data.getSysClock().getOffsetInRangeEventCount(), 13);
+    EXPECT_EQ(data.getSysClock().getGmIdentity(), 0x5678EF01);
+    EXPECT_EQ(data.getSysClock().getSyncInterval(), 10000);
+}
+
+// static int statusWaitByName(int timeout, const std::string &timeBaseName,
+//     ClockSyncData &clockSyncData)
+// static int statusWait(int timeout, size_t timeBaseIndex,
+//     ClockSyncData &clockSyncData)
+TEST_F(ClockManagerTest, statusWait) {
+    ClockSyncData data;
+    EXPECT_EQ(ClockManager::statusWaitByName(0, "xyz", data), -1);
+    EXPECT_EQ(ClockManager::statusWait(0, 1, data), 1);
+    EXPECT_EQ(data.getPtp().getClockOffset(), 23);
+    EXPECT_EQ(data.getPtp().getOffsetInRangeEventCount(), 8);
+    EXPECT_EQ(data.getPtp().getSyncedWithGmEventCount(), 9);
+    EXPECT_EQ(data.getPtp().getGmChangedEventCount(), 10);
+    EXPECT_EQ(data.getPtp().getAsCapableEventCount(), 11);
+    EXPECT_EQ(data.getPtp().getCompositeEventCount(), 12);
+    EXPECT_EQ(data.getSysClock().getClockOffset(), 50000);
+    EXPECT_EQ(data.getSysClock().getOffsetInRangeEventCount(), 13);
+    EXPECT_EQ(ClockManager::statusWait(0, 1, data), 0);
+    EXPECT_EQ(data.getPtp().getClockOffset(), 23);
+    EXPECT_EQ(data.getPtp().getOffsetInRangeEventCount(), 0);
+    EXPECT_EQ(data.getPtp().getSyncedWithGmEventCount(), 0);
+    EXPECT_EQ(data.getPtp().getGmChangedEventCount(), 0);
+    EXPECT_EQ(data.getPtp().getAsCapableEventCount(), 0);
+    EXPECT_EQ(data.getPtp().getCompositeEventCount(), 0);
+    EXPECT_EQ(data.getSysClock().getClockOffset(), 50000);
+    EXPECT_EQ(data.getSysClock().getOffsetInRangeEventCount(), 0);
+    utest_connected_with_proxy = false;
+    EXPECT_EQ(ClockManager::statusWait(1, 1, data), -1);
+}
