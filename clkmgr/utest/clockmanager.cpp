@@ -30,7 +30,7 @@ bool ClientState::init()
 
 // Used in ClockManager::connect() and check_proxy_liveness() to send a connect
 // message to the proxy and wait for a reply
-bool utest_connected_with_proxy = true;
+bool utest_connected_with_proxy = false;
 bool ClientState::connect(uint32_t timeOut, timespec *lastConnectTime)
 {
     // Simulate failure for testing
@@ -210,8 +210,8 @@ class clkmgr::ClientConnectMessage
             .interfaceName = { 'e', 't', 'h', '1', 0 },
             .transportSpecific = 5,
             .domainNumber = 5,
-            .haveSys = true,
-            .havePtp = false
+            .haveSys = false,
+            .havePtp = true
         });
     }
 };
@@ -233,10 +233,46 @@ TEST_F(ClockManagerTest, singleInstance) {
     EXPECT_EQ(&cm1, &cm2);
 }
 
-// 2. Connection Management
-TEST_F(ClockManagerTest, ConnectAndDisconnectIdempotency) {
-    printf("SiangDebug: start\n");
+// static bool connect()
+// static bool disconnect()
+TEST_F(ClockManagerTest, connectAndDisconnect) {
+    EXPECT_FALSE(ClockManager::connect());
+    utest_connected_with_proxy = true;
     EXPECT_TRUE(ClockManager::connect());
-    printf("SiangDebug: start2\n");
-    EXPECT_TRUE(ClockManager::connect()); // Should be idempotent
+    EXPECT_TRUE(ClockManager::connect());
+    EXPECT_TRUE(ClockManager::disconnect());
+    EXPECT_TRUE(ClockManager::disconnect());
+}
+
+// static const TimeBaseConfigurations &getTimebaseCfgs()
+TEST_F(ClockManagerTest, getTimeBaseCfgs) {
+    TimeBaseConfigurations cfgs = ClockManager::getTimebaseCfgs();
+    const auto record1 = cfgs.getRecord(1);
+    EXPECT_EQ(record1.index(), 1);
+    EXPECT_STREQ(record1.name_c(), "me");
+    EXPECT_STREQ(record1.ptp().ifName_c(), "eth0");
+    EXPECT_EQ(record1.ptp().transportSpecific(), 4);
+    EXPECT_EQ(record1.ptp().domainNumber(), 1);
+    EXPECT_TRUE(record1.haveSysClock());
+    EXPECT_TRUE(record1.havePtp());
+    const auto record2 = cfgs.getRecord(2);
+    EXPECT_EQ(record2.index(), 2);
+    EXPECT_STREQ(record2.name().c_str(), "too");
+    EXPECT_STREQ(record2.ptp().ifName().c_str(), "eth1");
+    EXPECT_EQ(record2.ptp().transportSpecific(), 5);
+    EXPECT_EQ(record2.ptp().domainNumber(), 5);
+    EXPECT_FALSE(record2.haveSysClock());
+    EXPECT_TRUE(record2.havePtp());
+    EXPECT_EQ(cfgs.size(), 2);
+    EXPECT_TRUE(cfgs.isTimeBaseIndexPresent(1));
+    EXPECT_TRUE(cfgs.isTimeBaseIndexPresent(2));
+    EXPECT_FALSE(cfgs.isTimeBaseIndexPresent(3));
+    size_t timeBaseIndex = 0;
+    EXPECT_TRUE(cfgs.BaseNameToBaseIndex("me", timeBaseIndex));
+    EXPECT_EQ(timeBaseIndex, 1);
+    EXPECT_TRUE(cfgs.BaseNameToBaseIndex("too", timeBaseIndex));
+    EXPECT_EQ(timeBaseIndex, 2);
+    EXPECT_FALSE(cfgs.BaseNameToBaseIndex("unknown", timeBaseIndex));
+    EXPECT_EQ(cfgs.getRecord(3).index(), 0);
+    EXPECT_STREQ(cfgs.getRecord(3).name_c(), "");
 }
