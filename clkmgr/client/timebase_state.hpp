@@ -31,13 +31,13 @@ class TimeBaseState
   private:
     bool subscribed{false}; /**< Subscription status */
     bool event_changed{false}; /**< Subscription status */
-    PTPClockEvent ptp4lEventState; /**< PTP4L Event state */
-    SysClockEvent chronyEventState; /**< Chrony Event state */
+    PTPClockEvent ptpEventState; /**< PTP Event state */
+    SysClockEvent sysEventState; /**< System Clock Event state */
     PTPClockSubscription ptpEventSub; /**< PTP Event subscription */
-    SysClockSubscription sysEventSub; /**< Chrony Event subscription */
+    SysClockSubscription sysEventSub; /**< System Clock Event subscription */
     timespec last_notification_time = {}; /**< Last notification time */
     bool havePtPData = false; /**< Flag to indicate if PTP data is available */
-    bool haveSysData = false; /**< Flag to indicate if Chrony data is available */
+    bool haveSysData = false; /**< Flag to indicate if System data is available */
 
   public:
     /**
@@ -67,13 +67,13 @@ class TimeBaseState
      * Get the ptp4l event state
      * @return Reference to the event state
      */
-    const PTPClockEvent &get_ptp4lEventState() const;
+    const PTPClockEvent &get_ptpEventState() const;
 
     /**
-     * Get the chrony event state
+     * Get the system clock event state
      * @return Reference to the event state
      */
-    const SysClockEvent &get_chronyEventState() const;
+    const SysClockEvent &get_sysEventState() const;
 
     /**
      * Set the ptp4l event state
@@ -82,10 +82,10 @@ class TimeBaseState
     void set_ptpEventState(const PTPClockEvent &ptpState);
 
     /**
-     * Set the chrony event state
+     * Set the system clock event state
      * @param[in] eState Event state
      */
-    void set_chronyEventState(const SysClockEvent &chronyState);
+    void set_sysEventState(const SysClockEvent &sysState);
 
     /**
      * Set the last notification time

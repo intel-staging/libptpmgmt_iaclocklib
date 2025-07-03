@@ -255,11 +255,11 @@ void ptpEvent::copy()
 {
     unique_lock<rtpi::mutex> eventLock(timeBaseLock[timeBaseIndex]);
     ptp_event &to = ptp4lEvents[timeBaseIndex];
-    to.master_offset = master_offset;
-    to.as_capable = as_capable;
-    to.ptp4l_sync_interval = ptp4l_sync_interval;
-    to.synced_to_primary_clock = synced_to_primary_clock;
-    memcpy(to.gm_identity, gm_identity, sizeof(gm_identity));
+    to.clockOffset = clockOffset;
+    to.asCapable = asCapable;
+    to.syncInterval = syncInterval;
+    to.syncedWithGm = syncedWithGm;
+    to.gmClockUUID = gmClockUUID;
 }
 
 chronyEvent::chronyEvent(size_t index) : timeBaseIndex(index)
@@ -272,9 +272,9 @@ void chronyEvent::copy()
 {
     unique_lock<rtpi::mutex> eventLock(timeBaseLock[timeBaseIndex]);
     chrony_event &to = chronyEvents[timeBaseIndex];
-    to.chrony_offset = chrony_offset;
-    to.chrony_reference_id = chrony_reference_id;
-    to.polling_interval = polling_interval;
+    to.clockOffset = clockOffset;
+    to.gmClockUUID = gmClockUUID;
+    to.syncInterval = syncInterval;
 }
 
 Transmitter *Transmitter::getTransmitterInstance(sessionId_t sessionId)

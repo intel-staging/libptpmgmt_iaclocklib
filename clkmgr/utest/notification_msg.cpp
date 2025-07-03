@@ -85,13 +85,13 @@ TEST(NotificationMessage, toProxy)
     EXPECT_STREQ(pcmsg->toString().c_str(),
         "get_msgId(): 2\n"
         "m_msgAck: 0\n");
-    EXPECT_TRUE(ptp_data.as_capable);
-    EXPECT_EQ(ptp_data.gm_identity[0], 1);
-    EXPECT_EQ(ptp_data.master_offset, 12);
-    EXPECT_EQ(ptp_data.ptp4l_sync_interval, 10000);
-    EXPECT_FALSE(ptp_data.synced_to_primary_clock);
+    EXPECT_TRUE(ptp_data.asCapable);
+    EXPECT_EQ(ptp_data.gmClockUUID, 123);
+    EXPECT_EQ(ptp_data.clockOffset, 12);
+    EXPECT_EQ(ptp_data.syncInterval, 10000);
+    EXPECT_FALSE(ptp_data.syncedWithGm);
     // No chrony data is received.
-    EXPECT_EQ(chrony_data.chrony_offset, 0);
-    EXPECT_EQ(chrony_data.chrony_reference_id, 0);
-    EXPECT_EQ(chrony_data.polling_interval, 0);
+    EXPECT_EQ(chrony_data.clockOffset, 0);
+    EXPECT_EQ(chrony_data.gmClockUUID, 0);
+    EXPECT_EQ(chrony_data.syncInterval, 0);
 }

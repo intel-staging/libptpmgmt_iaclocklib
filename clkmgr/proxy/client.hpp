@@ -29,16 +29,16 @@ class ptpEvent
   private:
     size_t timeBaseIndex;
   public:
-    int64_t master_offset;
-    int64_t ptp4l_sync_interval;
-    bool synced_to_primary_clock;
-    bool as_capable = false;
-    uint8_t gm_identity[8] = { 0 };
+    int64_t clockOffset;
+    int64_t syncInterval;
+    bool syncedWithGm;
+    bool asCapable = false;
+    uint64_t gmClockUUID = 0;
     ptpEvent(size_t index);
     void portClear() {
-        master_offset = 0;
-        ptp4l_sync_interval = 0;
-        synced_to_primary_clock = false;
+        clockOffset = 0;
+        syncInterval = 0;
+        syncedWithGm = false;
     }
     void copy();
 };
@@ -48,14 +48,14 @@ class chronyEvent
   private:
     size_t timeBaseIndex;
   public:
-    int64_t chrony_offset;
-    uint32_t chrony_reference_id;
-    int64_t polling_interval;
+    int64_t clockOffset;
+    uint32_t gmClockUUID;
+    int64_t syncInterval;
     chronyEvent(size_t index);
     void clear() {
-        chrony_offset = 0;
-        chrony_reference_id = 0;
-        polling_interval = 0;
+        clockOffset = 0;
+        gmClockUUID = 0;
+        syncInterval = 0;
         copy();
     }
     void copy();
