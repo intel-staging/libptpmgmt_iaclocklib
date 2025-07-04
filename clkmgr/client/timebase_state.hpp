@@ -31,11 +31,13 @@ class TimeBaseState
   private:
     bool subscribed{false}; /**< Subscription status */
     bool event_changed{false}; /**< Subscription status */
-    PTPClockEvent ptp4lEventState; /**< PTP4L Event state */
-    SysClockEvent chronyEventState; /**< Chrony Event state */
+    PTPClockEvent ptpEventState; /**< PTP Event state */
+    SysClockEvent sysEventState; /**< System Clock Event state */
     PTPClockSubscription ptpEventSub; /**< PTP Event subscription */
-    SysClockSubscription sysEventSub; /**< Chrony Event subscription */
+    SysClockSubscription sysEventSub; /**< System Clock Event subscription */
     timespec last_notification_time = {}; /**< Last notification time */
+    bool havePtPData = false; /**< Flag to indicate if PTP data is available */
+    bool haveSysData = false; /**< Flag to indicate if System data is available */
 
   public:
     /**
@@ -65,13 +67,13 @@ class TimeBaseState
      * Get the ptp4l event state
      * @return Reference to the event state
      */
-    const PTPClockEvent &get_ptp4lEventState() const;
+    const PTPClockEvent &get_ptpEventState() const;
 
     /**
-     * Get the chrony event state
+     * Get the system clock event state
      * @return Reference to the event state
      */
-    const SysClockEvent &get_chronyEventState() const;
+    const SysClockEvent &get_sysEventState() const;
 
     /**
      * Set the ptp4l event state
@@ -80,10 +82,10 @@ class TimeBaseState
     void set_ptpEventState(const PTPClockEvent &ptpState);
 
     /**
-     * Set the chrony event state
+     * Set the system clock event state
      * @param[in] eState Event state
      */
-    void set_chronyEventState(const SysClockEvent &chronyState);
+    void set_sysEventState(const SysClockEvent &sysState);
 
     /**
      * Set the last notification time
@@ -122,6 +124,30 @@ class TimeBaseState
      * @return True if the subscription is set successfully, false otherwise
      */
     bool set_sysEventSub(const SysClockSubscription &eSub);
+
+    /**
+     * Check whether there is any PTP clock data available
+     * @return true if available, false otherwise
+     */
+    bool is_havePtp() const;
+
+    /**
+     * Set havePtpData to indicate whether there is any PTP data available
+     * @param[in] havePtp True if PTP data is available, false otherwise
+     */
+    void set_havePtp(bool havePtp);
+
+    /**
+     * Check whether there is any system clock data available
+     * @return true if available, false otherwise
+     */
+    bool is_haveSys() const;
+
+    /**
+     * Set haveSysData to indicate whether there is any system clock data available
+     * @param[in] haveSys True if system clock data is available, false otherwise
+     */
+    void set_haveSys(bool haveSys);
 };
 
 /**
@@ -147,8 +173,11 @@ class TimeBaseStates
     // Method to get a copy of TimeBaseState by timeBaseIndex
     bool getTimeBaseState(size_t timeBaseIndex, TimeBaseState &state);
 
-    // Method to set TimeBaseState by timeBaseIndex
-    void setTimeBaseState(size_t timeBaseIndex, const ptp_event &event);
+    // Method to set TimeBaseState for PTP clock by timeBaseIndex
+    void setTimeBaseStatePtp(size_t timeBaseIndex, const ptp_event &event);
+
+    // Method to set TimeBaseState for System clock by timeBaseIndex
+    void setTimeBaseStateSys(size_t timeBaseIndex, const chrony_event &event);
 
     // Method to set PTPClockSubscription by timeBaseIndex
     bool setPtpEventSubscription(int timeBaseIndex,
@@ -192,7 +221,8 @@ class TimeBaseStates
 
     // Send Client subscribe message
     bool subscribe(size_t timeBaseIndex, const ClockSyncSubscription &newSub);
-    bool subscribeReply(size_t timeBaseIndex, const ptp_event &ptpData);
+    bool subscribeReply(size_t timeBaseIndex, const ptp_event &ptpData,
+        const chrony_event &chronyData);
 };
 
 __CLKMGR_NAMESPACE_END

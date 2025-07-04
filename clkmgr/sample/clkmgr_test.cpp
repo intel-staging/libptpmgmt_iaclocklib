@@ -131,15 +131,15 @@ static void printOut()
     printf("|------------------------------|--------------|-------------|\n");
     printf("| %-28s |     %-19ld ns |\n", "ptp_clockOffset", ptpClock.getClockOffset());
     gmClockUUID = ptpClock.getGmIdentity();
-    uint8_t gm_identity[8];
+    uint8_t gmClockUUID[8];
     // Copy the uint64_t into the array
     for (int i = 0; i < 8; ++i) {
-        gm_identity[i] = static_cast<uint8_t>(gmClockUUID >> (8 * (7 - i)));
+        gmClockUUID[i] = static_cast<uint8_t>(gmClockUUID >> (8 * (7 - i)));
     }
     printf("| %-28s |     %02x%02x%02x.%02x%02x.%02x%02x%02x     |\n",
-        "ptp_gmIdentity", gm_identity[0], gm_identity[1], gm_identity[2],
-            gm_identity[3],gm_identity[4], gm_identity[5], gm_identity[6],
-            gm_identity[7]);
+        "ptp_gmIdentity", gmClockUUID[0], gmClockUUID[1], gmClockUUID[2],
+            gmClockUUID[3],gmClockUUID[4], gmClockUUID[5], gmClockUUID[6],
+            gmClockUUID[7]);
     printf("| %-28s |     %-19ld us |\n", "ptp_syncInterval",
         ptpClock.getSyncInterval());
     printf("| %-28s |     %-19ld ns |\n", "ptp_notificationTimestamp",
