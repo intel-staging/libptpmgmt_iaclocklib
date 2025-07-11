@@ -13,6 +13,7 @@ CLKMGR_CLIENT_DIR:=$(CLKMGR_DIR)/client
 CLKMGR_PROXY_DIR:=$(CLKMGR_DIR)/proxy
 CLKMGR_UTEST_DIR:=$(CLKMGR_DIR)/utest
 CLKMGR_PUB_DIR:=$(CLKMGR_DIR)/pub
+CLKMGR_DOC_DIR:=$(CLKMGR_DIR)/doc
 
 CLKMGR_INIT_NAME:=$(CLKMGR_PROXY_DIR)/clkmgr-proxy
 CLKMGR_LIB:=lib$(CLKMGR_NAME)
@@ -160,3 +161,17 @@ ifdef MARKDOWN
 #       $(SED) -i 's$(REDIR2)' $(DOCDIR)/clkmgr/index.html
 #endif
 endif # MARKDOWN
+ifdef PANDOC
+	$(PANDOC) -s -t man clkmgr/clkmgr_proxy_cfg.md\
+	  -o man/clkmgr_proxy_cfg.5
+	$(PANDOC) -s -t html clkmgr/clkmgr_proxy_cfg.md\
+	  -o $(CLKMGR_DOC_DIR)/clkmgr_proxy_cfg.5.html
+	$(INSTALL_DATA) -D man/clkmgr_proxy_cfg.5\
+	  $(DESTDIR)$(mandir)/man5/clkmgr_proxy_cfg.5
+	$(INSTALL_DATA) -D $(CLKMGR_DOC_DIR)/clkmgr_proxy_cfg.5.html\
+	  $(DOCDIR)/clkmgr_proxy_cfg.5.html
+	$(SED) -i '1i<!-- SPDX-License-Identifier: GFDL-1.3-no-invariants-or-later\
+	  \nSPDX-FileCopyrightText: Copyright © 2025 Intel Corporation. -->'\
+	  $(DESTDIR)$(mandir)/man5/clkmgr_proxy_cfg.5\
+	  $(DOCDIR)/clkmgr_proxy_cfg.5.html
+endif # PANDOC

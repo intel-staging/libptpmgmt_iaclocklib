@@ -33,6 +33,7 @@ BuildRequires:  tcl tcl-devel
 BuildRequires:  librtpi1 librtpi-devel
 BuildRequires:  golang
 BuildRequires:  systemd
+BuildRequires:  pandoc
 #Source0:        https://github.com/erezgeva/%%{name}/archive/refs/tags/%%{version}.tar.gz
 Source0:        %{name}-%{version}.txz
 
@@ -325,6 +326,7 @@ autoreconf -i
 %files -n %{cbname}-proxy
 %{_sbindir}/%{cbname}_proxy
 %{_mandir}/man8/%{cbname}_proxy.8*
+%{_mandir}/man5/%{cbname}_proxy_cfg.5*
 %{_sysconfdir}/%{cbname}/proxy_cfg.json
 %{_prefix}/lib/systemd/system/%{cbname}-proxy.s*
 
