@@ -160,3 +160,9 @@ ifdef MARKDOWN
 #       $(SED) -i 's$(REDIR2)' $(DOCDIR)/clkmgr/index.html
 #endif
 endif # MARKDOWN
+ifdef PANDOC
+	$(PANDOC) -s -t man clkmgr/clkmgr_proxy_cfg.md\
+	  -o $(DESTDIR)$(mandir)/man5/clkmgr_proxy_cfg.5
+	$(PANDOC) -s -t html clkmgr/clkmgr_proxy_cfg.md\
+	  -o $(DOCDIR)/clkmgr/clkmgr_proxy_cfg.html
+endif # PANDOC
