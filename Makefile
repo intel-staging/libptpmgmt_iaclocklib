@@ -199,6 +199,7 @@ include tools/version
 
 SRC:=src
 PUB:=pub
+MAN:=man
 LIB_D:=.libs
 PUB_C:=$(PUB)/c
 PMC_DIR:=ptp-tools
@@ -272,7 +273,7 @@ UTEST_TGT:=utest_cpp utest_lang utest_c $(UTEST_CPP_TGT) $(UTEST_TGT_LNG)\
   $(UTEST_C_TGT) utest_clkmgr
 INS_TGT:=install_main $(addprefix install_,$(TGT_LNG)) install_clkmgr
 PHONY_TGT:=all clean distclean format install deb deb_arc deb_clean\
-  doxygen checkall help srcpkg rpm pkg gentoo utest config\
+  doxygen checkall help srcpkg rpm pkg gentoo utest config doc\
   $(UTEST_TGT) $(INS_TGT) utest_lua_a uctest
 .PHONY: $(PHONY_TGT)
 NONPHONY_TGT_ALL:=$(filter-out $(PHONY_TGT),$(MAKECMDGOALS))
@@ -856,6 +857,22 @@ defs.mk: defs.mk.in config.status
 endif # config.status
 endif # MAKECMDGOALS
 
+####### Generate Manpages from Markdown #######
+ifdef PANDOC
+CLKMGR_MAN_FILES := $(MAN)/clkmgr_proxy_cfg.5
+
+$(MAN)/%.5: $(CLKMGR_DIR)/%.md | $(MAN)
+	$(Q_GEN)$(PANDOC) -s -f markdown -t man $< -o $@
+	@echo "Adding copyright header to $@..."
+	@sed -i '1i\\" $(SPDXLI) $(SPDXGFDL)\n\\" $(SPDXCY_INTEL)\n\\"' $@
+
+$(MAN):
+	$Q$(MKDIR_P) "$@"
+
+doc: doxygen $(CLKMGR_MAN_FILES)
+	@echo "Documentation and man pages generated successfully"
+endif # PANDOC
+
 CLEAN:=$(wildcard */*.o */*/*.o archlinux/*.pkg.tar.zst\
   *.la wrappers/*/*.so\
   wrappers/python/*.pyc wrappers/php/*.h wrappers/php/*.ini wrappers/perl/*.pm\
@@ -869,7 +886,7 @@ CLEAN:=$(wildcard */*.o */*/*.o archlinux/*.pkg.tar.zst\
   .phpunit.result.cache wrappers/go/allocTlv.i wrappers/go/gtest/gtest\
   wrappers/go/clkmgr_gtest/clkmgr_gtest\
   $(subst .in,,$(wildcard $(CLKMGR_DIR)/proxy/clkmgr-proxy.*.in))\
-  $(CLKMGR_PROXY) $(HEADERS_GEN) $(CLKMGR_HEADERS_GEN) .null
+  $(CLKMGR_PROXY) $(HEADERS_GEN) $(CLKMGR_HEADERS_GEN) man/clkmgr_proxy_cfg.5 .null
 CLEAN_DIRS:=$(filter %/, $(wildcard wrappers/lua/*/ wrappers/python/*/ rpm/[BRS]*/\
   archlinux/*/ obj-*/ $(CLKMGR_DIR)/*/$(LIB_D)/)) _site $(OBJ_DIR)\
   $(LIB_D) wrappers/perl/auto $(CLKMGR_DIR)/doc wrappers/go/$(CLKMGR_NAME)\
