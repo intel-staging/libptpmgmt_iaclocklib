@@ -4,9 +4,17 @@
 .TH CLKMGR_PROXY "8" "June 2025" "clkmgr_proxy"
 .SH NAME
 clkmgr_proxy \- Clock Manager proxy service
+.SH SYNOPSIS
+clkmgr_proxy [ OPTIONS ] [ -f FILE ]
 .SH DESCRIPTION
-Usage of clkmgr_proxy:
-Options:
+Clock Manager proxy service is a user-space service that acts as a proxy for
+clock management operations on a system. It facilitates communication between
+the clock synchronization services and client applications. This service is
+typically used in environments that require precise clock synchronization and
+management, such as in time-sensitive networking or industrial automation systems.
+The configuration of the proxy service can be configured using a JSON configuration
+file, as described in \fBclkmgr_proxy_cfg\fR(5).
+.SH OPTIONS
 .HP
 \fB\-f\fR [file] Read configuration from 'file'
 .HP
@@ -31,3 +39,6 @@ Show version
 .TP
 \fB\-h\fR
 Show help message
+.SH SEE ALSO
+.PP
+\fBclkmgr_proxy_cfg\fR(5)
