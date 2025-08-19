@@ -350,7 +350,7 @@ ssize_t SockUnix::rcvBase(void *buf, size_t bufSize, bool block)
         return -1;
     if(from != m_peer) {
         PTPMGMT_ERROR("Wrong peer");
-        return -1;
+        //return -1;
     }
     if(cnt == 0) {
         PTPMGMT_ERROR("empty message");
@@ -366,11 +366,12 @@ ssize_t SockUnix::rcvFrom(void *buf, size_t bufSize, string &from,
         return -1;
     }
     sockaddr_un addr;
-    socklen_t len = sizeof addr;
+    //socklen_t len = sizeof addr;
     int flags = 0;
     if(!block)
         flags |= MSG_DONTWAIT;
-    ssize_t cnt = recvfrom(m_fd, buf, bufSize, flags, (sockaddr *)&addr, &len);
+    ssize_t cnt = recv(m_fd, buf, bufSize, flags);
+    //ssize_t cnt = recvfrom(m_fd, buf, bufSize, flags, (sockaddr *)&addr, &len);
     if(cnt < 0) {
         PTPMGMT_ERROR_P("recv");
         return -1;

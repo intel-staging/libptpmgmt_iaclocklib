@@ -114,7 +114,7 @@ main()
 {
  local -r base="$(realpath "$(dirname "$0")/../..")"
  # clknetsim location
- local -r CLKNETSIM_PATH=../clknetsim
+ local -r CLKNETSIM_PATH=clknetsim
  # clknetsim folder for simulation logs and configuration files
  local -r CLKNETSIM_TMPDIR=clkmgr/sim
  prepare_clknetsim
@@ -139,7 +139,7 @@ main()
  . $CLKNETSIM_PATH/clknetsim.bash
 
  # Test configuraton
- generate_config4 '1' '1 2 | 2 4 | 3 4 | 4 5' 0.01\
+ generate_config4 '1' '1 2 3 4 5' 0.01\
     '(sum (* 1e-9 (normal)))'\
     '(* 1e-8 (exponential))'
  echo 'node5_start = 100' >> $CLKNETSIM_TMPDIR/conf
@@ -156,15 +156,13 @@ main()
  trap c_sig EXIT # on exit
  trap c_sig ERR  #
 
- # UDS = /clknetsim/unix/<node>:<port start from 1>
- # sendmsg(sockfd) "/clknetsim/unix/%u:%u" req.to, req.dst_port
-
+ # echo 'node5_start = 50' >> clkmgr/sim/conf
  # Start clients
  c_node='c_node + 1'
- start_client $c_node ptp4l '' '' "-i $c_if"
+ start_client $c_node ptp4l "" "" "-i eth0"
 
  c_node='c_node + 1'
- start_client $c_node ptp4l '' '' "-i $c_if"
+ start_client $c_node ptp4l "" "" "-i eth0"
  ptp4l_node=$c_node
 
  c_node='c_node + 1'
@@ -172,7 +170,10 @@ main()
  chronyd_node=$c_node
 
  c_node='c_node + 1'
- export LD_LIBRARY_PATH=.libs
+ local CLKNETSIM_SO_PATH="$base/$CLKNETSIM_PATH/clknetsim.so"
+ export CLKNETSIM_PRELOAD="$CLKNETSIM_SO_PATH"
+ export LD_LIBRARY_PATH=".libs"
+
  start_client $c_node clkmgr_proxy "$ptp4l_node;$chronyd_node;$c_if" '' ' -l 2'
 
  c_node='c_node + 1'
