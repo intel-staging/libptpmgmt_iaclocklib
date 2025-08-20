@@ -1,0 +1,66 @@
+
+---------------------- Node 1 ----------------------
+
+RMS offset:                            	0.000000e+00
+Maximum absolute offset:               	0.000000e+00
+Mean absolute offset:                  	0.000000e+00
+Mean offset:                           	0.000000e+00
+RMS frequency:                         	0.000000e+00
+Maximum absolute frequency:            	0.000000e+00
+Mean absolute frequency:               	0.000000e+00
+Mean frequency:                        	0.000000e+00
+RMS raw frequency:                     	0.000000e+00
+Maximum absolute raw frequency:        	0.000000e+00
+Mean absolute raw frequency:           	0.000000e+00
+Mean raw frequency:                    	0.000000e+00
+RMS incoming packet delay:             	1.294054e-08
+Mean incoming packet interval:         	9.332814e-01
+Minimum incoming packet interval:      	4.199750e-09
+RMS outgoing packet delay:             	1.433969e-08
+Mean outgoing packet interval:         	1.428558e-01
+Minimum outgoing packet interval:      	0.000000e+00
+Mean wakeup interval:                  	4.141791e-01
+
+---------------------- Node 2 ----------------------
+
+RMS offset:                            	3.551428e-03
+Maximum absolute offset:               	1.000002e-02
+Mean absolute offset:                  	1.261268e-03
+Mean offset:                           	1.261260e-03
+RMS frequency:                         	1.179077e-08
+Maximum absolute frequency:            	4.017312e-08
+Mean absolute frequency:               	7.736290e-09
+Mean frequency:                        	2.353795e-10
+RMS raw frequency:                     	1.179077e-08
+Maximum absolute raw frequency:        	4.017312e-08
+Mean absolute raw frequency:           	7.736290e-09
+Mean raw frequency:                    	2.353795e-10
+RMS incoming packet delay:             	1.474482e-08
+Mean incoming packet interval:         	2.837439e-01
+Minimum incoming packet interval:      	1.271871e-11
+RMS outgoing packet delay:             	1.374242e-08
+Mean outgoing packet interval:         	4.522509e-01
+Minimum outgoing packet interval:      	0.000000e+00
+Mean wakeup interval:                  	2.356688e-01
+
+---------------------- Node 3 ----------------------
+
+RMS offset:                            	9.999871e-03
+Maximum absolute offset:               	1.000008e-02
+Mean absolute offset:                  	9.999871e-03
+Mean offset:                           	9.999871e-03
+RMS frequency:                         	6.140777e-09
+Maximum absolute frequency:            	1.092156e-08
+Mean absolute frequency:               	5.539902e-09
+Mean frequency:                        	-4.130337e-09
+RMS raw frequency:                     	6.140777e-09
+Maximum absolute raw frequency:        	1.092156e-08
+Mean absolute raw frequency:           	5.539902e-09
+Mean raw frequency:                    	-4.130337e-09
+RMS incoming packet delay:             	1.406128e-08
+Mean incoming packet interval:         	2.159309e-01
+Minimum incoming packet interval:      	5.435652e-12
+RMS outgoing packet delay:             	1.542310e-08
+Mean outgoing packet interval:         	0.000000e+00
+Minimum outgoing packet interval:      	0.000000e+00
+Mean wakeup interval:                  	7.928571e+00
