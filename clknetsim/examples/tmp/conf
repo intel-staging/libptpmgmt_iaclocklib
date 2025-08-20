@@ -1,0 +1,11 @@
+node1_delay2 = (* 1e-8 (exponential))
+node1_delay3 = (* 1e-8 (exponential))
+node2_offset = 0.01
+node2_freq = (sum (* 1e-9 (normal)))
+node2_delay1 = (* 1e-8 (exponential))
+node2_delay3 = (* 1e-8 (exponential))
+node3_offset = 0.01
+node3_freq = (sum (* 1e-9 (normal)))
+node3_delay1 = (* 1e-8 (exponential))
+node3_delay2 = (* 1e-8 (exponential))
+node3_start = 100

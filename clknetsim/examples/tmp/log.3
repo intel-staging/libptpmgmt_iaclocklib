@@ -1,0 +1,123 @@
+
+	[action] USER_DESCRIPTION
+	[action] DEFAULT_DATA_SET
+	[action] CURRENT_DATA_SET
+	[action] PARENT_DATA_SET
+	[action] TIME_PROPERTIES_DATA_SET
+	[action] PRIORITY1
+	[action] PRIORITY2
+	[action] DOMAIN
+	[action] SLAVE_ONLY
+	[action] CLOCK_ACCURACY
+	[action] TRACEABILITY_PROPERTIES
+	[action] TIMESCALE_PROPERTIES
+	[action] ALTERNATE_TIME_OFFSET_ENABLE
+	[action] ALTERNATE_TIME_OFFSET_NAME
+	[action] ALTERNATE_TIME_OFFSET_PROPERTIES
+	[action] MASTER_ONLY
+	[action] TIME_STATUS_NP
+	[action] GRANDMASTER_SETTINGS_NP
+	[action] SUBSCRIBE_EVENTS_NP
+	[action] SYNCHRONIZATION_UNCERTAIN_NP
+	[action] EXTERNAL_GRANDMASTER_PROPERTIES_NP
+	[action] NULL_MANAGEMENT
+	[action] CLOCK_DESCRIPTION
+	[action] PORT_DATA_SET
+	[action] LOG_ANNOUNCE_INTERVAL
+	[action] ANNOUNCE_RECEIPT_TIMEOUT
+	[action] LOG_SYNC_INTERVAL
+	[action] VERSION_NUMBER
+	[action] DELAY_MECHANISM
+	[action] LOG_MIN_PDELAY_REQ_INTERVAL
+	[action] PORT_DATA_SET_NP
+	[action] PORT_PROPERTIES_NP
+	[action] PORT_STATS_NP
+	[action] PORT_SERVICE_STATS_NP
+	[action] UNICAST_MASTER_TABLE_NP
+	[action] PORT_HWCLOCK_NP
+	[action] POWER_PROFILE_SETTINGS_NP
+	[action] CMLDS_INFO_NP
+	[action] PORT_CORRECTIONS_NP
+
+	The [action] can be GET, SET, CMD, or COMMAND
+	Commands are case insensitive and may be abbreviated.
+
+	TARGET [portIdentity]
+	TARGET *
+
+sending: GET TIME_STATUS_NP
+sendto
+
+sendmsg
+
+sendmsg to unix 2:1
+sending: GET TIME_PROPERTIES_DATA_SET
+sendto
+
+sendmsg
+
+sendmsg to unix 2:1
+sending: GET PORT_DATA_SET
+sendto
+
+sendmsg
+
+sendmsg to unix 2:1
+	123456.fffe.780102-0 seq 1 RESPONSE MANAGEMENT TIME_PROPERTIES_DATA_SET 
+		currentUtcOffset      37
+		leap61                0
+		leap59                0
+		currentUtcOffsetValid 0
+		ptpTimescale          1
+		timeTraceable         0
+		frequencyTraceable    0
+		timeSource            0xa0
+	123456.fffe.780102-0 seq 0 RESPONSE MANAGEMENT TIME_STATUS_NP 
+		master_offset              2
+		ingress_time               1262304099262023928
+		cumulativeScaledRateOffset +0.000000000
+		scaledLastGmPhaseChange    0
+		gmTimeBaseIndicator        0
+		lastGmPhaseChange          0x0000'0000000000000000.0000
+		gmPresent                  true
+		gmIdentity                 123456.fffe.780101
+	123456.fffe.780101-1 seq 1 RESPONSE MANAGEMENT TIME_PROPERTIES_DATA_SET 
+		currentUtcOffset      37
+		leap61                0
+		leap59                0
+		currentUtcOffsetValid 0
+		ptpTimescale          1
+		timeTraceable         0
+		frequencyTraceable    0
+		timeSource            0xa0
+	123456.fffe.780102-1 seq 2 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456.fffe.780102-1
+		portState               SLAVE
+		logMinDelayReqInterval  0
+		peerMeanPathDelay       0
+		logAnnounceInterval     1
+		announceReceiptTimeout  3
+		logSyncInterval         0
+		delayMechanism          1
+		logMinPdelayReqInterval 0
+		versionNumber           2
+	123456.fffe.780101-1 seq 0 RESPONSE MANAGEMENT TIME_STATUS_NP 
+		master_offset              0
+		ingress_time               0
+		cumulativeScaledRateOffset +0.000000000
+		scaledLastGmPhaseChange    0
+		gmTimeBaseIndicator        0
+		lastGmPhaseChange          0x0000'0000000000000000.0000
+		gmPresent                  false
+		gmIdentity                 123456.fffe.780101
+	123456.fffe.780101-1 seq 2 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456.fffe.780101-1
+		portState               MASTER
+		logMinDelayReqInterval  0
+		peerMeanPathDelay       0
+		logAnnounceInterval     1
+		announceReceiptTimeout  3
+		logSyncInterval         0
+		delayMechanism          1
+		logMinPdelayReqInterval 0
+		versionNumber           2

@@ -1,0 +1,204 @@
+From 4695ef616ca5a9594782df7eafa2e9db7d9545f4 Mon Sep 17 00:00:00 2001
+From: root <Lai, Peter Jun Ann>
+Date: Wed, 20 Aug 2025 06:06:55 +0800
+Subject: [PATCH] clknetsim: fix for clkmgr run successful
+
+---
+ Makefile       |  2 +-
+ client.c       | 30 ++++++++++++++++++++++++------
+ clknetsim.bash | 26 +++++++++++++++++++++-----
+ 3 files changed, 46 insertions(+), 12 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 3c5360e..48ad57d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,4 @@
+-CFLAGS += -O2 -Wall -g -fPIC
++CFLAGS += -O2 -Wall -g -fPIC -DNDEBUG
+ CXXFLAGS += $(CFLAGS)
+ CPPFLAGS += $(apiflags)
+ 
+diff --git a/client.c b/client.c
+index d6868b4..deb25ff 100644
+--- a/client.c
++++ b/client.c
+@@ -601,7 +601,7 @@ static void fill_refclock_sample(void) {
+ static int socket_in_subnet(int socket, int subnet) {
+ 	switch (sockets[socket].iface) {
+ 		case IFACE_LO:
+-			return 0;
++			return subnet != unix_subnet;
+ 		case IFACE_UNIX:
+ 			return subnet == unix_subnet;
+ 		case IFACE_ALL:
+@@ -1374,6 +1374,16 @@ try_again:
+ 			}
+ 
+ 			recv_fd = s >= 0 ? get_socket_fd(s) : 0;
++			if (rep.ret == REPLY_SELECT_BROADCAST) {
++				/* broadcast packet, so we can return any socket */
++				if (s < 0)
++					s = find_recv_socket(NULL);
++				assert(s >= 0);
++				sockets[s].broadcast = 1;
++			} else {
++				assert(s >= 0);
++				sockets[s].broadcast = 0;
++			}
+ 
+ 			/* fetch and drop the packet if no fd is waiting for it */
+ 			if (!readfds || !recv_fd || !FD_ISSET(recv_fd, readfds)) {
+@@ -1894,7 +1904,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
+ 			if (a == INADDR_ANY) {
+ 				sockets[s].iface = IFACE_ALL;
+ 			} else if (a == INADDR_LOOPBACK) {
+-				sockets[s].iface = IFACE_LO;
++				sockets[s].iface = IFACE_ETH0;
+ 			} else {
+ 				int subnet = SUBNET_FROM_ADDR(a);
+ 				assert(subnet >= 0 && subnet < subnets);
+@@ -1919,7 +1929,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
+ 			if (memcmp(sin6->sin6_addr.s6_addr, in6addr_any.s6_addr, 16) == 0) {
+ 				sockets[s].iface = IFACE_ALL;
+ 			} else if (memcmp(sin6->sin6_addr.s6_addr, in6addr_loopback.s6_addr, 16) == 0) {
+-				sockets[s].iface = IFACE_LO;
++				sockets[s].iface = IFACE_ETH0;
+ 			} else {
+ 				int subnet = SUBNET_FROM_SIN6(sin6);
+ 				assert(IS_SIN6_KNOWN(sin6));
+@@ -2443,6 +2453,7 @@ void freeifaddrs(struct ifaddrs *ifa) {
+ }
+ 
+ ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
++	//printf("sendmsg\n\n");
+ 	struct Request_send req;
+ 	struct sockaddr_un *sun;
+ 	struct cmsghdr *cmsg;
+@@ -2455,6 +2466,7 @@ ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
+ 	}
+ 
+ 	if (sockets[s].remote_node >= 0) {
++		printf("remote node %d:%d\n", sockets[s].remote_node, sockets[s].remote_port);
+ 		if (msg->msg_name) {
+ 			errno = EISCONN;
+ 			return -1;
+@@ -2467,6 +2479,7 @@ ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
+ 		switch (sockets[s].domain) {
+ 			case AF_INET:
+ 			case AF_INET6:
++				//printf("sendmsg to IP\n");
+ 				if (!get_ip_target(s, msg->msg_name, msg->msg_namelen, &req.subnet,
+ 						     &req.to, &req.dst_port)) {
+ 					errno = EINVAL;
+@@ -2481,11 +2494,14 @@ ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
+ 				if (sscanf(sun->sun_path, "/clknetsim/unix/%u:%u",
+ 					   &req.to, &req.dst_port) != 2) {
+ 					errno = EINVAL;
++					printf("failed sendmsg to unix %u:%u\n", req.to, req.dst_port);
+ 					return -1;
+ 				}
++				//printf("sendmsg to unix %u:%u\n", req.to, req.dst_port);
+ 				req.to--;
+ 				break;
+ 			default:
++				//printf("sendmsg to unknown domain %d\n", sockets[s].domain);
+ 				assert(0);
+ 		}
+ 	}
+@@ -2541,7 +2557,7 @@ ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
+ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen) {
+ 	struct msghdr msg;
+ 	struct iovec iov;
+-
++	//printf("sendto\n\n");
+ 	iov.iov_base = (void *)buf;
+ 	iov.iov_len = len;
+ 
+@@ -2818,6 +2834,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
+ 
+ 	iov.iov_base = (void *)buf;
+ 	iov.iov_len = len;
++	//printf("recvfrom buf=%p\n", buf);
+ 
+ 	/* needed for compatibility with old glibc recvmsg() */
+ 	memset(&msg, 0, sizeof (msg));
+@@ -2831,8 +2848,9 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
+ 	msg.msg_flags = 0;
+ 
+ 	ret = recvmsg(sockfd, &msg, flags);
++	//printf("clknetsim recvfrom: received %zd bytes\n", ret);
+ 	*addrlen = msg.msg_namelen;
+-
++	//printf("clknetsim recvfrom: received %zd bytes from %s\n", ret, src_addr ? inet_ntoa(((struct sockaddr_in *)src_addr)->sin_addr) : "unknown");
+ 	return ret;
+ }
+ 
+@@ -2842,7 +2860,7 @@ ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
+ 		struct sockaddr_un sun;
+ 	} sa;
+ 	socklen_t addrlen = sizeof (sa);
+-
++	//printf("clknetsim recv buf=%p\n", buf);
+ 	return recvfrom(sockfd, buf, len, flags, (struct sockaddr *)&sa, &addrlen);
+ }
+ 
+diff --git a/clknetsim.bash b/clknetsim.bash
+index 7d6acde..50fa855 100644
+--- a/clknetsim.bash
++++ b/clknetsim.bash
+@@ -90,22 +90,28 @@ start_client() {
+ 	    ;;
+ 	clkmgr_proxy)
+ 	    local -a cfgA=(${config//;/ })
++	    # Extract the target node from config (format: "ptp4l_node;chrony_node;interface")
++	    local ptp4l_node="${cfgA[0]}"
++	    local chrony_node="${cfgA[1]}"
++	    local interface="${cfgA[2]}"
+ 	    cat > $CLKNETSIM_TMPDIR/conf.$node <<-EOF
+ 		{
+ 		  "timeBases": [{
+ 		    "timeBaseName": "Global Clock",
+ 		    "ptp4l": {
+-		      "interfaceName": "${cfgA[2]}",
+-		      "udsAddr": "/clknetsim/unix/${cfgA[0]}:1",
++		      "udsAddr": "/clknetsim/unix/${ptp4l_node}:1",
+ 		      "domainNumber": 0,
+-		      "transportSpecific": 1
++		      "transportSpecific": 0
+ 		    },
+-		    "chrony": { "udsAddr": "/clknetsim/unix/${cfgA[1]}:1" }
++			"chrony": { "udsAddr": "/clknetsim/unix/${chrony_node}:1" }
+ 		  }]
+ 		}
+ 		EOF
+ 	    args=(-f $CLKNETSIM_TMPDIR/conf.$node $opts)
+ 	    ;;
++	checksync)
++		args=($opts)
++	    ;;
+ 	clkmgr)
+ 	    ;;
+ 	*)
+@@ -120,7 +126,17 @@ start_client() {
+ 	    wrapper_options="--log-file=$CLKNETSIM_TMPDIR/valgrind.$node --enable-debuginfod=no"
+     fi
+ 
+-    LD_PRELOAD=${CLKNETSIM_PRELOAD:+$CLKNETSIM_PRELOAD:}$CLKNETSIM_PATH/clknetsim.so \
++    # Special handling for clkmgr_proxy to ensure libptpmgmt socket calls are intercepted
++    local preload_libs="${CLKNETSIM_PRELOAD:+$CLKNETSIM_PRELOAD:}$CLKNETSIM_PATH/clknetsim.so"
++    if [[ "$client" == "clkmgr_proxy" ]]; then
++        # For clkmgr_proxy, ensure clknetsim.so is loaded first to intercept libptpmgmt socket calls
++        export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}.libs"
++        # Add debug to verify preloading
++        echo "DEBUG: Starting clkmgr_proxy with LD_PRELOAD=$preload_libs" >> $CLKNETSIM_TMPDIR/debug.log
++        echo "DEBUG: LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $CLKNETSIM_TMPDIR/debug.log
++    fi
++
++    LD_PRELOAD="$preload_libs" \
+ 	CLKNETSIM_NODE=$node CLKNETSIM_SOCKET=$CLKNETSIM_TMPDIR/sock \
+ 	$CLKNETSIM_CLIENT_WRAPPER $wrapper_options \
+ 	$client$suffix "${args[@]}" &> $CLKNETSIM_TMPDIR/log.$node &
+-- 
+2.34.1
+
