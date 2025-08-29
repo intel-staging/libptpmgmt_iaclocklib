@@ -113,6 +113,7 @@ start_client() {
 		args=($opts)
 	    ;;
 	clkmgr)
+		args=($opts)
 	    ;;
 	*)
 	    echo "unknown client $client"
