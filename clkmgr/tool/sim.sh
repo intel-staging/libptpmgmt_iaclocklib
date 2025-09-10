@@ -112,6 +112,7 @@ make_clkmgr()
 }
 main()
 {
+ echo "Clock Manager simulation using clknetsim"
  local -r base="$(realpath "$(dirname "$0")/../..")"
  # clknetsim location
  local -r CLKNETSIM_PATH=../clknetsim
@@ -122,6 +123,7 @@ main()
  local a_patch
  probe_linuxptp
  probe_chrony
+ echo "Using PATH=$PATH$a_patch"
  make_clkmgr
  # Add path to linuxptp, chrony, clkmgr_proxy and clkmgr_test
  local PATH=$PATH$a_patch
@@ -134,7 +136,7 @@ main()
  local -i ptp4l_node chronyd_node
  export CLKNETSIM_UNIX_SUBNET=2
  rm -f $CLKNETSIM_TMPDIR/log.[0-9]* $CLKNETSIM_TMPDIR/conf.[0-9]*
-
+ echo "start env"
  # includes the clknetsim script
  . $CLKNETSIM_PATH/clknetsim.bash
 
@@ -158,7 +160,7 @@ main()
 
  # UDS = /clknetsim/unix/<node>:<port start from 1>
  # sendmsg(sockfd) "/clknetsim/unix/%u:%u" req.to, req.dst_port
-
+ echo "start node"
  # Start clients
  c_node='c_node + 1'
  start_client $c_node ptp4l '' '' "-i $c_if"
