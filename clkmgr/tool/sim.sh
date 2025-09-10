@@ -141,9 +141,9 @@ main()
  . $CLKNETSIM_PATH/clknetsim.bash
 
  # Test configuraton
- generate_config4 '1' '1 2 | 2 4 | 3 4 | 4 5' 0.01\
-    '(sum (* 1e-9 (normal)))'\
-    '(* 1e-8 (exponential))'
+ generate_config4 "1" "1 2 | 2 3 | 3 4" 0.01\
+    "(sum (* 1e-9 (normal)))"\
+    "(* 1e-8 (exponential))"
  echo 'node5_start = 100' >> $CLKNETSIM_TMPDIR/conf
 
 #generate_config4 '1' '1 2' 0.01\
@@ -163,22 +163,22 @@ main()
  echo "start node"
  # Start clients
  c_node='c_node + 1'
- start_client $c_node ptp4l '' '' "-i $c_if"
+ start_client $c_node ptp4l "" "" "-i $c_if"
 
  c_node='c_node + 1'
- start_client $c_node ptp4l '' '' "-i $c_if"
+ start_client $c_node ptp4l "" "" "-i $c_if"
  ptp4l_node=$c_node
 
- c_node='c_node + 1'
- start_client $c_node chronyd 'refclock PHC /dev/ptp0 poll -6 dpoll -1'
- chronyd_node=$c_node
+# c_node='c_node + 1'
+# start_client $c_node chronyd 'refclock PHC /dev/ptp0 poll -6 dpoll -1'
+# chronyd_node=$c_node
 
  c_node='c_node + 1'
  export LD_LIBRARY_PATH=.libs
  start_client $c_node clkmgr_proxy "$ptp4l_node;$chronyd_node;$c_if" '' ' -l 2'
 
  c_node='c_node + 1'
- start_client $c_node clkmgr '' '_test'
+ start_client $c_node clkmgr "" "_test"
 
  # Run test with clknetsim server
  set +e
