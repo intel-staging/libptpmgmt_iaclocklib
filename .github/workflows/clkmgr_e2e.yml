@@ -47,7 +47,6 @@ jobs:
 
     - name: build and install linuxptp
       run: |
-        ptp4l -v
         cd linuxptp
         make
         sudo make install
@@ -59,7 +58,7 @@ jobs:
         cd libptpmgmt
         autoreconf -i
         ./configure
-        make
+        make CFLAGS="$CFLAGS -U_FORTIFY_SOURCE" CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE"
         cd clkmgr/sample
         make
         cd ../../..
