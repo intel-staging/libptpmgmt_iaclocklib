@@ -18,20 +18,13 @@ on: [push, pull_request, workflow_dispatch]
 # Permit read-only with GITHUB_TOKEN
 permissions: read-all
 
-env:
-  USER: builder
-
 jobs:
   clkmgr_e2e:
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        names: [deb.trixie]
-      fail-fast: false
     container:
-      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+      image: ghcr.io/erezgeva/deb.trixie:latest
     env:
-      GITHUB_CONTAINER: ${{ matrix.names }}
+      GITHUB_CONTAINER: deb.trixie
 
     steps:
 
@@ -47,21 +40,29 @@ jobs:
         repository: mlichvar/clknetsim
         path: clknetsim
 
-    - name: checkout clock manager repository
+    - name: checkout libptpmgmt repository
       uses: actions/checkout@v4
       with:
         path: libptpmgmt
 
-    - name: build packages and install clock manager
+    - name: build and install linuxptp
       run: |
-        chown -R $USER:$USER .
-        su $USER -c libptpmgmt/tools/ci_build.sh
+        ptp4l -v
+        cd linuxptp
+        make
+        sudo make install
+        cd ..
+        ptp4l -v
 
-    - name: build linuxptp
-      run: su $USER -c "make -C linuxptp"
-
-    - name: build clock manager sample app
-      run: su $USER -c libptpmgmt/clkmgr/sample/run_clkmgr_test.sh
+    - name: build libptpmgmt, clock manager, and sample app
+      run: |
+        cd libptpmgmt
+        autoreconf -i
+        ./configure
+        make
+        cd clkmgr/sample
+        make
+        cd ../../..
 
     - name: test with clknetsim
-      run: su $USER -c libptpmgmt/clkmgr/tool/sim.sh
+      run: sudo ./libptpmgmt/clkmgr/tool/sim.sh
