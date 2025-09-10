@@ -61,6 +61,9 @@ prepare_clknetsim()
  local sim_tgt=$base/$CLKNETSIM_PATH/patches
  mkdir -p $sim_tgt
  local n build=false
+ # Build sample app
+ cd $base/clkmgr/sample
+ make
  # Copy patches
  cd $base/clkmgr/tool/clknetsim
  for n in *
