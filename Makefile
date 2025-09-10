@@ -385,6 +385,8 @@ override CXXFLAGS+=-Wdate-time -Wall -std=c++11 -g -I$(SRC) -I$(PUB)
 override CXXFLAGS+=-Wtype-limits -Wdeprecated-copy -Wundef
 # Ignore deprecated functions in pub/opt.h and pub/init.h pub/json.h pub/c/json.h
 override CXXFLAGS+=-Wno-deprecated-declarations
+override CFLAGS   += -U_FORTIFY_SOURCE
+override CXXFLAGS += -U_FORTIFY_SOURCE
 CXXFLAGS_SWIG+=-Wno-tautological-type-limit-compare -Wno-undef
 CXXFLAGS_RUBY+=-Wno-deprecated-copy
 CXXFLAGS_GO:=$(filter-out -I%,$(CXXFLAGS))
