@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: Copyright © 2025 Intel Corporation.
+#
+# @author Song Yoong Siang <yoong.siang.song@@intel.com>
+# @copyright © 2025 Intel Corporation.
+#
+# GitHub Clock Manager end-to-end simulation script
+# - Build and install linuxptp, chronyd, libchrony, libptpmgmt, and
+#   Clock Manager in debian system and test with clknetsim to verify proper
+#   functionality.
+###############################################################################
+
+name: Clock Manager E2E Simulation
+
+# On every push and Pull Request (PR)
+on: [push, pull_request, workflow_dispatch]
+
+# Permit read-only with GITHUB_TOKEN
+permissions: read-all
+
+env:
+  USER: builder
+
+jobs:
+  clkmgr_e2e:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        names: [deb.trixie]
+      fail-fast: false
+    container:
+      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+    env:
+      GITHUB_CONTAINER: ${{ matrix.names }}
+
+    steps:
+
+    - name: checkout linuxptp repository
+      uses: actions/checkout@v4
+      with:
+        repository: nwtime/linuxptp
+        path: linuxptp
+
+    - name: checkout clknetsim repository
+      uses: actions/checkout@v4
+      with:
+        repository: mlichvar/clknetsim
+        path: clknetsim
+
+    - name: checkout clock manager repository
+      uses: actions/checkout@v4
+      with:
+        path: libptpmgmt
+
+    - name: build packages and install clock manager
+      run: |
+        chown -R $USER:$USER .
+        su $USER -c libptpmgmt/tools/ci_build.sh
+
+    - name: build linuxptp
+      run: su $USER -c "make -C linuxptp"
+
+    - name: test with clknetsim
+      run: |
+        chown -R $USER:$USER .
+        su $USER -c libptpmgmt/clkmgr/tool/sim.sh
