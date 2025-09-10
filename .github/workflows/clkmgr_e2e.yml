@@ -63,5 +63,12 @@ jobs:
         make
         cd ../../..
 
+    - name: remove AppArmor profile for chronyd
+      run: |
+        sudo systemctl stop chronyd
+        sudo systemctl disable chronyd
+        sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.chronyd
+        sudo apparmor_status | grep chrony
+
     - name: test with clknetsim
       run: sudo ./libptpmgmt/clkmgr/tool/sim.sh
