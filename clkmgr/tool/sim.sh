@@ -185,6 +185,14 @@ main()
  start_server $c_node -l $run_time -n 2
  set -e
  client_pids=''
+ echo "\nfinish 1"
+ cat $CLKNETSIM_TMPDIR/log.1
+ echo "\nfinish 2"
+ cat $CLKNETSIM_TMPDIR/log.2
+ echo "\nfinish 3"
+ cat $CLKNETSIM_TMPDIR/log.3
+ echo "\nfinish 4"
  cat $CLKNETSIM_TMPDIR/log.4
+
 }
 main "$@"

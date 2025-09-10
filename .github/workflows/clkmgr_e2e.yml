@@ -60,7 +60,8 @@ jobs:
     - name: build linuxptp
       run: su $USER -c "make -C linuxptp"
 
+    - name: build clock manager sample app
+      run: su $USER -c libptpmgmt/clkmgr/sample/run_clkmgr_test.sh
+
     - name: test with clknetsim
-      run: |
-        chown -R $USER:$USER .
-        su $USER -c libptpmgmt/clkmgr/tool/sim.sh
+      run: su $USER -c libptpmgmt/clkmgr/tool/sim.sh
