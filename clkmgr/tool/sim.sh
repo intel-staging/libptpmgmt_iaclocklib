@@ -213,6 +213,13 @@ esac
  start_server $c_node -l $run_time -n $CLKNETSIM_UNIX_SUBNET
  set -e
  client_pids=''
- #cat $CLKNETSIM_TMPDIR/log.4
+ echo log1:
+ cat $CLKNETSIM_TMPDIR/log.1
+ echo log2:
+ cat $CLKNETSIM_TMPDIR/log.2
+ echo log3:
+ cat $CLKNETSIM_TMPDIR/log.3
+ echo log4:
+ cat $CLKNETSIM_TMPDIR/log.4
 }
 main "$@"
