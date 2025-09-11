@@ -51,7 +51,17 @@ jobs:
         make
         sudo make install
         cd ..
+        echo "ptp4l version:"
         ptp4l -v
+
+    - name: remove AppArmor profile for chronyd
+      run: |
+        echo "AppArmor status:"
+        sudo apparmor_status | grep chrony
+        sudo pkill -9 chronyd
+        sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.chronyd
+        echo "AppArmor status after removal:"
+        sudo apparmor_status | grep chrony
 
     - name: build libptpmgmt, clock manager, and sample app
       run: |
