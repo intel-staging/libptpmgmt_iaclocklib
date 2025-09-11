@@ -66,3 +66,9 @@ jobs:
 
     - name: test with clknetsim
       run: timeout 400 sudo ./libptpmgmt/clkmgr/tool/sim.sh
+
+    - name: Upload simulation logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: clknetsim-logs
+        path: libptpmgmt/clkmgr/sim/log.*
