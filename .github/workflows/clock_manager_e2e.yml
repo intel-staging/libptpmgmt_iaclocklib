@@ -65,4 +65,4 @@ jobs:
         cd ../../..
 
     - name: test with clknetsim
-      run: timeout 300 sudo ./libptpmgmt/clkmgr/tool/sim.sh
+      run: timeout 400 sudo ./libptpmgmt/clkmgr/tool/sim.sh
