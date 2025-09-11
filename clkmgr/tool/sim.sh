@@ -221,5 +221,7 @@ esac
  cat $CLKNETSIM_TMPDIR/log.3
  echo log4:
  cat $CLKNETSIM_TMPDIR/log.4
+ echo log5:
+ cat $CLKNETSIM_TMPDIR/log.5
 }
 main "$@"
