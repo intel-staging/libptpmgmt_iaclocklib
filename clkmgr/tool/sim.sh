@@ -203,10 +203,10 @@ esac
  export CLKNETSIM_PRELOAD="$CLKNETSIM_SO_PATH"
  export LD_LIBRARY_PATH=".libs"
 
- start_client $c_node clkmgr_proxy "$ptp4l_node;$chronyd_node;$c_if" '' ' -l 2'
+ start_client $c_node clkmgr_proxy "$ptp4l_node;$chronyd_node;$c_if" '' ' -l 1'
 
  c_node='c_node + 1'
- start_client $c_node clkmgr '' '_test' '-l 10 -m 10'
+ start_client $c_node clkmgr '' '_test' '-l 100 -m 100 -t 1 -i 0'
 
  # Run test with clknetsim server
  set +e
