@@ -47,8 +47,11 @@ static timespec ts;
 
 static void signal_handler(int sig)
 {
-    std::cout << " Exit ..." << std::endl;
-    signal_flag = 1;
+    if (!signal_flag) {
+        std::cout << " Exit ..." << std::endl;
+        signal_flag = 1;
+    }
+    sleep(1);
 }
 
 static double getMonotonicTime() {
