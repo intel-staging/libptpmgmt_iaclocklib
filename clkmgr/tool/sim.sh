@@ -134,7 +134,7 @@ main()
  local client_pids
  local -i c_node=0
  local -r c_if=eth0
- local -ir run_time='60 * 5' # time limit in seconds for clknetsim server
+ local -ir run_time='250' # time limit in seconds for clknetsim server
  local -i ptp4l_node chronyd_node
  export CLKNETSIM_UNIX_SUBNET=4
  rm -f $CLKNETSIM_TMPDIR/log.[0-9]* $CLKNETSIM_TMPDIR/conf.[0-9]*
@@ -195,10 +195,10 @@ echo 'node1_delay2 = (+ (* 1e-8 (exponential)) (* -1 (equal 0.1 (min time 200) t
 
  # Start clients
  c_node='c_node + 1'
- start_client $c_node ptp4l "" "" "-i eth0"
+ start_client $c_node ptp4l '' '' "-i $c_if"
 
  c_node='c_node + 1'
- start_client $c_node ptp4l "" "" "-i eth0"
+ start_client $c_node ptp4l '' '' "-i $c_if"
  ptp4l_node=$c_node
 
  c_node='c_node + 1'
@@ -210,7 +210,18 @@ echo 'node1_delay2 = (+ (* 1e-8 (exponential)) (* -1 (equal 0.1 (min time 200) t
  export CLKNETSIM_PRELOAD="$CLKNETSIM_SO_PATH"
  export LD_LIBRARY_PATH=".libs"
 
- start_client $c_node clkmgr_proxy "$ptp4l_node;$chronyd_node;$c_if" '' ' -l 1'
+ start_client $c_node clkmgr_proxy "
+		{
+		  \"timeBases\": [{
+		    \"timeBaseName\": \"Global Clock\",
+		    \"ptp4l\": {
+		      \"interfaceName\": \"$c_if\",
+		      \"udsAddr\": \"/clknetsim/unix/${ptp4l_node}:1\",
+		      \"domainNumber\": 0,
+		      \"transportSpecific\": 0
+		    }
+		  }]
+		}" '' ' -l 1'
 
  c_node='c_node + 1'
  start_client $c_node clkmgr '' '_test' '-l 100 -m 100 -t 1 -i 0'

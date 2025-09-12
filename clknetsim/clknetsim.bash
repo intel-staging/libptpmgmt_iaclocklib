@@ -89,23 +89,8 @@ start_client() {
 	    while read line; do args+=("$line"); done <<< "$config"
 	    ;;
 	clkmgr_proxy)
-	    local -a cfgA=(${config//;/ })
-	    # Extract the target node from config (format: "ptp4l_node;chrony_node;interface")
-	    local ptp4l_node="${cfgA[0]}"
-	    local chrony_node="${cfgA[1]}"
-	    local interface="${cfgA[2]}"
 	    cat > $CLKNETSIM_TMPDIR/conf.$node <<-EOF
-		{
-		  "timeBases": [{
-		    "timeBaseName": "Global Clock",
-		    "ptp4l": {
-		      "interfaceName": "eth0",
-		      "udsAddr": "/clknetsim/unix/${ptp4l_node}:1",
-		      "domainNumber": 0,
-		      "transportSpecific": 0
-		    }
-		  }]
-		}
+		$config
 		EOF
 	    args=(-f $CLKNETSIM_TMPDIR/conf.$node $opts)
 	    ;;
