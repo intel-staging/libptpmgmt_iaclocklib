@@ -59,18 +59,18 @@ jobs:
         cd libptpmgmt
         autoreconf -i
         ./configure
-        make CFLAGS="$CFLAGS -U_FORTIFY_SOURCE" CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE"
+        make CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE"
         cd clkmgr/sample
         make
         cd ../../..
 
     - name: test with clknetsim
-      run: timeout 400 sudo ./libptpmgmt/clkmgr/tool/sim.sh
+      run: timeout 300 sudo ./libptpmgmt/clkmgr/tool/sim.sh
       continue-on-error: true
 
-    - name: Upload simulation logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: clknetsim-logs
-        path: libptpmgmt/clkmgr/sim/log.*
+#    - name: Upload simulation logs
+#      if: always()
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: clknetsim-logs
+#        path: libptpmgmt/clkmgr/sim/log.*
