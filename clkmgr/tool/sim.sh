@@ -147,35 +147,6 @@ main()
     '(sum (* 1e-9 (normal)))'\
     '(* 1e-8 (exponential))'
 
-## test_mode: Controls the simulation mode for clknetsim.
-# Usage: Pass as the first argument to the script, e.g. ./sim.sh 1
-# If no argument is provided, defaults to 0 (normal mode).
-# Possible values:
-#   0 - Normal operation
-#   1 - Simulate clock stepping (ptp4l master) >> Done
-#   2 - Simulate network down/lost sync and reconnect (ptp4l master) >> Done
-#   3 - Future scenarios
-case $test_mode in
-  0)
-    # Normal mode, no changes
-    ;;
-  1)
-    # Simulate a time jump of 0.1s at the 100th second
-    echo 'node1_step = (* 0.1 (equal 0.1 (sum 1.0) 100))' >> "$CLKNETSIM_TMPDIR/conf"
-    ;;
-  2)
-    # Simulate network down between 100s and 200s for ptp4l master
-    echo 'node1_delay2 = (+ (* 1e-8 (exponential)) (* -1 (equal 0.1 (min time 200) time) (equal 0.1 (max time 100) time)))' >> "$CLKNETSIM_TMPDIR/conf"
-    ;;
-  3)
-    # Placeholder for future scenarios
-    ;;
-  *)
-   echo "Error: Unsupported test_mode: '$test_mode'." >&2
-   exit 1
-   ;;
-esac
-
  echo 'node4_start = 20' >> $CLKNETSIM_TMPDIR/conf
  echo 'node5_start = 30' >> $CLKNETSIM_TMPDIR/conf
 
@@ -223,8 +194,44 @@ echo 'node1_delay2 = (+ (* 1e-8 (exponential)) (* -1 (equal 0.1 (min time 200) t
 		  }]
 		}" '' ' -l 1'
 
+## test_mode: Controls the simulation mode for clknetsim.
+# Usage: Pass as the first argument to the script, e.g. ./sim.sh 1
+# If no argument is provided, defaults to 0 (normal mode).
+# Possible values:
+#   0 - ptp4l single domain
+#   1 - chronyd
+case $test_mode in
+  0)
+    start_client $c_node clkmgr_proxy "
+      {
+        \"timeBases\": [{
+          \"timeBaseName\": \"Global Clock\",
+          \"ptp4l\": {
+            \"interfaceName\": \"$c_if\",
+		        \"udsAddr\": \"/clknetsim/unix/${ptp4l_node}:1\",
+            \"domainNumber\": 0,
+            \"transportSpecific\": 0
+          }
+        }]
+      }" '' ' -l 1'
+    ;;
+  1)
+    start_client $c_node clkmgr_proxy "
+      {
+        \"timeBases\": [{
+          \"timeBaseName\": \"Global Clock\",
+          \"chrony\": { \"udsAddr\": \"/clknetsim/unix/${chrony_node}:1\" }
+        }]
+      }" '' ' -l 1'
+    ;;
+  *)
+   echo "Error: Unsupported test_mode: '$test_mode'." >&2
+   exit 1
+   ;;
+esac
+
  c_node='c_node + 1'
- start_client $c_node clkmgr '' '_test' '-l 100 -m 100 -t 1 -i 0'
+ start_client $c_node clkmgr '' '_test' '-t 1 -i 0'
 
  # Run test with clknetsim server
  set +e

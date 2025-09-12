@@ -64,8 +64,12 @@ jobs:
         make
         cd ../../..
 
-    - name: test with clknetsim
-      run: timeout 300 sudo ./libptpmgmt/clkmgr/tool/sim.sh
+    - name: test ptp4l with clknetsim
+      run: timeout 300 sudo ./libptpmgmt/clkmgr/tool/sim.sh 0
+      continue-on-error: true
+
+    - name: test chronydwith clknetsim
+      run: timeout 300 sudo ./libptpmgmt/clkmgr/tool/sim.sh 1
       continue-on-error: true
 
 #    - name: Upload simulation logs
