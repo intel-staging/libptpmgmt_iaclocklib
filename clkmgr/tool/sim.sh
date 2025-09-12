@@ -134,7 +134,7 @@ main()
  local client_pids
  local -i c_node=0
  local -r c_if=eth0
- local -ir run_time='60 * 10' # time limit in seconds for clknetsim server
+ local -ir run_time='60 * 5' # time limit in seconds for clknetsim server
  local -i ptp4l_node chronyd_node
  export CLKNETSIM_UNIX_SUBNET=4
  rm -f $CLKNETSIM_TMPDIR/log.[0-9]* $CLKNETSIM_TMPDIR/conf.[0-9]*
@@ -175,8 +175,15 @@ case $test_mode in
    exit 1
    ;;
 esac
+
  echo 'node4_start = 20' >> $CLKNETSIM_TMPDIR/conf
  echo 'node5_start = 30' >> $CLKNETSIM_TMPDIR/conf
+
+# Simulate a time jump of 0.1s at the 100th second
+echo 'node1_step = (* 0.1 (equal 0.1 (sum 1.0) 100))' >> "$CLKNETSIM_TMPDIR/conf"
+
+# Simulate network down between 150s and 200s for ptp4l master
+echo 'node1_delay2 = (+ (* 1e-8 (exponential)) (* -1 (equal 0.1 (min time 200) time) (equal 0.1 (max time 150) time)))' >> "$CLKNETSIM_TMPDIR/conf"
 
  # Trap signals
  trap c_ctrl INT # Ctrl^C
