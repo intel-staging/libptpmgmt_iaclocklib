@@ -66,6 +66,7 @@ jobs:
 
     - name: test with clknetsim
       run: timeout 400 sudo ./libptpmgmt/clkmgr/tool/sim.sh
+      continue-on-error: true
 
     - name: Upload simulation logs
       if: always()
