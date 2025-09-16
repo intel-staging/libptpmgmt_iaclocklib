@@ -112,6 +112,7 @@ make_clkmgr()
 }
 main()
 {
+ local -ir test_mode=${1:-0}
  local -r base="$(realpath "$(dirname "$0")/../..")"
  # clknetsim location
  local -r CLKNETSIM_PATH=../clknetsim
@@ -130,23 +131,32 @@ main()
  local client_pids
  local -i c_node=0
  local -r c_if=eth0
- local -ir run_time='60 * 5' # time limit in seconds for clknetsim server
+ local -ir run_time='250' # time limit in seconds for clknetsim server
  local -i ptp4l_node chronyd_node
- export CLKNETSIM_UNIX_SUBNET=2
+ export CLKNETSIM_UNIX_SUBNET=4
  rm -f $CLKNETSIM_TMPDIR/log.[0-9]* $CLKNETSIM_TMPDIR/conf.[0-9]*
 
  # includes the clknetsim script
  . $CLKNETSIM_PATH/clknetsim.bash
 
  # Test configuraton
- generate_config4 '1' '1 2 | 2 4 | 3 4 | 4 5' 0.01\
+ generate_config4 '1' '1 2 3 | 2 4 | 3 4 | 4 5' 0.01\
     '(sum (* 1e-9 (normal)))'\
     '(* 1e-8 (exponential))'
- echo 'node5_start = 100' >> $CLKNETSIM_TMPDIR/conf
 
-#generate_config4 '1' '1 2' 0.01\
-#  '(sum (* 1e-9 (normal)))'\
-#  '(* 1e-8 (exponential))'
+ echo 'node4_start = 20' >> $CLKNETSIM_TMPDIR/conf
+ echo 'node5_start = 30' >> $CLKNETSIM_TMPDIR/conf
+
+# Simulate a time jump of 0.1s at the 100th second
+echo 'node1_step = (* 0.1 (equal 0.1 (sum 1.0) 100))' >> "$CLKNETSIM_TMPDIR/conf"
+
+# Simulate network down between 150s and 200s for ptp4l master
+node1_delay2=$(cat <<-EOF | tr -d '\n'
+  (+ (* 1e-8 (exponential))
+    (* -1 (equal 0.1 (min time 200) time) (equal 0.1 (max time 150) time)))
+EOF
+)
+echo "node1_delay2 = $node1_delay2" >> "$CLKNETSIM_TMPDIR/conf"
 
  # Trap signals
  trap c_ctrl INT # Ctrl^C
@@ -155,9 +165,6 @@ main()
  trap c_sig HUP  # Hangup detected
  trap c_sig EXIT # on exit
  trap c_sig ERR  #
-
- # UDS = /clknetsim/unix/<node>:<port start from 1>
- # sendmsg(sockfd) "/clknetsim/unix/%u:%u" req.to, req.dst_port
 
  # Start clients
  c_node='c_node + 1'
@@ -168,21 +175,65 @@ main()
  ptp4l_node=$c_node
 
  c_node='c_node + 1'
- start_client $c_node chronyd 'refclock PHC /dev/ptp0 poll -6 dpoll -1'
+ start_client $c_node chronyd 'refclock PHC /dev/ptp0 poll -3 dpoll -1'
  chronyd_node=$c_node
 
  c_node='c_node + 1'
  export LD_LIBRARY_PATH=.libs
- start_client $c_node clkmgr_proxy "$ptp4l_node;$chronyd_node;$c_if" '' ' -l 2'
+
+# test_mode: Controls the simulation mode for clknetsim.
+# Usage: Pass as the first argument to the script, e.g. ./sim.sh 1
+# If no argument is provided, defaults to 0 (normal mode).
+# Possible values:
+#   0 - ptp4l single domain
+#   1 - chronyd
+case $test_mode in
+  0)
+    start_client $c_node clkmgr_proxy "
+      {
+        \"timeBases\": [{
+          \"timeBaseName\": \"Global Clock\",
+          \"ptp4l\": {
+            \"interfaceName\": \"$c_if\",
+            \"udsAddr\": \"/clknetsim/unix/${ptp4l_node}:1\",
+            \"domainNumber\": 0,
+            \"transportSpecific\": 0
+          }
+        }]
+      }" '' ' -l 1'
+    ;;
+  1)
+    start_client $c_node clkmgr_proxy "
+      {
+        \"timeBases\": [{
+          \"timeBaseName\": \"Global Clock\",
+          \"chrony\": { \"udsAddr\": \"/clknetsim/unix/${chronyd_node}:1\" }
+        }]
+      }" '' ' -l 1'
+    ;;
+  *)
+   echo "Error: Unsupported test_mode: '$test_mode'." >&2
+   exit 1
+   ;;
+esac
 
  c_node='c_node + 1'
- start_client $c_node clkmgr '' '_test'
+ start_client $c_node clkmgr '' '_test' '-t 1 -i 0'
 
  # Run test with clknetsim server
  set +e
- start_server $c_node -l $run_time -n 2
+ start_server $c_node -l $run_time -n $CLKNETSIM_UNIX_SUBNET
  set -e
  client_pids=''
+ echo -e "\nlog1:"
+ cat $CLKNETSIM_TMPDIR/log.1
+ echo -e "\nlog2:"
+ cat $CLKNETSIM_TMPDIR/log.2
+ echo -e "\nlog3:"
+ cat $CLKNETSIM_TMPDIR/log.3
+ echo -e "\nlog4:"
  cat $CLKNETSIM_TMPDIR/log.4
+ echo -e "\nlog5:"
+ grep -v -E '^\s*$|Waiting|No event|sleep for' $CLKNETSIM_TMPDIR/log.5
 }
 main "$@"
