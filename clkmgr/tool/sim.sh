@@ -140,7 +140,7 @@ main()
  . $CLKNETSIM_PATH/clknetsim.bash
 
  # Test configuraton
- generate_config4 '1' '1 2 3 | 2 4 | 3 4 | 4 5' 0.01\
+ generate_config4 '1' '1 2 | 2 4 | 3 4 | 4 5' 0.01\
     '(sum (* 1e-9 (normal)))'\
     '(* 1e-8 (exponential))'
 

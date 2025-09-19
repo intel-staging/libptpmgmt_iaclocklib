@@ -12,7 +12,7 @@
 name: Clock Manager E2E Simulation
 
 # Start manually
-on: [pull_request, workflow_dispatch]
+on: [push, pull_request, workflow_dispatch]
 
 # Permit read-only with GITHUB_TOKEN
 permissions: read-all
@@ -64,7 +64,7 @@ jobs:
         cd ../../..
 
     - name: ptp4l single domain test with clknetsim
-      run: timeout 50 sudo ./libptpmgmt/clkmgr/tool/sim.sh 0
+      run: timeout 50 ./libptpmgmt/clkmgr/tool/sim.sh 0
       continue-on-error: true
 
     - name: Upload simulation logs
@@ -75,7 +75,7 @@ jobs:
         path: libptpmgmt/clkmgr/sim/*
 
     - name: chronyd test with clknetsim
-      run: timeout 50 sudo ./libptpmgmt/clkmgr/tool/sim.sh 1
+      run: timeout 50 ./libptpmgmt/clkmgr/tool/sim.sh 1
       continue-on-error: true
 
     - name: Upload simulation logs
