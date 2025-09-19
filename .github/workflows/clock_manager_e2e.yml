@@ -12,7 +12,7 @@
 name: Clock Manager E2E Simulation
 
 # Start manually
-on: workflow_dispatch
+on: [pull_request, workflow_dispatch]
 
 # Permit read-only with GITHUB_TOKEN
 permissions: read-all
