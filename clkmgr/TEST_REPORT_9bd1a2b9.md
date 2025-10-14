@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GFDL-1.3-no-invariants-or-later
+     SPDX-FileCopyrightText: Copyright © 2025 Intel Corporation. -->
 # 🧪 Clock Manager Test Report - Git hash 9bd1a2b9
 
 **Project:** `Clock Manager`
@@ -9,7 +11,9 @@
 
 ## 1. Purpose / Objective
 
-This report summarizes the validation of the Clock Manager for libptpmgmt v2.0, focusing on functional tests that confirm correct reporting of Chrony and PTP synchronization status in single and multi-domain environments.
+This report summarizes the validation of the Clock Manager for libptpmgmt
+v2.0, focusing on functional tests that confirm correct reporting of Chrony
+ and PTP synchronization status in single and multi-domain environments.
 
 ---
 
@@ -49,9 +53,16 @@ This report summarizes the validation of the Clock Manager for libptpmgmt v2.0, 
 
 ## 4. Test Strategy / Approach
 
-* The Clock Management Library was validated primarily through black-box functional testing using test applications that exercise the library’s APIs. Test outcomes was verified by comparing API responses to expected results under defined conditions. In addition, non-functional stress testing was conducted to assess the library’s robustness during extended operation.
-* Both automated and manual tests were executed, with automation rate of 97.14%
-* CI/CD were tested on Debian/Fedora/Arch Linux and Gentoo containers in addition to tests performed on Ubuntu
+* The Clock Management Library was validated primarily through black-box 
+functional testing using test applications that exercise the library’s 
+APIs. Test outcomes was verified by comparing API responses to expected 
+results under defined conditions. In addition, non-functional stress 
+testing was conducted to assess the library’s robustness during 
+extended operation.
+* Both automated and manual tests were executed, with automation rate of 
+97.14%
+* CI/CD were tested on Debian/Fedora/Arch Linux and Gentoo containers in 
+addition to tests performed on Ubuntu
 
 ---
 
@@ -87,11 +98,18 @@ This report summarizes the validation of the Clock Manager for libptpmgmt v2.0, 
 
 ### 24 Hour Loaded Message Queue Stress Test Summary - Single Domain
 * Test Objective: 
-  * Verify the Clock Manager software is able to continuously report events over 24 hours with the message queue constantly loaded
-  * Message queue is loaded by using a small GM Offset threshold window (-+5ns) which will trigger events from clock synchronization offset fluctuations (ptp_isOffsetInRange) and composite events (ptp_isCompositeEventMet)
+  * Verify the Clock Manager software is able to continuously report events
+  over 24 hours with the message queue constantly loaded
+  * Message queue is loaded by using a small GM Offset threshold window 
+  (-+5ns) which will trigger events from clock synchronization offset 
+  fluctuations (ptp_isOffsetInRange) and composite events 
+  (ptp_isCompositeEventMet)
   * Monitor event status and counts hourly over the test duration
   * Test Sequence:
-    * [DUT1]Start PTP4L Follower + Chrony --> [DUT2]Start PTP4L GM --> [DUT1]Start Clock Manager Proxy --> [DUT1]Start Clock Manager Application
+    [DUT1]Start PTP4L Follower + Chrony --> 
+    [DUT2]Start PTP4L GM --> 
+    [DUT1]Start Clock Manager Proxy --> 
+    [DUT1]Start Clock Manager Application
   * Events status and counts are verified based on PTP4L logs
 * Test Summary:
   * Result: PASS
@@ -128,29 +146,44 @@ This report summarizes the validation of the Clock Manager for libptpmgmt v2.0, 
     ```
 ### Notification Time Latency - Single Domain
 * Test Objective: 
-  * Verify the Clock Manager software notifies the user of an event within 93.75ms of event detection
-  * After clocks are in sync, an out of sync event is triggered by shifting the DUT1 clock. The timestamp of the time shift is logged and compared with the event timestamp received from Clock Manager software
+  * Verify the Clock Manager software notifies the user of an event within 
+  93.75ms of event detection
+  * After clocks are in sync, an out of sync event is triggered by shifting
+   the DUT1 clock. The timestamp of the time shift is logged and compared 
+   with the event timestamp received from Clock Manager software
   * Test Sequence:
-    * [DUT1]Start PTP4L Follower + Chrony --> [DUT2]Start PTP4L GM --> [DUT1]Start Clock Manager Proxy --> [DUT1]Start Clock Manager Application --> [DUT1]Trigger out of sync event
+    [DUT1]Start PTP4L Follower + Chrony --> 
+    [DUT2]Start PTP4L GM --> 
+    [DUT1]Start Clock Manager Proxy -->
+    [DUT1]Start Clock Manager Application --> 
+    [DUT1]Trigger out of sync event
 * Test Summary:
   * Result: PASS
   * Notification Latency: 6ms
   * Sample application command: clkmgr_test -s 0x1 -c 0 -i 0
   * Test Logs:
-    * PTP4L Log
+    * PTP4L Log (timeshift timestamp = **707225.320**)
       ```
-      ptp4l[707225.320]: clockcheck: clock jumped forward or running faster than expected!  <--- timeshift timestamp
-      ptp4l[707225.320]: master offset  499997101 s0 freq   +3957 path delay         9
-      ptp4l[707225.320]: port 1 (enp1s0): SLAVE to UNCALIBRATED on SYNCHRONIZATION_FAULT
-      ptp4l[707225.455]: master offset  499997099 s2 freq   +3937 path delay         9
-      ptp4l[707225.455]: port 1 (enp1s0): UNCALIBRATED to SLAVE on MASTER_CLOCK_SELECTED
-      ptp4l[707225.591]: master offset  499997100 s2 freq +62499999 path delay         9
-      ptp4l[707225.726]: master offset  492188998 s2 freq +62499999 path delay         9
-      ptp4l[707225.862]: master offset  484376207 s2 freq +62499999 path delay         9
+      ptp4l[707225.320]: clockcheck: clock jumped forward or running faster
+        than expected! 
+      ptp4l[707225.320]: master offset  499997101 s0 freq   +3957 
+        path delay         9
+      ptp4l[707225.320]: port 1 (enp1s0): SLAVE to UNCALIBRATED on 
+        SYNCHRONIZATION_FAULT
+      ptp4l[707225.455]: master offset  499997099 s2 freq   +3937 
+        path delay         9
+      ptp4l[707225.455]: port 1 (enp1s0): UNCALIBRATED to SLAVE on 
+        MASTER_CLOCK_SELECTED
+      ptp4l[707225.591]: master offset  499997100 s2 freq +62499999 
+        path delay         9
+      ptp4l[707225.726]: master offset  492188998 s2 freq +62499999 
+        path delay         9
+      ptp4l[707225.862]: master offset  484376207 s2 freq +62499999 
+        path delay         9
       ```
-    * Clock Manager software event:
+    * Clock Manager software event log (event timestamp = **707225.326**)
       ```
-      [clkmgr][707225.326] Obtained data from Notification Event:                           <--- event notification timestamp
+      [clkmgr][707225.326] Obtained data from Notification Event:
       [clkmgr] Current Time of CLOCK_REALTIME: 1760409122147915534 ns
       |------------------------------|--------------|-------------|
       | Events                       | Event Status | Event Count |
@@ -173,19 +206,24 @@ This report summarizes the validation of the Clock Manager for libptpmgmt v2.0, 
 
       [clkmgr][707225.326] sleep for 0 seconds...
       ```
-### Multi-domain event count: timeBaseIndex#1 - GM Offset Event; timeBaseIndex#2 - GM Changed event
+### Multi-domain event subscription and monitoring
 * Test Objective: 
-  * Verify the Clock Manager software allows the user to subscribe and monitor multiple PTP4L time domains
+  * Verify the Clock Manager software allows the user to subscribe and 
+  monitor multiple PTP4L time domains
   * TimeBaseIndex 1 subscribes to GM Offset Event (ptp_isOffsetInRange)
   * TimeBaseIndex 2 subscribes to GM Changed Event (ptp_isGmChanged)
   * Events status and counts are verified based on PTP4L logs
   * Test Sequence:
-    * [DUT1]Start PTP4L Follower + Chrony --> [DUT1]Start Clock Manager Proxy --> [DUT1]Start Clock Manager Application --> 3x [DUT2]Start/Restart PTP4L GM
+    * [DUT1]Start PTP4L Follower + Chrony --> 
+    [DUT1]Start Clock Manager Proxy --> 
+    [DUT1]Start Clock Manager Application --> 
+    3x [DUT2]Start/Restart PTP4L GM
 * Test Summary:
   * Result: PASS
   * Sample application command: clkmgr_test -a -s 0xB -c 0x3 -i 70 -l 0
   * Test Logs:
-    * Initialize Clock Manager software with multiple time domain subscription information
+    * Initialize Clock Manager software with multiple time domain 
+    subscription information
       ```
       [clkmgr] set subscribe event : 0xb
       [clkmgr] set composite event : 0x3
@@ -261,7 +299,7 @@ This report summarizes the validation of the Clock Manager for libptpmgmt v2.0, 
 
       [clkmgr][713037.746] Waiting Notification from time base index 1 ...
       [clkmgr][713037.746] Waiting Notification from time base index 1 ...
-      [clkmgr][713047.756] No event status changes identified in 10 seconds.
+      [clkmgr][713047.756] No event status changes identified in 10 seconds
       ```
     * Capture events over 70 second period
       ```
