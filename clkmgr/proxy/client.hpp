@@ -64,10 +64,12 @@ class Client
     static sessionId_t CreateClientSession(const std::string &id);
     static void RemoveClient(sessionId_t sessionId);
     static Client *getClient(sessionId_t sessionId);
+    static void CleanupResidualMq();
     static bool connect_ptp4l();
     #ifdef HAVE_LIBCHRONY
     static bool connect_chrony();
     #endif
+    friend class ProxyDisconnectMessage;
 
   protected:
     static Transmitter *getTransmitter(sessionId_t sessionId);

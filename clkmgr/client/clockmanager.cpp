@@ -56,14 +56,18 @@ bool ClockManager::connect()
 
 bool ClockManager::disconnect()
 {
-    // Send a disconnect message - TODO do we want to send a message here?
-    if(doInit.load()) {
-        if(!End::stopAll()) {
-            PrintDebug("[DISCONNECT] Client disconnect Failed");
-            return false;
-        }
-        doInit.store(false);
+    if(!doInit.load()) {
+        return true; // Not connected, nothing to disconnect
     }
+    if(!ClientState::notifyDisconnect()) {
+        PrintDebug("[DISCONNECT] Failed to send disconnect notification to proxy");
+        return false;
+    }
+    if(!End::stopAll()) {
+        PrintDebug("[DISCONNECT] Client disconnect Failed");
+        return false;
+    }
+    doInit.store(false);
     return true;
 }
 
