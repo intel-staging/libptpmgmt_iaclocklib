@@ -13,6 +13,7 @@
 #include "client/connect_msg.hpp"
 #include "client/notification_msg.hpp"
 #include "client/subscribe_msg.hpp"
+#include "client/disconnect_msg.hpp"
 #include "common/termin.hpp"
 #include "common/print.hpp"
 
@@ -49,6 +50,8 @@ bool ClientState::init()
     }
     if(!txContext.open(mqProxyName)) {
         PrintErrorCode("Failed to open transmitter queue: " + mqProxyName);
+        // Clean up listener queue on failure
+        mq_unlink((mqListenerName).c_str());
         return false;
     }
     PrintDebug("Client Message queue opened");
@@ -86,6 +89,22 @@ bool ClientState::connect(uint32_t timeOut, timespec *lastConnectTime)
                 to_string(get_connected()));
         }
     }
+    return true;
+}
+
+bool ClientState::notifyDisconnect()
+{
+    ClientDisconnectMessage *cmsg = new ClientDisconnectMessage();
+    if(cmsg == nullptr) {
+        PrintDebug("[DISCONNECT] Failed to allocate ClientDisconnectMessage");
+        return false;
+    }
+    unique_ptr<Message> disconnectMsg(cmsg);
+    cmsg->set_sessionId(get_sessionId());
+    if(!sendMessage(*cmsg))
+        return false;
+    m_connected = false;
+    PrintDebug("ClientState::disconnect - Disconnect message sent successfully");
     return true;
 }
 
