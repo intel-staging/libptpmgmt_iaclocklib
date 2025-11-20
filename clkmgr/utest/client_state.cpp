@@ -11,6 +11,7 @@
 
 #include "client/client_state.hpp"
 #include "client/connect_msg.hpp"
+#include "client/disconnect_msg.hpp"
 #include "common/print.hpp"
 
 using namespace clkmgr;
@@ -155,4 +156,32 @@ TEST_F(ClientStateTest, connectAndReply)
     EXPECT_EQ(ClientState::get_clientID(), mqListenerName);
     EXPECT_EQ(ClientState::get_sessionId(), 12345);
     EXPECT_GT(lastConnectTime.tv_sec, 0);
+}
+
+// Tests notifyDisconnect function
+// bool notifyDisconnect()
+// bool get_connected()
+TEST_F(ClientStateTest, notifyDisconnect)
+{
+    // Ensure ClientState is initialized before testing disconnect functionality
+    if(ClientState::get_clientID().empty()) {
+        bool initResult = ClientState::init();
+        ASSERT_TRUE(initResult);
+    }
+    // Establish connection
+    timespec lastConnectTime = {};
+    bool connectResult = false;
+    std::thread connectThread([&]() {
+        connectResult = ClientState::connect(1000, &lastConnectTime);
+    });
+    usleep(1000);
+    // Simulate successful connection
+    ClientState::connectReply(54321);
+    connectThread.join();
+    ASSERT_TRUE(connectResult);
+    EXPECT_TRUE(ClientState::get_connected());
+    EXPECT_EQ(ClientState::get_sessionId(), 54321);
+    // Test and verify disconnect
+    EXPECT_TRUE(ClientState::notifyDisconnect());
+    EXPECT_FALSE(ClientState::get_connected());
 }

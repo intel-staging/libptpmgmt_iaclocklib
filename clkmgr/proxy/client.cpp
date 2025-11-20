@@ -14,12 +14,14 @@
 #include "proxy/connect_msg.hpp"
 #include "proxy/notification_msg.hpp"
 #include "proxy/subscribe_msg.hpp"
+#include "proxy/disconnect_msg.hpp"
 #include "common/shared_mutex.hpp" // Replace C++17 <shared_mutex>
 #include "common/termin.hpp"
 #include "common/print.hpp"
 
 #include <map>
 #include <cstring>
+#include <dirent.h>
 #include <rtpi/mutex.hpp>
 
 __CLKMGR_NAMESPACE_USE;
@@ -168,12 +170,8 @@ void Client::RemoveClient(sessionId_t sessionId)
     Client *client = getClient(sessionId);
     if(client != nullptr) {
         Transmitter *tx = client->getTransmitter();
-        if(tx != nullptr) {
+        if(tx != nullptr)
             tx->finalize();
-            std::string mqClientName = tx->getClientId();
-            if(!mqClientName.empty() && !mq_unlink(mqClientName.c_str()))
-                PrintInfo("Cleaning residue message queue: " + mqClientName);
-        }
     }
     sessionMap.erase(sessionId);
     mapLock.unlock(); // Explicitly unlock the mutex
@@ -198,10 +196,30 @@ Client *Client::getClient(sessionId_t sessionId)
     return sessionMap.count(sessionId) > 0 ? sessionMap[sessionId].get() : nullptr;
 }
 
+void Client::CleanupResidualMq()
+{
+    string mqName = string(mqProxyName);
+    DIR *dir = opendir("/dev/mqueue");
+    if(dir != nullptr) {
+        struct dirent *entry;
+        while((entry = readdir(dir)) != nullptr) {
+            string entryMqName = "/" + string(entry->d_name);
+            if(strncmp(entryMqName.c_str(), mqName.c_str(), mqName.length()) == 0) {
+                PrintDebug("Cleaning up residual message queue: " + entryMqName);
+                mq_unlink(entryMqName.c_str());
+            }
+        }
+        closedir(dir);
+    }
+}
+
 bool Client::init(bool useMsgQAllAccess)
 {
-    // Register messages we recieve from client side
-    reg_message_type<ProxyConnectMessage, ProxySubscribeMessage>();
+    // Cleanup any residual message queues from previous runs
+    CleanupResidualMq();
+    // Register messages we receive from client side
+    reg_message_type<ProxyConnectMessage, ProxySubscribeMessage,
+                     ProxyDisconnectMessage>();
     // ProxyNotificationMessage - Proxy send it only, never send from client
     Listener &rx = Listener::getSingleListenerInstance();
     PrintDebug("Initializing Proxy listener Queue ...");
@@ -293,8 +311,6 @@ __CLKMGR_NAMESPACE_BEGIN
 class ClientRemoveAll : public End
 {
   public:
-    // TODO : do we need to send a disconnect message to the clients?
-    // Here is our opportunity :-)
     bool stop() override final { return true; }
     bool finalize() override final {
         unique_lock<rtpi::mutex> mapLock(sessionMapLock);
