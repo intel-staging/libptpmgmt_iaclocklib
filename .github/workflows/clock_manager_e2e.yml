@@ -32,17 +32,20 @@ jobs:
       with:
         repository: nwtime/linuxptp
         path: linuxptp
+        persist-credentials: false
 
     - name: checkout clknetsim repository
       uses: actions/checkout@v4
       with:
         repository: mlichvar/clknetsim
         path: clknetsim
+        persist-credentials: false
 
     - name: checkout libptpmgmt repository
       uses: actions/checkout@v4
       with:
         path: libptpmgmt
+        persist-credentials: false
 
     - name: build and install linuxptp
       run: |

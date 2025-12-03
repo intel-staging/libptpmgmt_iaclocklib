@@ -33,6 +33,8 @@ jobs:
 
     - name: checkout repository
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: log in to the container registry
       if: ${{ github.actor == github.repository_owner }}

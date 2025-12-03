@@ -33,6 +33,8 @@ jobs:
 
     - name: checkout repository
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: setup pages
       uses: actions/configure-pages@v5

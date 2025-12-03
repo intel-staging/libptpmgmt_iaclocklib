@@ -19,7 +19,8 @@ name: CI
 on: [push, pull_request, workflow_dispatch]
 
 # Permit read-only with GITHUB_TOKEN
-permissions: read-all
+permissions:
+  contents: read
 
 env:
   USER: builder
@@ -40,6 +41,8 @@ jobs:
 
     - name: checkout repository
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: continuous integration
       run: |
@@ -67,6 +70,8 @@ jobs:
 
     - name: checkout repository
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: cross build
       run: |
@@ -91,17 +96,20 @@ jobs:
       with:
         repository: nwtime/linuxptp
         path: linuxptp
+        persist-credentials: false
 
     - name: checkout clknetsim repository
       uses: actions/checkout@v4
       with:
         repository: mlichvar/clknetsim
         path: clknetsim
+        persist-credentials: false
 
     - name: checkout repository
       uses: actions/checkout@v4
       with:
         path: libptpmgmt
+        persist-credentials: false
 
     - name: build packages and install them
       run: |
@@ -142,6 +150,7 @@ jobs:
       with:
         fetch-depth: 0
         fetch-tags: true
+        persist-credentials: false
 
     - name: compare ABI
       run: |
