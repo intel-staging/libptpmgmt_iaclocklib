@@ -28,6 +28,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Scan Repository
-        uses: hugoalh/scan-virus-ghaction@v0.20.0
+        uses: hugoalh/scan-virus-ghaction@5c23aa05c9c252b3f6e60f40504a3388a4497d9d # v0.20.0
         with:
           statistics_summary: True

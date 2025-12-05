@@ -30,12 +30,24 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        names: [deb.forky, deb.trixie, deb.bookworm, rpmbuild, pacmanbuild, portage]
+        include:
+          - name: deb.forky
+            image: ghcr.io/erezgeva/deb.forky@sha256:e7be87dc866c0682b4cb177fbdd54eba853e50a5ebee8d96a6439708434100ff
+          - name: deb.trixie
+            image: ghcr.io/erezgeva/deb.trixie@sha256:caa451c42050445ffbff1992442ec9526a481b392e758d0c2e071a4a55935bc8
+          - name: deb.bookworm
+            image: ghcr.io/erezgeva/deb.bookworm@sha256:4dbbe60338cb77c8cd7142e5054426124f6d824330a6f8f4e7413aef7c61d0a8
+          - name: rpmbuild
+            image: ghcr.io/erezgeva/rpmbuild@sha256:64343fc4d5eb7a4f66339959630c94e543c9d45f5fc6ee201db2fd4bd566265f
+          - name: pacmanbuild
+            image: ghcr.io/erezgeva/pacmanbuild@sha256:4a8c2e3c5885792a819a307d8be64e9cd44ac0b5bf220020c3130615c4278486
+          - name: portage
+            image: ghcr.io/erezgeva/portage@sha256:fa18e53f1587d47751e2f611a31a5b5af3731edae6c5e5e7b2d5b6a825b3ee85
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+      image: ${{ matrix.image}}
     env:
-      GITHUB_CONTAINER: ${{ matrix.names }}
+      GITHUB_CONTAINER: ${{ matrix.name }}
 
     steps:
 
@@ -61,10 +73,16 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        names: [deb.forky, deb.trixie, deb.bookworm]
+        include:
+          - name: deb.forky
+            image: ghcr.io/erezgeva/deb.forky@sha256:e7be87dc866c0682b4cb177fbdd54eba853e50a5ebee8d96a6439708434100ff
+          - name: deb.trixie
+            image: ghcr.io/erezgeva/deb.trixie@sha256:caa451c42050445ffbff1992442ec9526a481b392e758d0c2e071a4a55935bc8
+          - name: deb.bookworm
+            image: ghcr.io/erezgeva/deb.bookworm@sha256:4dbbe60338cb77c8cd7142e5054426124f6d824330a6f8f4e7413aef7c61d0a8
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+      image: ${{ matrix.image}}
 
     steps:
 
@@ -82,12 +100,24 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        names: [deb.forky, deb.trixie, deb.bookworm, rpmbuild, pacmanbuild, portage]
+        include:
+          - name: deb.forky
+            image: ghcr.io/erezgeva/deb.forky@sha256:e7be87dc866c0682b4cb177fbdd54eba853e50a5ebee8d96a6439708434100ff
+          - name: deb.trixie
+            image: ghcr.io/erezgeva/deb.trixie@sha256:caa451c42050445ffbff1992442ec9526a481b392e758d0c2e071a4a55935bc8
+          - name: deb.bookworm
+            image: ghcr.io/erezgeva/deb.bookworm@sha256:4dbbe60338cb77c8cd7142e5054426124f6d824330a6f8f4e7413aef7c61d0a8
+          - name: rpmbuild
+            image: ghcr.io/erezgeva/rpmbuild@sha256:64343fc4d5eb7a4f66339959630c94e543c9d45f5fc6ee201db2fd4bd566265f
+          - name: pacmanbuild
+            image: ghcr.io/erezgeva/pacmanbuild@sha256:4a8c2e3c5885792a819a307d8be64e9cd44ac0b5bf220020c3130615c4278486
+          - name: portage
+            image: ghcr.io/erezgeva/portage@sha256:fa18e53f1587d47751e2f611a31a5b5af3731edae6c5e5e7b2d5b6a825b3ee85
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/${{ matrix.names }}:latest
+      image: ${{ matrix.image}}
     env:
-      GITHUB_CONTAINER: ${{ matrix.names }}
+      GITHUB_CONTAINER: ${{ matrix.name }}
 
     steps:
 
@@ -141,7 +171,7 @@ jobs:
   abi:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/erezgeva/deb.forky:latest
+      image: ghcr.io/erezgeva/deb.forky@sha256:e7be87dc866c0682b4cb177fbdd54eba853e50a5ebee8d96a6439708434100ff
 
     steps:
 
