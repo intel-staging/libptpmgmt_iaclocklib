@@ -21,7 +21,7 @@ jobs:
   clkmgr_e2e:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/erezgeva/deb.forky:latest
+      image: ghcr.io/erezgeva/deb.forky@sha256:e7be87dc866c0682b4cb177fbdd54eba853e50a5ebee8d96a6439708434100ff
     env:
       GITHUB_CONTAINER: deb.forky
 
@@ -32,17 +32,20 @@ jobs:
       with:
         repository: nwtime/linuxptp
         path: linuxptp
+        persist-credentials: false
 
     - name: checkout clknetsim repository
       uses: actions/checkout@v4
       with:
         repository: mlichvar/clknetsim
         path: clknetsim
+        persist-credentials: false
 
     - name: checkout libptpmgmt repository
       uses: actions/checkout@v4
       with:
         path: libptpmgmt
+        persist-credentials: false
 
     - name: build and install linuxptp
       run: |

@@ -16,7 +16,8 @@ name: manual testing
 on: workflow_dispatch
 
 # Permit read-only with GITHUB_TOKEN
-permissions: read-all
+permissions:
+  contents: read
 
 env:
   USER: builder
@@ -25,7 +26,7 @@ jobs:
   full:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/erezgeva/deb.forky:latest
+      image: ghcr.io/erezgeva/deb.forky@sha256:e7be87dc866c0682b4cb177fbdd54eba853e50a5ebee8d96a6439708434100ff
 
     steps:
 
@@ -34,11 +35,13 @@ jobs:
       with:
         repository: nwtime/linuxptp
         path: linuxptp
+        persist-credentials: false
 
     - name: checkout repository
       uses: actions/checkout@v4
       with:
         path: libptpmgmt
+        persist-credentials: false
 
     - name: test with linuxptp
       run: libptpmgmt/tools/sim_ptp4l.sh -ct
@@ -53,11 +56,13 @@ jobs:
       with:
         repository: nwtime/linuxptp
         path: linuxptp
+        persist-credentials: false
 
     - name: checkout repository
       uses: actions/checkout@v4
       with:
         path: libptpmgmt
+        persist-credentials: false
 
     - name: test with linuxptp
       run: libptpmgmt/tools/ci_address.sh
@@ -70,7 +75,7 @@ jobs:
         names: [utest_address, utest_valgrid]
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/deb.forky:latest
+      image: ghcr.io/erezgeva/deb.forky@sha256:e7be87dc866c0682b4cb177fbdd54eba853e50a5ebee8d96a6439708434100ff
     env:
       GITHUB_TOOL: ${{ matrix.names }}
 
@@ -78,6 +83,8 @@ jobs:
 
     - name: checkout repository
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: unit test with memory check
       run: |
