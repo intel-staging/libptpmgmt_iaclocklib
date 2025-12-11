@@ -25,7 +25,7 @@ jobs:
   full:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/erezgeva/deb.forky:latest
+      image: ghcr.io/erezgeva/deb.forky@sha256:fe6dcd99d5f97d24a13cdb59040ce131647381bf604854d68c2f7f259f84e03c
 
     steps:
 
@@ -74,7 +74,7 @@ jobs:
         names: [utest_address, utest_valgrid]
       fail-fast: false
     container:
-      image: ghcr.io/erezgeva/deb.forky:latest
+      image: ghcr.io/erezgeva/deb.forky@sha256:fe6dcd99d5f97d24a13cdb59040ce131647381bf604854d68c2f7f259f84e03c
     env:
       GITHUB_TOOL: ${{ matrix.names }}
 
